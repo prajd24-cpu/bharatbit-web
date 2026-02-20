@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.spacing.xl,
+    marginBottom: theme.spacing.lg,
   },
   greeting: {
     fontSize: theme.fontSize.md,
@@ -245,6 +245,29 @@ const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.bold,
     color: theme.colors.textPrimary,
     textTransform: 'capitalize',
+  },
+  kycBanner: {
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.lg,
+    marginBottom: theme.spacing.lg,
+  },
+  kycBannerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  kycBannerText: {
+    flex: 1,
+    marginLeft: theme.spacing.md,
+  },
+  kycBannerTitle: {
+    fontSize: theme.fontSize.md,
+    fontWeight: theme.fontWeight.bold,
+    color: theme.colors.textPrimary,
+  },
+  kycBannerSubtitle: {
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.textSecondary,
+    marginTop: 2,
   },
   portfolioCard: {
     marginBottom: theme.spacing.lg,
