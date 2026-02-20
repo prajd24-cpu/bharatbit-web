@@ -587,8 +587,9 @@ async def admin_get_users(admin: dict = Depends(get_admin_user)):
 async def admin_get_pending_kyc(admin: dict = Depends(get_admin_user)):
     kyc_docs = await db.kyc_documents.find({"status": {"$in": ["pending", "under_review"]}}).to_list(100)
     
-    # Enrich with user data
+    # Enrich with user data and clean ObjectIds
     for doc in kyc_docs:
+        doc.pop("_id", None)
         user = await db.users.find_one({"id": doc["user_id"]})
         if user:
             doc["user_email"] = user["email"]
