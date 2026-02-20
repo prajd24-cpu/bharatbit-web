@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../components/Button';
@@ -20,6 +20,7 @@ export default function Verify2FAScreen() {
   const mockOTP = params.mock_otp as string;
 
   const handleVerify = async () => {
+    Keyboard.dismiss();
     if (!otp || otp.length !== 6) {
       Alert.alert('Error', 'Please enter a valid 6-digit OTP');
       return;
@@ -37,52 +38,56 @@ export default function Verify2FAScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <Ionicons name="shield-checkmark" size={48} color={theme.colors.gold} />
-          <Text style={styles.title}>Two-Factor Authentication</Text>
-          <Text style={styles.subtitle}>Enter the OTP sent to</Text>
-          <Text style={styles.mobile}>{mobile}</Text>
-          {mockOTP && (
-            <View style={styles.mockContainer}>
-              <Text style={styles.mockLabel}>Mock OTP (Dev Only):</Text>
-              <Text style={styles.mockOTP}>{mockOTP}</Text>
-            </View>
-          )}
-        </View>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <Ionicons name="shield-checkmark" size={48} color={theme.colors.primary} />
+            <Text style={styles.title}>Two-Factor Authentication</Text>
+            <Text style={styles.subtitle}>Enter the OTP sent to</Text>
+            <Text style={styles.mobile}>{mobile}</Text>
+            {mockOTP && (
+              <View style={styles.mockContainer}>
+                <Text style={styles.mockLabel}>Mock OTP (Dev Only):</Text>
+                <Text style={styles.mockOTP}>{mockOTP}</Text>
+              </View>
+            )}
+          </View>
 
-        <Card>
-          <Input
-            label="Enter 2FA OTP"
-            value={otp}
-            onChangeText={setOtp}
-            placeholder="6-digit OTP"
-            keyboardType="number-pad"
-            maxLength={6}
-            style={{ fontSize: 24, textAlign: 'center', letterSpacing: 8 }}
-          />
-          <Button
-            title="Verify & Login"
-            onPress={handleVerify}
-            loading={loading}
-            size="lg"
-            style={{ marginTop: theme.spacing.md }}
-          />
-        </Card>
+          <Card>
+            <Input
+              label="Enter 2FA OTP"
+              value={otp}
+              onChangeText={setOtp}
+              placeholder="6-digit OTP"
+              keyboardType="number-pad"
+              maxLength={6}
+              returnKeyType="done"
+              onSubmitEditing={handleVerify}
+              style={{ fontSize: 24, textAlign: 'center', letterSpacing: 8 }}
+            />
+            <Button
+              title="Verify & Login"
+              onPress={handleVerify}
+              loading={loading}
+              size="lg"
+              style={{ marginTop: theme.spacing.md }}
+            />
+          </Card>
 
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Didn't receive the OTP?</Text>
-          <Button
-            title="Resend OTP"
-            onPress={() => Alert.alert('OTP Sent', 'A new OTP has been sent')}
-            variant="outline"
-            size="sm"
-            style={{ marginTop: theme.spacing.sm }}
-          />
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Didn't receive the OTP?</Text>
+            <Button
+              title="Resend OTP"
+              onPress={() => Alert.alert('OTP Sent', 'A new OTP has been sent')}
+              variant="outline"
+              size="sm"
+              style={{ marginTop: theme.spacing.sm }}
+            />
+          </View>
         </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 }
 
