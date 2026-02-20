@@ -1,35 +1,39 @@
-// BharatBit Official Color Theme
+// BharatBit Official Color Theme (from screenshot)
 export const theme = {
   colors: {
-    // Primary Background - Dark
+    // Primary Background - Dark Navy
     background: '#0A0F1A',
-    backgroundSecondary: '#1A1F2E',
-    backgroundTertiary: '#0F172A',
+    backgroundSecondary: '#273A52',    // BharatBit Navy Blue
+    backgroundTertiary: '#1A2332',
     
-    // BharatBit Primary Colors
-    primary: '#1a9c5d',        // BharatBit Green
-    primaryDark: '#158750',
-    primaryLight: '#22b86d',
-    accent: '#d64545',         // BharatBit Red
-    accentDark: '#b83939',
-    accentLight: '#e05555',
+    // BharatBit Primary Colors (from screenshot)
+    primary: '#E54444',        // BharatBit Orange-Red (Primary button)
+    primaryDark: '#C93939',
+    primaryLight: '#FF5555',
+    accent: '#F5B8A4',         // BharatBit Peach (Secondary button)
+    accentDark: '#E5A894',
+    accentLight: '#FFC8B4',
     
-    // Text Colors (from BharatBit website)
-    textPrimary: '#ffffff',
-    textSecondary: '#8a8a8a',
-    textMuted: '#64748B',
+    // Additional Brand Colors
+    cream: '#FDF4E3',          // Light cream accent
+    navyBlue: '#273A52',       // Brand navy blue
+    
+    // Text Colors
+    textPrimary: '#FFFFFF',
+    textSecondary: '#CBD5E1',
+    textMuted: '#94A3B8',
     textDark: '#1c1c1c',
     
-    // Status Colors (matching BharatBit)
-    success: '#1a9c5d',        // BharatBit Green
-    successLight: '#22b86d',
-    error: '#d64545',          // BharatBit Red
-    errorLight: '#e05555',
+    // Status Colors
+    success: '#10B981',
+    successLight: '#34D399',
+    error: '#E54444',          // Using BharatBit primary for errors
+    errorLight: '#FF5555',
     warning: '#F59E0B',
     info: '#3B82F6',
     
     // Borders & Dividers
-    border: 'rgba(26, 156, 93, 0.2)',
+    border: 'rgba(229, 68, 68, 0.2)',
     borderLight: 'rgba(148, 163, 184, 0.1)',
     divider: 'rgba(148, 163, 184, 0.1)',
     
@@ -41,10 +45,10 @@ export const theme = {
     overlay: 'rgba(10, 22, 40, 0.95)',
     overlayLight: 'rgba(10, 22, 40, 0.7)',
     
-    // Legacy gold references (now using green)
-    gold: '#1a9c5d',
-    goldDark: '#158750',
-    goldLight: '#22b86d',
+    // Legacy gold references (now using BharatBit primary)
+    gold: '#E54444',
+    goldDark: '#C93939',
+    goldLight: '#FF5555',
   },
   
   spacing: {
@@ -104,7 +108,7 @@ export const theme = {
       elevation: 8,
     },
     primary: {
-      shadowColor: '#1a9c5d',
+      shadowColor: '#E54444',
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.3,
       shadowRadius: 12,
