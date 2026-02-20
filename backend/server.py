@@ -961,11 +961,17 @@ async def admin_wallet_action(data: AdminWalletActionRequest, admin: dict = Depe
 
 @api_router.get("/admin/orders")
 async def admin_get_orders(admin: dict = Depends(get_admin_user)):
-    orders = await db.orders.find().sort("created_at", -1).to_list(500)
+    orders = await db.orders.find().sort("created_at", -1).to_list(100)
+    
+    # Batch fetch all users to avoid N+1 queries
+    user_ids = list(set(o["user_id"] for o in orders if o.get("user_id")))
+    users = await db.users.find({"id": {"$in": user_ids}}).to_list(len(user_ids))
+    user_map = {u["id"]: u for u in users}
     
     # Enrich with user data
     for order in orders:
-        user = await db.users.find_one({"id": order["user_id"]})
+        order.pop("_id", None)
+        user = user_map.get(order.get("user_id"))
         if user:
             order["user_email"] = user["email"]
             order["user_mobile"] = user["mobile"]
