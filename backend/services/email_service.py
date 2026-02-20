@@ -115,7 +115,7 @@ async def send_order_confirmation_email(to_email: str, order_id: str, details: d
     subject = f"Order Confirmation #{order_id}"
     html = f"""
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #D4AF37;">Order Confirmation</h1>
+        <h1 style="color: #E54444;">Order Confirmation</h1>
         <p>Your order has been placed successfully.</p>
         <p><strong>Order ID:</strong> #{order_id}</p>
         <p><strong>Type:</strong> {details['type'].upper()}</p>
@@ -123,6 +123,32 @@ async def send_order_confirmation_email(to_email: str, order_id: str, details: d
         <p><strong>Quantity:</strong> {details['quantity']}</p>
         <p><strong>Total:</strong> ₹{details['total']}</p>
         <p style="margin-top: 20px;">We'll notify you once the order is processed.</p>
+    </div>
+    """
+    return await email_service.send_email(to_email, subject, html)
+
+async def send_otp_email(to_email: str, otp: str) -> dict:
+    """Send OTP via email for registration/verification"""
+    subject = "Your BharatBit OTP Code"
+    html = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #273A52; margin-bottom: 10px;">BharatBit OTC Desk</h1>
+            <p style="color: #5A6C7D; font-size: 14px;">Verification Code</p>
+        </div>
+        
+        <div style="background: #F8F9FA; border-left: 4px solid #E54444; padding: 20px; margin: 20px 0;">
+            <p style="color: #273A52; margin: 0 0 10px 0;">Your verification code is:</p>
+            <h2 style="color: #E54444; font-size: 36px; letter-spacing: 8px; margin: 10px 0;">{otp}</h2>
+        </div>
+        
+        <p style="color: #5A6C7D; font-size: 14px; margin-top: 20px;">
+            This code will expire in 10 minutes. Do not share this code with anyone.
+        </p>
+        
+        <p style="color: #8B95A0; font-size: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #E5E7EB;">
+            If you didn't request this code, please ignore this email or contact support.
+        </p>
     </div>
     """
     return await email_service.send_email(to_email, subject, html)
