@@ -6,11 +6,11 @@ import { StatusBar } from 'expo-status-bar';
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: '#0A1628' },
+          contentStyle: { backgroundColor: '#FFFFFF' },
           animation: 'fade',
         }}
       >
@@ -23,7 +23,7 @@ export default function RootLayout() {
         <Stack.Screen name="kyc/submit" />
         <Stack.Screen name="orders/create" />
         <Stack.Screen name="orders/[id]" />
-        <Stack.Screen name="admin" />
+        <Stack.Screen name="admin/index" />
       </Stack>
     </AuthProvider>
   );
