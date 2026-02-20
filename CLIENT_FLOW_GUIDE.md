@@ -1,0 +1,364 @@
+# BharatBit OTC Desk - Client Flow Guide
+
+## 🎯 What Clients See & How to Test
+
+### **Preview URL:** https://elite-trading-5.preview.emergentagent.com
+
+---
+
+## 📱 **COMPLETE CLIENT JOURNEY**
+
+### **Step 1: Welcome Screen**
+**What Client Sees:**
+- BharatBit logo (orange circle with shield icon)
+- "BharatBit OTC DESK" heading
+- "Discreet. Secure. Direct." tagline
+- **"Sign In"** button (orange)
+- **"Create Account"** button (orange outline)
+- "By invitation only. For High Net-worth Individuals." text
+
+**Colors:**
+- White background
+- Orange buttons (#E54444)
+- Navy blue text (#273A52)
+
+---
+
+### **Step 2: Registration**
+**What Client Enters:**
+1. Mobile Number (10 digits)
+2. Email Address
+3. Password (minimum 8 characters)
+4. Confirm Password
+5. Referral Code (optional)
+
+**After Submit:**
+- OTP sent to their EMAIL (not SMS)
+- Mock OTP shown on screen for testing
+- Enter 6-digit OTP to verify
+
+---
+
+### **Step 3: KYC Submission**
+
+**Client Must Upload:**
+
+#### **A. PAN Details**
+- PAN Number (ABCDE1234F format)
+- PAN Card Photo
+
+#### **B. Aadhaar Details**
+- Aadhaar Number (12 digits)
+- Aadhaar Front Photo
+- Aadhaar Back Photo
+
+#### **C. Selfie & Address**
+- **Selfie Photo** ← Can use camera or gallery
+- Address Proof Photo (utility bill/rent agreement)
+
+#### **D. Bank Details (Typed)**
+- Account Holder Name
+- Account Number
+- IFSC Code
+- Bank Name
+- Branch Name (optional)
+
+#### **E. Nominee Details (Typed)**
+- Nominee Name
+- Relationship (Father/Mother/Spouse/Child)
+- Date of Birth (optional)
+
+#### **F. Declarations (Checkboxes)**
+- FATCA declaration
+- Terms & Risk Disclosure
+
+**Photo Upload:**
+- Click "Upload [Document Name]" button
+- Choose from:
+  - **Take Photo** (opens camera)
+  - **Choose from Gallery**
+- Photos stored as base64 in database
+
+**After Submit:**
+- KYC status: "Under Review"
+- Admin will approve/reject
+- Client waits for approval
+
+---
+
+### **Step 4: Dashboard (After KYC Approval)**
+
+**What Client Sees:**
+1. **Portfolio Summary**
+   - Total crypto balance by asset
+   - Displays: USDT, BTC, ETH balances
+
+2. **Quick Actions**
+   - "Place Order" button
+   - "My Orders" button
+
+3. **Relationship Manager Section** (if assigned)
+   - RM Name
+   - Call button (direct phone call)
+   - WhatsApp button (opens WhatsApp)
+
+4. **Recent Orders**
+   - Last 5 orders
+   - Status badges (colored)
+
+5. **Bottom Tabs:**
+   - Dashboard
+   - Orders
+   - Wallet
+   - Profile
+
+---
+
+### **Step 5: Place Order (BUY Crypto)**
+
+**Client Flow:**
+1. Click "Place Order"
+2. Select "BUY" tab
+3. Select Asset (USDT / BTC / ETH)
+4. See current buy rate
+5. Enter quantity
+6. See total INR amount calculated
+
+**Payment Details Shown:**
+
+#### **Bank Transfer (NEFT/RTGS/IMPS)**
+```
+Bank Name: [YOUR BANK NAME]
+Account Holder: [YOUR BUSINESS NAME]
+Account Number: [YOUR ACCOUNT NUMBER]
+IFSC Code: [YOUR IFSC]
+Branch: [YOUR BRANCH]
+Account Type: Current Account
+```
+
+#### **UPI Payment**
+- UPI ID: yourbusiness@bankname
+- QR Code displayed (scan to pay)
+
+**After Placing Order:**
+- Order ID generated (e.g., OTC202503121234)
+- Order status: "Awaiting Payment"
+- Client makes payment to YOUR account
+- Then uploads payment proof
+
+---
+
+### **Step 6: Upload Payment Proof**
+
+**Client Goes to:**
+- Orders tab → Click on order
+
+**What They Upload:**
+1. **Payment Screenshot/Receipt**
+   - Upload from gallery or take photo
+   - Shows their payment confirmation
+
+2. **UTR Number** (Required)
+   - Enter transaction reference number
+   - From bank SMS/email
+
+**After Upload:**
+- Order status changes to "Payment Confirmed"
+- Admin reviews payment proof
+- Admin approves order
+
+**After Admin Approval:**
+- Order status: "Completed"
+- Crypto credited to client's wallet
+- Shows in Portfolio
+
+---
+
+### **Step 7: View Wallet & Ledger**
+
+**Wallet Tab Shows:**
+1. **Your Assets**
+   - USDT balance
+   - BTC balance
+   - ETH balance
+
+2. **Transaction History**
+   - All credits/debits
+   - Order references
+   - Running balance
+   - Date & time
+
+**Icons:**
+- 🔽 Green arrow = Credit (received crypto)
+- 🔼 Red arrow = Debit (sent crypto)
+
+---
+
+## 🔐 **WHERE TO UPDATE YOUR BANK DETAILS**
+
+### **Option 1: Backend Code**
+
+**File:** `/app/backend/server.py`
+**Function:** `get_bank_details()` (around line 778)
+
+```python
+@api_router.get("/payment/bank-details")
+async def get_bank_details():
+    return {
+        "bank_name": "YOUR BANK NAME",  # Update here
+        "account_holder": "YOUR BUSINESS NAME",  # Update here
+        "account_number": "YOUR_ACCOUNT_NUMBER",  # Update here
+        "ifsc": "YOUR_IFSC_CODE",  # Update here
+        "branch": "YOUR BRANCH NAME",  # Update here
+        "account_type": "Current Account"
+    }
+
+@api_router.get("/payment/upi-details")
+async def get_upi_details():
+    return {
+        "upi_id": "yourbusiness@yourbank",  # Update here
+        "qr_code": "..."  # Generated by Razorpay when integrated
+    }
+```
+
+**After updating:**
+```bash
+# Restart backend
+sudo supervisorctl restart backend
+```
+
+### **Option 2: Environment Variables (Recommended)**
+
+**File:** `/app/backend/.env`
+
+```bash
+# Add these:
+BANK_NAME=Your Bank Name
+BANK_ACCOUNT_NUMBER=1234567890
+BANK_IFSC=ABCD0001234
+BANK_ACCOUNT_HOLDER=Your Business Name
+BANK_BRANCH=Mumbai Branch
+UPI_ID=yourbusiness@bank
+```
+
+Then modify `get_bank_details()` to read from env:
+```python
+import os
+
+@api_router.get("/payment/bank-details")
+async def get_bank_details():
+    return {
+        "bank_name": os.getenv("BANK_NAME"),
+        "account_holder": os.getenv("BANK_ACCOUNT_HOLDER"),
+        "account_number": os.getenv("BANK_ACCOUNT_NUMBER"),
+        "ifsc": os.getenv("BANK_IFSC"),
+        "branch": os.getenv("BANK_BRANCH"),
+        "account_type": "Current Account"
+    }
+```
+
+---
+
+## 📸 **SELFIE FEATURE DETAILS**
+
+**Location:** KYC Submission screen  
+**Label:** "Upload Selfie *"  
+**How it Works:**
+- Uses `expo-image-picker`
+- Client can:
+  1. Take new photo with camera
+  2. Choose existing photo from gallery
+- Photo is compressed (quality: 0.5)
+- Converted to base64
+- Stored in MongoDB
+- Admin can view in Admin Panel → KYC Approval
+
+**Technical:**
+- File: `/app/frontend/app/kyc/submit.tsx`
+- Function: `pickImage(setSelfieImage)`
+- Storage: base64 string in database
+
+---
+
+## 🧪 **HOW TO TEST**
+
+### **1. Test as Client:**
+```
+1. Go to preview URL
+2. Click "Create Account"
+3. Register with email/mobile
+4. Enter OTP (shown on screen)
+5. Submit KYC with all documents
+6. Wait or approve as admin
+7. Place BUY order
+8. See YOUR bank details
+9. Upload mock payment proof
+10. Check wallet balance
+```
+
+### **2. Test as Admin:**
+```
+Login: admin@bharatbit.com
+Password: admin123
+
+1. Go to Admin Panel
+2. View pending KYC
+3. Click on KYC application
+4. Review all uploaded documents (including selfie)
+5. Approve or reject
+6. View orders
+7. Update order status
+8. Set crypto rates
+```
+
+### **3. Test Payment Flow:**
+```
+1. Create order as client
+2. Note the bank details shown
+3. Verify it's YOUR bank details
+4. Upload payment screenshot
+5. Enter UTR number
+6. Admin approves order
+7. Check wallet - crypto credited
+```
+
+---
+
+## 🎨 **CLIENT UI COLORS**
+
+**Confirmed Colors:**
+- Background: White (#FFFFFF)
+- Buttons: Orange (#E54444)
+- Text: Dark Navy Blue (#273A52)
+- Secondary text: Light Navy (#5A6C7D)
+- Cards: White with light shadow
+
+**Orange is used for:**
+- Primary buttons
+- Icons
+- Status indicators
+- Brand accents
+
+---
+
+## 📝 **SUMMARY**
+
+✅ **Selfie Feature:** Already implemented in KYC  
+✅ **Bank Details:** Update in `/app/backend/server.py` lines 778-795  
+✅ **Payment Flow:** Clients see YOUR bank details when placing BUY orders  
+✅ **Document Upload:** 5 photo uploads + selfie with camera/gallery  
+✅ **Testing:** Use preview URL or deploy to production  
+
+**Your bank details will be shown to ALL clients when they place BUY orders!**
+
+---
+
+## 🚀 **Next Steps**
+
+1. **Update your bank details** in `server.py`
+2. **Restart backend**: `sudo supervisorctl restart backend`
+3. **Test the flow** using preview URL
+4. **Deploy to production** when satisfied
+5. **Add real API keys** (Razorpay, Signzy, SendGrid)
+
+Your clients will deposit funds directly to YOUR bank account! 💰
