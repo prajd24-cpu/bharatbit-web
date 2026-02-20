@@ -15,9 +15,20 @@ export default function Verify2FAScreen() {
   const { verify2FA } = useAuth();
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
+  const inputRef = useRef<RNTextInput>(null);
 
   const mobile = params.mobile as string;
   const mockOTP = params.mock_otp as string;
+
+  // Auto-focus the input when screen loads
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleVerify = async () => {
     Keyboard.dismiss();
