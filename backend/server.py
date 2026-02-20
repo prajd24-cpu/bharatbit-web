@@ -561,9 +561,11 @@ async def get_rates(current_user: dict = Depends(get_current_user)):
     # Get user-specific rates or default rates
     rates = await db.asset_rates.find({"$or": [{"user_specific": None}, {"user_specific": current_user["id"]}]}).to_list(100)
     
-    # Organize by asset
+    # Organize by asset and clean MongoDB ObjectId
     rate_map = {}
     for rate in rates:
+        # Remove MongoDB ObjectId
+        rate.pop("_id", None)
         asset = rate["asset"]
         if rate.get("user_specific") == current_user["id"]:
             rate_map[asset] = rate  # User-specific takes priority
