@@ -59,10 +59,14 @@ class BharatBitAPITester:
             # Parse response
             try:
                 response_data = response.json()
+                if isinstance(response_data, dict):
+                    response_data["status_code"] = response.status_code
+                else:
+                    # For list responses, wrap in a dict
+                    response_data = {"data": response_data, "status_code": response.status_code}
             except:
                 response_data = {"raw_response": response.text, "status_code": response.status_code}
             
-            response_data["status_code"] = response.status_code
             return response_data
             
         except requests.exceptions.RequestException as e:
