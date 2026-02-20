@@ -584,7 +584,10 @@ async def update_order(order_id: str, data: OrderUpdateRequest, current_user: di
 # ==================== WALLET ROUTES ====================
 @api_router.get("/wallet/balance")
 async def get_wallet_balance(current_user: dict = Depends(get_current_user)):
-    ledger_entries = await db.wallet_ledger.find({"user_id": current_user["id"]}).to_list(1000)
+    ledger_entries = await db.wallet_ledger.find(
+        {"user_id": current_user["id"]},
+        {"asset": 1, "amount": 1, "transaction_type": 1, "_id": 0}
+    ).to_list(500)
     
     balances = {}
     for entry in ledger_entries:
