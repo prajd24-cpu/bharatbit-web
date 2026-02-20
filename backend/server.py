@@ -767,7 +767,7 @@ async def get_rates(current_user: dict = Depends(get_current_user)):
 # ==================== ADMIN ROUTES ====================
 @api_router.get("/admin/users")
 async def admin_get_users(admin: dict = Depends(get_admin_user)):
-    users = await db.users.find({"role": "user"}).to_list(1000)
+    users = await db.users.find({"role": "user"}, {"password_hash": 0}).to_list(100)
     # Clean MongoDB ObjectIds
     for user in users:
         user.pop("_id", None)
@@ -777,10 +777,15 @@ async def admin_get_users(admin: dict = Depends(get_admin_user)):
 async def admin_get_pending_kyc(admin: dict = Depends(get_admin_user)):
     kyc_docs = await db.kyc_documents.find({"status": {"$in": ["pending", "under_review"]}}).to_list(100)
     
+    # Batch fetch all users to avoid N+1 queries
+    user_ids = list(set(doc["user_id"] for doc in kyc_docs if doc.get("user_id")))
+    users = await db.users.find({"id": {"$in": user_ids}}).to_list(len(user_ids))
+    user_map = {u["id"]: u for u in users}
+    
     # Enrich with user data and clean ObjectIds
     for doc in kyc_docs:
         doc.pop("_id", None)
-        user = await db.users.find_one({"id": doc["user_id"]})
+        user = user_map.get(doc.get("user_id"))
         if user:
             doc["user_email"] = user["email"]
             doc["user_mobile"] = user["mobile"]
