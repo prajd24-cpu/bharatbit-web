@@ -603,6 +603,148 @@ async def get_wallet_ledger(current_user: dict = Depends(get_current_user)):
     ledger = await db.wallet_ledger.find({"user_id": current_user["id"]}).sort("created_at", -1).to_list(100)
     return ledger
 
+# ==================== SAVED WALLET ADDRESSES ROUTES ====================
+@api_router.post("/wallets/save")
+async def save_wallet_address(data: SaveWalletRequest, current_user: dict = Depends(get_current_user)):
+    """Save a new wallet address with ownership proof"""
+    
+    # Check if wallet address already exists for this user and asset
+    existing = await db.saved_wallets.find_one({
+        "user_id": current_user["id"],
+        "wallet_address": data.wallet_address,
+        "asset": data.asset
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="This wallet address is already saved for this asset")
+    
+    # Validate wallet type
+    wallet_type = WalletType.EXCHANGE if data.wallet_type == "exchange" else WalletType.SELF_CUSTODY
+    
+    # If exchange wallet, exchange name is required
+    if wallet_type == WalletType.EXCHANGE and not data.exchange_name:
+        raise HTTPException(status_code=400, detail="Exchange name is required for exchange wallets")
+    
+    # If setting as primary, unset other primary wallets for this asset
+    if data.is_primary:
+        await db.saved_wallets.update_many(
+            {"user_id": current_user["id"], "asset": data.asset},
+            {"$set": {"is_primary": False}}
+        )
+    
+    wallet = SavedWallet(
+        user_id=current_user["id"],
+        label=data.label,
+        wallet_address=data.wallet_address,
+        asset=data.asset,
+        network=data.network,
+        wallet_type=wallet_type,
+        exchange_name=data.exchange_name,
+        proof_image=data.proof_image,
+        proof_description=data.proof_description,
+        is_primary=data.is_primary
+    )
+    await db.saved_wallets.insert_one(wallet.dict())
+    
+    # Notify admin about new wallet submission
+    from services.email_service import email_service
+    try:
+        support_email = email_service.support_email
+        await email_service.send_email(
+            support_email,
+            f"New Wallet Address Submitted - {current_user['email']}",
+            f"""
+            <div style="font-family: Arial, sans-serif; padding: 20px;">
+                <h2>New Wallet Address Pending Verification</h2>
+                <p><strong>User:</strong> {current_user['email']}</p>
+                <p><strong>Label:</strong> {data.label}</p>
+                <p><strong>Asset:</strong> {data.asset} ({data.network})</p>
+                <p><strong>Address:</strong> {data.wallet_address}</p>
+                <p><strong>Type:</strong> {data.wallet_type}{' - ' + data.exchange_name if data.exchange_name else ''}</p>
+                <p style="margin-top: 20px; padding: 15px; background: #FEF3C7; border-radius: 6px;">
+                    <strong>Action Required:</strong> Please verify this wallet in the admin panel.
+                </p>
+            </div>
+            """
+        )
+    except Exception as e:
+        logger.warning(f"Failed to send wallet notification email: {e}")
+    
+    return {
+        "success": True,
+        "message": "Wallet saved successfully. Pending verification.",
+        "wallet_id": wallet.id
+    }
+
+@api_router.get("/wallets/my-wallets")
+async def get_my_wallets(current_user: dict = Depends(get_current_user)):
+    """Get all saved wallets for the current user"""
+    wallets = await db.saved_wallets.find({"user_id": current_user["id"]}).sort("created_at", -1).to_list(50)
+    
+    # Clean MongoDB ObjectIds
+    for wallet in wallets:
+        wallet.pop("_id", None)
+    
+    return wallets
+
+@api_router.get("/wallets/verified")
+async def get_verified_wallets(current_user: dict = Depends(get_current_user)):
+    """Get only verified wallets for order placement"""
+    wallets = await db.saved_wallets.find({
+        "user_id": current_user["id"],
+        "verification_status": "verified"
+    }).to_list(50)
+    
+    # Clean MongoDB ObjectIds
+    for wallet in wallets:
+        wallet.pop("_id", None)
+    
+    return wallets
+
+@api_router.get("/wallets/{wallet_id}")
+async def get_wallet_detail(wallet_id: str, current_user: dict = Depends(get_current_user)):
+    """Get wallet details"""
+    wallet = await db.saved_wallets.find_one({"id": wallet_id, "user_id": current_user["id"]})
+    if not wallet:
+        raise HTTPException(status_code=404, detail="Wallet not found")
+    
+    wallet.pop("_id", None)
+    return wallet
+
+@api_router.put("/wallets/{wallet_id}/set-primary")
+async def set_primary_wallet(wallet_id: str, current_user: dict = Depends(get_current_user)):
+    """Set a wallet as primary for its asset type"""
+    wallet = await db.saved_wallets.find_one({"id": wallet_id, "user_id": current_user["id"]})
+    if not wallet:
+        raise HTTPException(status_code=404, detail="Wallet not found")
+    
+    if wallet["verification_status"] != "verified":
+        raise HTTPException(status_code=400, detail="Only verified wallets can be set as primary")
+    
+    # Unset other primary wallets for this asset
+    await db.saved_wallets.update_many(
+        {"user_id": current_user["id"], "asset": wallet["asset"]},
+        {"$set": {"is_primary": False}}
+    )
+    
+    # Set this wallet as primary
+    await db.saved_wallets.update_one(
+        {"id": wallet_id},
+        {"$set": {"is_primary": True}}
+    )
+    
+    return {"success": True, "message": "Wallet set as primary"}
+
+@api_router.delete("/wallets/{wallet_id}")
+async def delete_wallet(wallet_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a saved wallet"""
+    wallet = await db.saved_wallets.find_one({"id": wallet_id, "user_id": current_user["id"]})
+    if not wallet:
+        raise HTTPException(status_code=404, detail="Wallet not found")
+    
+    await db.saved_wallets.delete_one({"id": wallet_id})
+    
+    return {"success": True, "message": "Wallet deleted"}
+
 # ==================== RATES ROUTES ====================
 @api_router.get("/rates")
 async def get_rates(current_user: dict = Depends(get_current_user)):
