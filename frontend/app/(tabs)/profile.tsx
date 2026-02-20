@@ -67,6 +67,16 @@ export default function ProfileScreen() {
           <ProfileRow icon="person-circle" label="Role" value={user?.role?.toUpperCase() || ''} />
         </Card>
 
+        {/* Wallet Management */}
+        <Card>
+          <Text style={styles.sectionTitle}>Wallet Management</Text>
+          <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/wallets')}>
+            <Ionicons name="wallet" size={24} color={theme.colors.primary} />
+            <Text style={styles.menuText}>Saved Wallets</Text>
+            <Ionicons name="chevron-forward" size={20} color={theme.colors.textMuted} />
+          </TouchableOpacity>
+        </Card>
+
         {/* Security */}
         <Card>
           <Text style={styles.sectionTitle}>Security</Text>
