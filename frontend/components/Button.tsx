@@ -75,8 +75,8 @@ const styles = StyleSheet.create({
   
   // Variants
   primaryVariant: {
-    backgroundColor: theme.colors.gold,
-    ...theme.shadows.gold,
+    backgroundColor: theme.colors.primary,
+    ...theme.shadows.primary,
   },
   secondaryVariant: {
     backgroundColor: theme.colors.card,
@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
   outlineVariant: {
     backgroundColor: 'transparent',
     borderWidth: 1.5,
-    borderColor: theme.colors.gold,
+    borderColor: theme.colors.primary,
   },
   dangerVariant: {
     backgroundColor: theme.colors.error,
