@@ -163,8 +163,13 @@ class BharatBitAPITester:
             return
         
         # Check if we got the expected assets
-        rates = response if isinstance(response, list) else []
-        assets_found = [rate.get("asset") for rate in rates]
+        if response.get("status_code") != 200:
+            self.log_test("Get Default Rates", False, 
+                         f"Failed to get rates: {response.get('detail', 'Unknown error')}", response)
+            return
+        
+        rates = response.get("data", []) if "data" in response else (response if isinstance(response, list) else [])
+        assets_found = [rate.get("asset") for rate in rates if isinstance(rate, dict)]
         expected_assets = ["USDT", "BTC", "ETH"]
         
         missing_assets = [asset for asset in expected_assets if asset not in assets_found]
