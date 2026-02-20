@@ -170,12 +170,12 @@ export default function KYCSubmitScreen() {
           <Card style={styles.section}>
             <Text style={styles.sectionTitle}>Selfie & Address Proof</Text>
             <ImageUploadButton
-              label=\"Upload Selfie *\"
+              label="Upload Selfie *"
               hasImage={!!selfieImage}
               onPress={() => pickImage(setSelfieImage)}
             />
             <ImageUploadButton
-              label=\"Upload Address Proof *\"
+              label="Upload Address Proof *"
               hasImage={!!addressProof}
               onPress={() => pickImage(setAddressProof)}
             />
@@ -184,80 +184,80 @@ export default function KYCSubmitScreen() {
           <Card style={styles.section}>
             <Text style={styles.sectionTitle}>Bank Details</Text>
             <Input
-              label=\"Account Holder Name *\"
+              label="Account Holder Name *"
               value={accountHolderName}
               onChangeText={setAccountHolderName}
-              placeholder=\"As per bank records\"
+              placeholder="As per bank records"
             />
             <Input
-              label=\"Account Number *\"
+              label="Account Number *"
               value={bankAccountNumber}
               onChangeText={setBankAccountNumber}
-              placeholder=\"Bank account number\"
-              keyboardType=\"number-pad\"
+              placeholder="Bank account number"
+              keyboardType="number-pad"
             />
             <Input
-              label=\"IFSC Code *\"
+              label="IFSC Code *"
               value={bankIFSC}
               onChangeText={setBankIFSC}
-              placeholder=\"ABCD0123456\"
-              autoCapitalize=\"characters\"
+              placeholder="ABCD0123456"
+              autoCapitalize="characters"
             />
             <Input
-              label=\"Bank Name *\"
+              label="Bank Name *"
               value={bankName}
               onChangeText={setBankName}
-              placeholder=\"Bank name\"
+              placeholder="Bank name"
             />
             <Input
-              label=\"Branch Name\"
+              label="Branch Name"
               value={bankBranch}
               onChangeText={setBankBranch}
-              placeholder=\"Branch location\"
+              placeholder="Branch location"
             />
           </Card>
 
           <Card style={styles.section}>
             <Text style={styles.sectionTitle}>Nominee Details</Text>
             <Input
-              label=\"Nominee Name *\"
+              label="Nominee Name *"
               value={nomineeName}
               onChangeText={setNomineeName}
-              placeholder=\"Full name\"
+              placeholder="Full name"
             />
             <Input
-              label=\"Relationship *\"
+              label="Relationship *"
               value={nomineeRelationship}
               onChangeText={setNomineeRelationship}
-              placeholder=\"Father/Mother/Spouse/Child\"
+              placeholder="Father/Mother/Spouse/Child"
             />
             <Input
-              label=\"Date of Birth\"
+              label="Date of Birth"
               value={nomineeDOB}
               onChangeText={setNomineeDOB}
-              placeholder=\"DD/MM/YYYY\"
+              placeholder="DD/MM/YYYY"
             />
           </Card>
 
           <Card style={styles.section}>
             <Text style={styles.sectionTitle}>Declarations</Text>
             <CheckBox
-              label=\"I accept FATCA declaration *\"
+              label="I accept FATCA declaration *"
               checked={fatcaAccepted}
               onPress={() => setFatcaAccepted(!fatcaAccepted)}
             />
             <CheckBox
-              label=\"I accept Terms & Risk Disclosure *\"
+              label="I accept Terms & Risk Disclosure *"
               checked={termsAccepted}
               onPress={() => setTermsAccepted(!termsAccepted)}
             />
           </Card>
 
           <Button
-            title=\"Submit KYC\"
+            title="Submit KYC"
             onPress={handleSubmit}
             loading={loading}
-            size=\"lg\"
+            size="lg"
             style={{ marginTop: theme.spacing.lg }}
           />
         </ScrollView>
