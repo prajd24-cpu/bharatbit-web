@@ -69,6 +69,49 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* KYC Status Banner */}
+        {user?.kyc_status !== 'approved' && (
+          <TouchableOpacity 
+            style={[
+              styles.kycBanner, 
+              { backgroundColor: user?.kyc_status === 'rejected' ? theme.colors.error + '15' : 
+                                 user?.kyc_status === 'under_review' ? theme.colors.warning + '15' : 
+                                 theme.colors.primary + '15' }
+            ]}
+            onPress={() => {
+              if (user?.kyc_status === 'pending') {
+                router.push('/kyc/submit');
+              }
+            }}
+          >
+            <View style={styles.kycBannerContent}>
+              <Ionicons 
+                name={user?.kyc_status === 'rejected' ? 'alert-circle' : 
+                      user?.kyc_status === 'under_review' ? 'time' : 'document-text'} 
+                size={32} 
+                color={user?.kyc_status === 'rejected' ? theme.colors.error : 
+                       user?.kyc_status === 'under_review' ? theme.colors.warning : 
+                       theme.colors.primary} 
+              />
+              <View style={styles.kycBannerText}>
+                <Text style={styles.kycBannerTitle}>
+                  {user?.kyc_status === 'rejected' ? 'KYC Rejected' :
+                   user?.kyc_status === 'under_review' ? 'KYC Under Review' :
+                   'Complete Your KYC'}
+                </Text>
+                <Text style={styles.kycBannerSubtitle}>
+                  {user?.kyc_status === 'rejected' ? 'Please resubmit your documents' :
+                   user?.kyc_status === 'under_review' ? 'We are reviewing your documents' :
+                   'Submit your documents to start trading'}
+                </Text>
+              </View>
+              {user?.kyc_status === 'pending' && (
+                <Ionicons name="chevron-forward" size={24} color={theme.colors.primary} />
+              )}
+            </View>
+          </TouchableOpacity>
+        )}
+
         {/* Portfolio Summary */}
         <Card style={styles.portfolioCard}>
           <View style={styles.cardHeader}>
