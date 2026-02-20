@@ -823,6 +823,127 @@ async def admin_kyc_action(data: AdminKYCActionRequest, admin: dict = Depends(ge
     
     return {"success": True, "message": f"KYC {data.action}d successfully"}
 
+# ==================== ADMIN WALLET VERIFICATION ROUTES ====================
+@api_router.get("/admin/wallets/pending")
+async def admin_get_pending_wallets(admin: dict = Depends(get_admin_user)):
+    """Get all wallets pending verification"""
+    wallets = await db.saved_wallets.find({"verification_status": "pending"}).sort("created_at", -1).to_list(100)
+    
+    # Enrich with user data
+    for wallet in wallets:
+        wallet.pop("_id", None)
+        user = await db.users.find_one({"id": wallet["user_id"]})
+        if user:
+            wallet["user_email"] = user["email"]
+            wallet["user_mobile"] = user["mobile"]
+    
+    return wallets
+
+@api_router.get("/admin/wallets/all")
+async def admin_get_all_wallets(admin: dict = Depends(get_admin_user)):
+    """Get all wallets across all users"""
+    wallets = await db.saved_wallets.find().sort("created_at", -1).to_list(500)
+    
+    # Enrich with user data
+    for wallet in wallets:
+        wallet.pop("_id", None)
+        user = await db.users.find_one({"id": wallet["user_id"]})
+        if user:
+            wallet["user_email"] = user["email"]
+            wallet["user_mobile"] = user["mobile"]
+    
+    return wallets
+
+@api_router.get("/admin/wallets/{wallet_id}")
+async def admin_get_wallet_detail(wallet_id: str, admin: dict = Depends(get_admin_user)):
+    """Get wallet details with proof image for verification"""
+    wallet = await db.saved_wallets.find_one({"id": wallet_id})
+    if not wallet:
+        raise HTTPException(status_code=404, detail="Wallet not found")
+    
+    wallet.pop("_id", None)
+    user = await db.users.find_one({"id": wallet["user_id"]})
+    if user:
+        user.pop("_id", None)
+        user.pop("password_hash", None)
+        wallet["user"] = user
+    
+    return wallet
+
+@api_router.post("/admin/wallets/action")
+async def admin_wallet_action(data: AdminWalletActionRequest, admin: dict = Depends(get_admin_user)):
+    """Verify or reject a wallet"""
+    wallet = await db.saved_wallets.find_one({"id": data.wallet_id})
+    if not wallet:
+        raise HTTPException(status_code=404, detail="Wallet not found")
+    
+    new_status = WalletVerificationStatus.VERIFIED if data.action == "verify" else WalletVerificationStatus.REJECTED
+    
+    update_data = {
+        "verification_status": new_status,
+        "verified_at": datetime.utcnow(),
+        "verified_by": admin["id"]
+    }
+    
+    if data.action == "reject" and data.rejection_reason:
+        update_data["rejection_reason"] = data.rejection_reason
+    
+    await db.saved_wallets.update_one({"id": data.wallet_id}, {"$set": update_data})
+    
+    # Get user for notifications
+    user = await db.users.find_one({"id": wallet["user_id"]})
+    
+    # Send email notification to user
+    from services.email_service import email_service
+    if user:
+        if data.action == "verify":
+            await email_service.send_email(
+                user["email"],
+                f"Wallet Verified - {wallet['label']}",
+                f"""
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2 style="color: #10B981;">Wallet Verified!</h2>
+                    <p>Your wallet <strong>{wallet['label']}</strong> has been verified.</p>
+                    <p><strong>Address:</strong> {wallet['wallet_address']}</p>
+                    <p><strong>Asset:</strong> {wallet['asset']} ({wallet['network']})</p>
+                    <p>You can now use this wallet for receiving crypto from your orders.</p>
+                </div>
+                """
+            )
+        else:
+            await email_service.send_email(
+                user["email"],
+                f"Wallet Verification Failed - {wallet['label']}",
+                f"""
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2 style="color: #EF4444;">Wallet Verification Failed</h2>
+                    <p>Your wallet <strong>{wallet['label']}</strong> could not be verified.</p>
+                    <p><strong>Reason:</strong> {data.rejection_reason or 'Invalid proof of ownership'}</p>
+                    <p>Please submit a new wallet with valid proof of ownership.</p>
+                </div>
+                """
+            )
+    
+    # Send push notification
+    if user and user.get("push_token"):
+        from services.push_service import push_service
+        if data.action == "verify":
+            await push_service.send_push_notification(
+                [user["push_token"]],
+                "Wallet Verified ✓",
+                f"Your wallet {wallet['label']} has been verified.",
+                {"type": "wallet_verified", "wallet_id": wallet["id"]}
+            )
+        else:
+            await push_service.send_push_notification(
+                [user["push_token"]],
+                "Wallet Verification Failed",
+                f"Please check your wallet submission.",
+                {"type": "wallet_rejected", "wallet_id": wallet["id"]}
+            )
+    
+    return {"success": True, "message": f"Wallet {data.action}d successfully"}
+
 @api_router.get("/admin/orders")
 async def admin_get_orders(admin: dict = Depends(get_admin_user)):
     orders = await db.orders.find().sort("created_at", -1).to_list(500)
