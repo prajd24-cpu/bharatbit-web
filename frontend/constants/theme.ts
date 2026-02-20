@@ -1,34 +1,35 @@
-// Premium Banking Theme - Royal Blue & Orange
+// BharatBit Official Color Theme
 export const theme = {
   colors: {
-    // Primary Background - Deep Navy & Dark Blue
-    background: '#0A1628',
+    // Primary Background - Dark
+    background: '#0A0F1A',
     backgroundSecondary: '#1A1F2E',
     backgroundTertiary: '#0F172A',
     
-    // Royal Blue & Orange Accents
-    primary: '#4169E1',        // Royal Blue
-    primaryDark: '#2C4A9C',
-    primaryLight: '#6B8FE8',
-    accent: '#FF6B35',         // Orange
-    accentDark: '#E55A2B',
-    accentLight: '#FF8C5F',
+    // BharatBit Primary Colors
+    primary: '#1a9c5d',        // BharatBit Green
+    primaryDark: '#158750',
+    primaryLight: '#22b86d',
+    accent: '#d64545',         // BharatBit Red
+    accentDark: '#b83939',
+    accentLight: '#e05555',
     
-    // Text
-    textPrimary: '#F8FAFC',
-    textSecondary: '#94A3B8',
+    // Text Colors (from BharatBit website)
+    textPrimary: '#ffffff',
+    textSecondary: '#8a8a8a',
     textMuted: '#64748B',
+    textDark: '#1c1c1c',
     
-    // Status Colors
-    success: '#10B981',
-    successLight: '#34D399',
-    error: '#EF4444',
-    errorLight: '#F87171',
+    // Status Colors (matching BharatBit)
+    success: '#1a9c5d',        // BharatBit Green
+    successLight: '#22b86d',
+    error: '#d64545',          // BharatBit Red
+    errorLight: '#e05555',
     warning: '#F59E0B',
     info: '#3B82F6',
     
     // Borders & Dividers
-    border: 'rgba(65, 105, 225, 0.2)',
+    border: 'rgba(26, 156, 93, 0.2)',
     borderLight: 'rgba(148, 163, 184, 0.1)',
     divider: 'rgba(148, 163, 184, 0.1)',
     
@@ -40,10 +41,10 @@ export const theme = {
     overlay: 'rgba(10, 22, 40, 0.95)',
     overlayLight: 'rgba(10, 22, 40, 0.7)',
     
-    // Legacy gold references (now using royal blue)
-    gold: '#4169E1',
-    goldDark: '#2C4A9C',
-    goldLight: '#6B8FE8',
+    // Legacy gold references (now using green)
+    gold: '#1a9c5d',
+    goldDark: '#158750',
+    goldLight: '#22b86d',
   },
   
   spacing: {
@@ -103,7 +104,7 @@ export const theme = {
       elevation: 8,
     },
     primary: {
-      shadowColor: '#4169E1',
+      shadowColor: '#1a9c5d',
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.3,
       shadowRadius: 12,
