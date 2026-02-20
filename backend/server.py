@@ -154,6 +154,33 @@ class OTPStore(BaseModel):
     expires_at: datetime = Field(default_factory=lambda: datetime.utcnow() + timedelta(minutes=10))
     is_used: bool = False
 
+class WalletType(str, Enum):
+    EXCHANGE = "exchange"  # Custodial wallet on exchange (Binance, WazirX, etc.)
+    SELF_CUSTODY = "self_custody"  # Personal wallet (MetaMask, Trust Wallet, Ledger, etc.)
+
+class WalletVerificationStatus(str, Enum):
+    PENDING = "pending"
+    VERIFIED = "verified"
+    REJECTED = "rejected"
+
+class SavedWallet(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    label: str  # User-friendly name like "My Binance USDT", "Personal ETH Wallet"
+    wallet_address: str
+    asset: str  # USDT, BTC, ETH
+    network: str  # TRC20, ERC20, BEP20, Bitcoin, etc.
+    wallet_type: WalletType
+    exchange_name: Optional[str] = None  # Required if wallet_type is EXCHANGE
+    proof_image: str  # base64 - Screenshot from exchange or signed message proof
+    proof_description: Optional[str] = None  # Additional notes about the proof
+    verification_status: WalletVerificationStatus = WalletVerificationStatus.PENDING
+    rejection_reason: Optional[str] = None
+    is_primary: bool = False  # Primary wallet for this asset
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    verified_at: Optional[datetime] = None
+    verified_by: Optional[str] = None
+
 # ==================== REQUEST/RESPONSE MODELS ====================
 class RegisterRequest(BaseModel):
     mobile: str
