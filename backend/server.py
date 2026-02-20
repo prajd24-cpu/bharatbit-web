@@ -254,6 +254,22 @@ class AdminLedgerEntryRequest(BaseModel):
     asset: str
     description: str
 
+class SaveWalletRequest(BaseModel):
+    label: str
+    wallet_address: str
+    asset: str  # USDT, BTC, ETH
+    network: str  # TRC20, ERC20, BEP20, Bitcoin, etc.
+    wallet_type: str  # exchange, self_custody
+    exchange_name: Optional[str] = None
+    proof_image: str  # base64 screenshot
+    proof_description: Optional[str] = None
+    is_primary: bool = False
+
+class AdminWalletActionRequest(BaseModel):
+    wallet_id: str
+    action: str  # verify, reject
+    rejection_reason: Optional[str] = None
+
 # ==================== UTILITY FUNCTIONS ====================
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
