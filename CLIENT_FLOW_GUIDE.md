@@ -2,7 +2,7 @@
 
 ## 🎯 What Clients See & How to Test
 
-### **Preview URL:** https://elite-trading-5.preview.emergentagent.com
+### **Preview URL:** https://crypto-desk-demo.preview.emergentagent.com
 
 ---
 

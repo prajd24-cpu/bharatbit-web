@@ -1,0 +1,199 @@
+<analysis>
+<original_problem_statement>
+The user wants to build a premium Over-the-Counter (OTC) crypto trading desk mobile and web application named BharatBit OTC Desk. The application is targeted at high-net-worth Indian clients and should have a user experience similar to a Swiss private banking app.
+
+**PRODUCT REQUIREMENTS:**
+- **Branding:** Premium, discreet, elegant, secure. Dark luxury theme (initially requested, later changed by user to a light theme).
+- **Core Features:**
+    1.  **User Registration:** Mobile + OTP, Email verification, invite/referral code.
+    2.  **Full KYC Module:** PAN, Aadhaar, Selfie, Address proof, Bank details, Nominee, FATCA, etc. with an admin approval workflow.
+    3.  **Secure Login:** 2FA, Biometrics.
+    4.  **Dashboard:** Portfolio summary, active orders, wallet ledger, assigned Relationship Manager (RM) details.
+    5.  **Place OTC Order:** Buy/Sell Crypto, INR Settlement, live indicative rates, payment proof upload.
+    6.  **Order History:** View, filter, and export past orders.
+    7.  **Wallet & Ledger:** Complete transparent ledger of all transactions.
+    8.  **Admin Panel:** User management, KYC approval, order management, manual ledger entries, custom rate setting, analytics.
+- **UI/UX:** Initially a dark theme with gold accents, but later changed by the user to a **light theme** with a white background, orange buttons, and dark navy blue text. The welcome screen was also simplified to show only Sign In and Create Account buttons with an invitation only message.
+- **Tech Stack:** Expo (React Native) for cross-platform frontend, FastAPI backend, MongoDB database.
+- **Integrations:** The user requested integrations for Email OTP (initially SMS), Signzy for KYC, and Razorpay for payments, but also wants to display their static bank details for manual transfers (IMPS/NEFT/RTGS).
+- **Additional Features Requested:** Push notifications for KYC approval, enhanced admin analytics, live crypto charts, auto-refreshing rates, and WhatsApp notifications.
+</original_problem_statement>
+
+**User's preferred language**: English
+
+**what currently exists?**
+A full-stack application has been built based on the user's requirements.
+- **Backend (FastAPI):** Features complete APIs for user authentication (registration, login, JWT), a full KYC workflow, order management, wallet/ledger functionality, and a comprehensive admin panel. The user's actual bank details for G.F.T. Investments Private Limited have been hardcoded into a backend endpoint as requested.
+- **Frontend (Expo/React Native):** The application has a complete UI flow, including a simplified welcome screen, authentication screens (Login, Register, OTP, 2FA), a multi-step KYC submission form (including selfie upload), and a tab-based main interface (Dashboard, Orders, Wallet, Profile). The UI follows the user's latest request for a light theme: white background, orange buttons, and navy blue text.
+- **Integrations:** Service modules and stubs have been created for real integrations (Email, KYC, Payments, Push Notifications), but they currently operate in mock mode as no API keys have been provided.
+
+**Last working item**:
+    - Last item agent was working: The user reported a new bug where the keyboard does not appear when they try to type in the OTP/2FA input fields. The agent identified that the  prop was missing and started adding  to the first  of the OTP components to automatically trigger the keyboard on screen load. The fix was applied to  but not yet to .
+    - Status: IN PROGRESS
+    - Agent Testing Done: N
+    - Which testing method agent to use? manual testing by curl
+    - User Testing Done: N
+
+**All Pending/In progress Issue list**:
+  - Issue 1: Keyboard not appearing on OTP/2FA screens (P0)
+  - Issue 2: Preview environment is unstable due to ngrok (P2)
+
+  Issues Detail:
+  - Issue 1:
+     - Description: The user is unable to type in the OTP and 2FA verification screens because the keyboard does not automatically appear, nor does it appear when the input fields are tapped. This is a critical bug as it blocks the registration and login flows.
+     - Attempted fixes: The agent started adding  to the first  in the  file. This fix needs to be completed for the  as well and then thoroughly tested.
+     - Next debug checklist:
+        1. Apply the  fix to the  in .
+        2. Ensure the  and  wrappers are correctly implemented on both screens to handle both keyboard appearance and dismissal.
+        3. Restart the expo server and test the full registration and login flows to confirm the keyboard appears and can be dismissed correctly.
+     - Why fix this issue and what will be achieved with the fix? Fixing this will unblock the core user authentication flows, allowing new users to register and existing users to log in.
+     - Status: IN PROGRESS
+     - Is recurring issue? N
+     - Should Test frontend/backend/both after fix? Frontend
+     - Blocked on other issue: None
+
+  - Issue 2:
+     - Description: The  tunnel used to provide the live preview URL is extremely unstable. It frequently fails to connect, restarts in a loop, or returns HTTP 520/502 errors. This severely hinders the user's ability to test and provide feedback.
+     - Attempted fixes: The agent has repeatedly tried restarting the expo service, waiting for the tunnel to stabilize, and has used the . These are temporary workarounds for an underlying infrastructure problem. The agent has also provided the user with a  for a more stable production deployment.
+     - Next debug checklist: This is an environmental issue, not a code issue. The best path forward is to either tolerate the instability, encourage the user to follow the deployment guide, or test features via backend API calls where possible. No further debugging by the agent is likely to resolve this permanently.
+     - Why fix this issue and what will be achieved with the fix? Resolving this would provide a stable testing environment for the user, leading to a smoother development and feedback loop.
+     - Status: BLOCKED
+     - Is recurring issue? Y
+     - Should Test frontend/backend/both after fix? Frontend
+     - Blocked on other issue: None
+
+**In progress Task List**:
+  There are no in-progress tasks, as the last action was a bug fix.
+
+**Upcoming and Future Tasks**
+  Upcoming Tasks:
+    - **P0: Implement Real Integrations:**
+        - **Email OTP:** Switch from mock OTP to a real email service using SendGrid/Resend. The user does not have API keys yet. The  is ready for key insertion.
+        - **KYC Verification:** Integrate Signzy for automatic PAN/Aadhaar verification. The  is ready for API keys.
+        - **Payment Gateway:** Integrate Razorpay for dynamic UPI QR codes and payment webhooks.  is ready for API keys.
+    - **P1: Implement Push Notifications:**
+        - Use  to send a push notification to the user when their KYC is approved by an admin. The package is installed, but the logic needs to be built in the backend and handled in the frontend.
+
+  Future Tasks:
+    - **P1: Enhanced Admin Analytics:** The admin panel has a basic structure. This task involves adding more detailed analytics, charts, and data visualizations.
+    - **P1: Live Crypto Charts & Auto-Refresh Rates:** Implement a feature to display live price charts for cryptocurrencies and ensure the indicative rates on the order screen auto-refresh. This will likely require integrating a third-party crypto data API (e.g., via WebSocket or polling).
+    - **P2: WhatsApp Notifications:** Build the structure to send notifications via WhatsApp, likely requiring a provider like Twilio for WhatsApp Business API.
+
+**Completed work in this session**
+- **Full-Stack Application Scaffolding:** Created a complete Expo (React Native) frontend and FastAPI backend.
+- **Core Feature Implementation:**
+  - Complete User Authentication flow (Registration, Login, 2FA)
+  - Full KYC Submission Module (with PAN, Aadhaar, Selfie upload)
+  - OTC Order Placement and History
+  - Wallet and Transaction Ledger system
+  - Comprehensive Admin Panel for management
+- **UI/UX Iterations:**
+  - Initial dark/gold theme implementation.
+  - Revision to a royal blue/orange theme based on user feedback.
+  - Revision to a green/red theme based on  website.
+  - Final revision to a **light theme** (white background, orange buttons, navy blue text) with a simplified welcome screen, as per user's final request.
+- **Bug Fixes:** Resolved a keyboard *dismissal* issue on OTP screens.
+- **Bank Details Integration:** Hardcoded the user's company bank account details (ICICI Bank for G.F.T. Investments) into the backend to be displayed during the payment flow.
+- **Documentation:** Created , , and  to assist the user.
+
+**Earlier issues found/mentioned but not fixed**
+   - The primary and only major unfixed issue is the **persistent ngrok tunnel instability**, which is an environmental/infrastructure problem, not a code defect. It has been documented extensively in the Pending/In progress Issue list.
+
+**Known issue recurrence from previous fork**
+  - N/A
+
+**Code Architecture**
+
+
+**Key Technical Concepts**
+- **Frontend:** Expo (React Native), TypeScript,  for file-based navigation,  (implied for state management, or a similar context-based approach),  for document uploads.
+- **Backend:** FastAPI, Python, Pydantic for data validation, JWT for authentication, bcrypt for password hashing.
+- **Database:** MongoDB with  (async driver).
+- **Architecture:** Monorepo structure with distinct  and  directories. API-driven communication between frontend and backend.
+
+**key DB schema**
+  - **users**: 
+  - **kyc_details**: 
+  - **orders**: 
+  - **wallets**: 
+  - **transactions**: 
+  - **rates**: 
+
+**changes in tech stack**
+  - N/A
+
+**All files of reference**
+- : The single source of truth for all backend logic, APIs, and database models. Contains the hardcoded bank details.
+- : File being edited to fix the keyboard appearance bug.
+- : File that also needs the keyboard appearance fix.
+- : Defines the application's color scheme (currently white/orange/navy).
+- : The simplified welcome screen.
+- : The multi-step KYC form, including the selfie upload feature.
+- : Instructions for deploying the application to a production environment.
+- : Guide explaining the user flow for payments and KYC.
+
+**Areas that need refactoring**:
+- The  file has grown very large (over 800 lines). It could be refactored by splitting routes into multiple files using FastAPI's  for better organization (e.g., , , etc.).
+- Bank details are hardcoded in . While requested by the user, this is not ideal. A better approach would be to store them in a configuration collection in the database, allowing an admin to update them without code changes.
+
+**key api endpoints**
+- , , 
+- , 
+- , 
+- , 
+-  (This is where the user's hardcoded bank details are served)
+- 
+
+**Critical Info for New Agent**
+- **The preview environment is highly unstable.** Do not waste time trying to fix the  tunnel. If the preview is down, inform the user and suggest either waiting or focusing on backend work that can be tested via .
+- **The user is very particular about the UI.** The current light theme (white bg, orange buttons, navy text) is what they approved. Do not deviate without explicit instruction.
+- The **keyboard bug on OTP screens is the highest priority (P0)**. The login/registration flow is currently broken.
+- **Bank details are hardcoded** in  per the user's request. Be aware of this if any payment-related changes are requested.
+- The project is functionally complete in mock mode. The next major phase is wiring up the real integrations for which the user does not yet have API keys.
+
+**documents created in this job**
+  - 
+  - 
+  - 
+  - 
+
+**Last 10 User Messages and any pending HUMAN messages**
+10.  - User rejected the blue/orange theme and requested to match . (Completed)
+9.  - User agreed to wait for the unstable preview tunnel to reconnect. (Completed)
+8.  - User rejected the  theme and provided a screenshot for the correct colors. (Completed)
+7.  - User provided very specific UI instructions: light theme, simplified welcome screen. (Completed)
+6.  - User approved the new UI and asked for the next steps. (Completed)
+5.  - User chose to proceed with real integrations and adding new features. (In Progress/Upcoming)
+4.  - User clarified integration/feature priorities: Email OTP, display bank details, Signzy, push notifications, analytics, charts, WhatsApp. (In Progress/Upcoming)
+3.  - User asked for clarification on payment flow, KYC documents (selfie), and where to add their bank details. (Completed)
+2.  - User provided their actual company bank details to be added to the app. (Completed)
+1.  - **LATEST/PENDING**: User reported a critical bug blocking login/registration.
+
+**Project Health Check:**
+- **Broken:** The preview environment due to persistent  tunnel failures. The OTP/2FA authentication flow due to the keyboard bug.
+- **Mocked:** All external service integrations (SMS, Email, KYC, Payments, Push Notifications).
+
+**3rd Party Integrations**
+- **Planned (Stubs Created):**
+    - Twilio / MSG91 (for SMS, currently replaced by Email OTP)
+    - SendGrid / Resend (for Email OTP)
+    - Signzy (for KYC verification)
+    - Razorpay (for payment gateway)
+    - WhatsApp (via a provider like Twilio)
+- No integrations are currently active or use any API keys.
+
+**Testing status**
+  - Testing agent used after significant changes: NO
+  - Troubleshoot agent used after agent stuck in loop: YES (for the ngrok issue)
+  - Test files created: []
+  - Known regressions: [Keyboard not appearing on OTP/2FA screens. This might be a regression from a previous fix that handled keyboard *dismissal*.]
+
+**Credentials to test flow:**
+- **Admin User:**
+  - Email: 
+  - Password: 
+
+**What agent forgot to execute**
+- The agent did not forget, but the fix for the keyboard-not-appearing bug is incomplete. It was applied to  but needs to be applied to  as well.
+- The new features requested by the user (Push Notifications, Charts, Analytics) have been acknowledged and stubbed out, but are not fully implemented. This is the next major work package after the critical bug fix.
+</analysis>
