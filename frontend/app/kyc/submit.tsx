@@ -131,15 +131,15 @@ export default function KYCSubmitScreen() {
           <Card style={styles.section}>
             <Text style={styles.sectionTitle}>PAN Details</Text>
             <Input
-              label=\"PAN Number *\"
+              label="PAN Number *"
               value={panNumber}
               onChangeText={setPanNumber}
-              placeholder=\"ABCDE1234F\"
-              autoCapitalize=\"characters\"
+              placeholder="ABCDE1234F"
+              autoCapitalize="characters"
               maxLength={10}
             />
             <ImageUploadButton
-              label=\"Upload PAN Card *\"
+              label="Upload PAN Card *"
               hasImage={!!panImage}
               onPress={() => pickImage(setPanImage)}
             />
@@ -148,20 +148,20 @@ export default function KYCSubmitScreen() {
           <Card style={styles.section}>
             <Text style={styles.sectionTitle}>Aadhaar Details</Text>
             <Input
-              label=\"Aadhaar Number *\"
+              label="Aadhaar Number *"
               value={aadhaarNumber}
               onChangeText={setAadhaarNumber}
-              placeholder=\"1234 5678 9012\"
-              keyboardType=\"number-pad\"
+              placeholder="1234 5678 9012"
+              keyboardType="number-pad"
               maxLength={12}
             />
             <ImageUploadButton
-              label=\"Upload Aadhaar Front *\"
+              label="Upload Aadhaar Front *"
               hasImage={!!aadhaarFront}
               onPress={() => pickImage(setAadhaarFront)}
             />
             <ImageUploadButton
-              label=\"Upload Aadhaar Back *\"
+              label="Upload Aadhaar Back *"
               hasImage={!!aadhaarBack}
               onPress={() => pickImage(setAadhaarBack)}
             />
