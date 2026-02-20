@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   mobile: {
     fontSize: theme.fontSize.lg,
     fontWeight: theme.fontWeight.semibold,
-    color: theme.colors.gold,
+    color: theme.colors.primary,
     marginTop: theme.spacing.xs,
   },
   mockContainer: {
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
   },
   mockOTP: {
     fontSize: theme.fontSize.xl,
-    color: theme.colors.gold,
+    color: theme.colors.primary,
     fontWeight: theme.fontWeight.bold,
     marginTop: theme.spacing.xs,
   },
