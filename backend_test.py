@@ -185,10 +185,14 @@ class BharatBitAPITester:
         """Test new user registration with OTP verification"""
         print("\n=== Test 4: User Registration Flow ===")
         
+        # Generate unique user data
+        import time
+        timestamp = str(int(time.time()))[-6:]
+        
         # Step 1: Register new user
         registration_data = {
-            "mobile": "9876543210",
-            "email": "test@example.com", 
+            "mobile": f"98765{timestamp}",
+            "email": f"test{timestamp}@example.com", 
             "password": "Test@123"
         }
         
