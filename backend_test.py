@@ -246,8 +246,9 @@ class BharatBitAPITester:
         # Test GET /api/admin/kyc-pending
         response = self.make_request("GET", "/admin/kyc-pending", token=self.admin_token)
         if response.get("status_code") == 200:
+            kyc_data = response.get("data", []) if "data" in response else (response if isinstance(response, list) else [])
             self.log_test("GET /admin/kyc-pending", True, 
-                         f"Retrieved {len(response) if isinstance(response, list) else 'unknown'} pending KYC records")
+                         f"Retrieved {len(kyc_data)} pending KYC records")
         else:
             self.log_test("GET /admin/kyc-pending", False, 
                          f"Failed: {response.get('detail', 'Unknown error')}", response)
@@ -255,7 +256,8 @@ class BharatBitAPITester:
         # Test GET /api/admin/users
         response = self.make_request("GET", "/admin/users", token=self.admin_token)
         if response.get("status_code") == 200:
-            users_count = len(response) if isinstance(response, list) else 0
+            users_data = response.get("data", []) if "data" in response else (response if isinstance(response, list) else [])
+            users_count = len(users_data)
             self.log_test("GET /admin/users", True, 
                          f"Retrieved {users_count} users")
         else:
