@@ -578,6 +578,9 @@ async def get_rates(current_user: dict = Depends(get_current_user)):
 @api_router.get("/admin/users")
 async def admin_get_users(admin: dict = Depends(get_admin_user)):
     users = await db.users.find({"role": "user"}).to_list(1000)
+    # Clean MongoDB ObjectIds
+    for user in users:
+        user.pop("_id", None)
     return users
 
 @api_router.get("/admin/kyc-pending")
