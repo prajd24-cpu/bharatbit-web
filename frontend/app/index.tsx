@@ -34,24 +34,23 @@ export default function WelcomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.logoContainer}>
-          <Ionicons name="shield-checkmark" size={48} color={theme.colors.gold} />
-        </View>
-        <Text style={styles.brandName}>BharatBit</Text>
-        <Text style={styles.brandSubtitle}>OTC DESK</Text>
-        <Text style={styles.tagline}>Discreet. Secure. Direct.</Text>
-      </View>
-
       <View style={styles.content}>
-        <View style={styles.features}>
-          <Feature icon="lock-closed" text="Bank-Grade Security" />
-          <Feature icon="trending-up" text="Premium OTC Trading" />
-          <Feature icon="person" text="Dedicated Relationship Manager" />
-          <Feature icon="shield" text="Full KYC Compliance" />
+        {/* Logo and Brand */}
+        <View style={styles.header}>
+          <View style={styles.logoContainer}>
+            <Ionicons name="shield-checkmark" size={56} color={theme.colors.primary} />
+          </View>
+          <Text style={styles.brandName}>BharatBit</Text>
+          <Text style={styles.brandSubtitle}>OTC DESK</Text>
+        </View>
+
+        {/* Tagline */}
+        <View style={styles.taglineContainer}>
+          <Text style={styles.tagline}>Discreet. Secure. Direct.</Text>
         </View>
       </View>
 
+      {/* Action Buttons */}
       <View style={styles.footer}>
         <Button
           title="Sign In"
@@ -66,9 +65,12 @@ export default function WelcomeScreen() {
           size="lg"
           style={{ marginTop: theme.spacing.md }}
         />
-        <Text style={styles.footerText}>
-          By invitation only. For high-net-worth individuals.
-        </Text>
+        
+        {/* Invitation Only Text */}
+        <View style={styles.inviteContainer}>
+          <Text style={styles.inviteText}>By invitation only.</Text>
+          <Text style={styles.inviteSubtext}>For High Net-worth Individuals.</Text>
+        </View>
       </View>
     </SafeAreaView>
   );
