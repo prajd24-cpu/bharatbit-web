@@ -834,10 +834,15 @@ async def admin_get_pending_wallets(admin: dict = Depends(get_admin_user)):
     """Get all wallets pending verification"""
     wallets = await db.saved_wallets.find({"verification_status": "pending"}).sort("created_at", -1).to_list(100)
     
+    # Batch fetch all users to avoid N+1 queries
+    user_ids = list(set(w["user_id"] for w in wallets if w.get("user_id")))
+    users = await db.users.find({"id": {"$in": user_ids}}).to_list(len(user_ids))
+    user_map = {u["id"]: u for u in users}
+    
     # Enrich with user data
     for wallet in wallets:
         wallet.pop("_id", None)
-        user = await db.users.find_one({"id": wallet["user_id"]})
+        user = user_map.get(wallet.get("user_id"))
         if user:
             wallet["user_email"] = user["email"]
             wallet["user_mobile"] = user["mobile"]
@@ -847,12 +852,17 @@ async def admin_get_pending_wallets(admin: dict = Depends(get_admin_user)):
 @api_router.get("/admin/wallets/all")
 async def admin_get_all_wallets(admin: dict = Depends(get_admin_user)):
     """Get all wallets across all users"""
-    wallets = await db.saved_wallets.find().sort("created_at", -1).to_list(500)
+    wallets = await db.saved_wallets.find().sort("created_at", -1).to_list(100)
+    
+    # Batch fetch all users to avoid N+1 queries
+    user_ids = list(set(w["user_id"] for w in wallets if w.get("user_id")))
+    users = await db.users.find({"id": {"$in": user_ids}}).to_list(len(user_ids))
+    user_map = {u["id"]: u for u in users}
     
     # Enrich with user data
     for wallet in wallets:
         wallet.pop("_id", None)
-        user = await db.users.find_one({"id": wallet["user_id"]})
+        user = user_map.get(wallet.get("user_id"))
         if user:
             wallet["user_email"] = user["email"]
             wallet["user_mobile"] = user["mobile"]
