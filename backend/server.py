@@ -275,10 +275,10 @@ async def register(data: RegisterRequest):
     if existing:
         raise HTTPException(status_code=400, detail="User already exists")
     
-    # Generate OTP for mobile verification
+    # Generate OTP for email verification (6-digit)
     otp = generate_otp()
     otp_data = OTPStore(
-        mobile=data.mobile,
+        mobile=data.email,  # Using email as identifier
         otp=otp,
         purpose="registration"
     )
@@ -294,12 +294,17 @@ async def register(data: RegisterRequest):
     )
     await db.users.insert_one(user.dict())
     
-    # Mock OTP sending (in production, send via SMS gateway)
+    # Send email OTP (using email service)
+    from services.email_service import send_otp_email
+    email_result = await send_otp_email(data.email, otp)
+    
+    # Mock OTP sending (in production, send via email service)
     return {
         "success": True,
-        "message": "OTP sent to mobile",
+        "message": "OTP sent to email",
         "user_id": user.id,
-        "mock_otp": otp  # Remove in production
+        "mock_otp": otp,  # Remove in production
+        "email_sent": email_result.get("success", False)
     }
 
 @api_router.post("/auth/verify-otp")
