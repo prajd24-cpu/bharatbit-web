@@ -45,7 +45,7 @@ export default function WelcomeScreen() {
 
       <View style={styles.content}>
         <View style={styles.features}>
-          <Feature icon="lock-closed" text="Swiss-Grade Security" />
+          <Feature icon="lock-closed" text="Bank-Grade Security" />
           <Feature icon="trending-up" text="Premium OTC Trading" />
           <Feature icon="person" text="Dedicated Relationship Manager" />
           <Feature icon="shield" text="Full KYC Compliance" />
