@@ -64,6 +64,7 @@ export default function Verify2FAScreen() {
               maxLength={6}
               returnKeyType="done"
               onSubmitEditing={handleVerify}
+              autoFocus={true}
               style={{ fontSize: 24, textAlign: 'center', letterSpacing: 8 }}
             />
             <Button
