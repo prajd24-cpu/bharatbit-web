@@ -366,7 +366,7 @@ async def register(data: RegisterRequest):
 @api_router.post("/auth/verify-otp")
 async def verify_otp(data: VerifyOTPRequest):
     otp_record = await db.otp_store.find_one({
-        "mobile": data.mobile,
+        "mobile": data.mobile,  # This is actually email for registration
         "otp": data.otp,
         "purpose": data.purpose,
         "is_used": False
@@ -384,13 +384,20 @@ async def verify_otp(data: VerifyOTPRequest):
         {"$set": {"is_used": True}}
     )
     
+    # Find user by email or mobile (data.mobile could be email for registration)
+    user = await db.users.find_one({
+        "$or": [{"mobile": data.mobile}, {"email": data.mobile}]
+    })
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
     # Update user verification status
     await db.users.update_one(
-        {"mobile": data.mobile},
-        {"$set": {"is_mobile_verified": True}}
+        {"id": user["id"]},
+        {"$set": {"is_mobile_verified": True, "is_email_verified": True}}
     )
     
-    user = await db.users.find_one({"mobile": data.mobile})
     token = create_access_token({"sub": user["id"]})
     
     return {
