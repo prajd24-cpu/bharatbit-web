@@ -35,9 +35,11 @@ export default function WelcomeScreen() {
       <View style={styles.content}>
         {/* Logo and Brand */}
         <View style={styles.header}>
-          <View style={styles.logoContainer}>
-            <Text style={styles.logoText}>B</Text>
-          </View>
+          <Image 
+            source={require('../assets/images/logo-original.png')} 
+            style={styles.logo}
+            resizeMode="contain"
+          />
           <Text style={styles.brandName}>BharatBit</Text>
           <Text style={styles.brandSubtitle}>OTC DESK</Text>
         </View>
@@ -99,26 +101,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: theme.spacing.xxl,
   },
-  logoContainer: {
+  logo: {
     width: 120,
     height: 120,
-    borderRadius: 24,
-    backgroundColor: '#ffffff',
-    alignItems: 'center',
-    justifyContent: 'center',
     marginBottom: theme.spacing.xl,
-    borderWidth: 3,
-    borderColor: '#E95721',
-    shadowColor: '#E95721',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  logoText: {
-    fontSize: 72,
-    fontWeight: '900',
-    color: '#E95721',
+    borderRadius: 16,
   },
   brandName: {
     fontSize: 48,
