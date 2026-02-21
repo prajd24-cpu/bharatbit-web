@@ -1,11 +1,10 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../components/Button';
 import { useAuth } from '../contexts/AuthContext';
 import { theme } from '../constants/theme';
-import { Ionicons } from '@expo/vector-icons';
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -37,7 +36,7 @@ export default function WelcomeScreen() {
         {/* Logo and Brand */}
         <View style={styles.header}>
           <View style={styles.logoContainer}>
-            <Ionicons name="shield-checkmark" size={56} color={theme.colors.primary} />
+            <Text style={styles.logoText}>B</Text>
           </View>
           <Text style={styles.brandName}>BharatBit</Text>
           <Text style={styles.brandSubtitle}>OTC DESK</Text>
@@ -75,13 +74,6 @@ export default function WelcomeScreen() {
   );
 }
 
-const Feature = ({ icon, text }: { icon: any; text: string }) => (
-  <View style={styles.feature}>
-    <Ionicons name={icon} size={24} color={theme.colors.gold} />
-    <Text style={styles.featureText}>{text}</Text>
-  </View>
-);
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -110,14 +102,23 @@ const styles = StyleSheet.create({
   logoContainer: {
     width: 120,
     height: 120,
-    borderRadius: 60,
-    backgroundColor: theme.colors.backgroundSecondary,
+    borderRadius: 24,
+    backgroundColor: '#ffffff',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: theme.spacing.xl,
     borderWidth: 3,
-    borderColor: theme.colors.primary,
-    ...theme.shadows.md,
+    borderColor: '#E95721',
+    shadowColor: '#E95721',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  logoText: {
+    fontSize: 72,
+    fontWeight: '900',
+    color: '#E95721',
   },
   brandName: {
     fontSize: 48,
@@ -128,7 +129,7 @@ const styles = StyleSheet.create({
   brandSubtitle: {
     fontSize: theme.fontSize.md,
     fontWeight: theme.fontWeight.semibold,
-    color: theme.colors.primary,
+    color: '#E95721',
     letterSpacing: 4,
     marginTop: theme.spacing.sm,
   },
