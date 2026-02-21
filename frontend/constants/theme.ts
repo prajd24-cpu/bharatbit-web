@@ -1,4 +1,4 @@
-// BharatBit Light Theme - White & Orange
+// BharatBit Light Theme - White & Orange (#E95721)
 export const theme = {
   colors: {
     // Light Background
@@ -6,10 +6,10 @@ export const theme = {
     backgroundSecondary: '#F8F9FA',  // Light grey
     backgroundTertiary: '#F1F3F5',
     
-    // BharatBit Brand Colors
-    primary: '#E54444',              // Orange-Red (buttons)
-    primaryDark: '#C93939',
-    primaryLight: '#FF5555',
+    // BharatBit Brand Colors - Using logo color #E95721
+    primary: '#E95721',              // Logo Orange (buttons)
+    primaryDark: '#D04A1A',
+    primaryLight: '#F06A3A',
     accent: '#F5B8A4',               // Peach
     accentDark: '#E5A894',
     accentLight: '#FFC8B4',
@@ -27,13 +27,13 @@ export const theme = {
     // Status Colors
     success: '#10B981',
     successLight: '#34D399',
-    error: '#E54444',
-    errorLight: '#FF5555',
+    error: '#DC2626',
+    errorLight: '#EF4444',
     warning: '#F59E0B',
     info: '#3B82F6',
     
     // Borders & Dividers
-    border: 'rgba(229, 68, 68, 0.2)',
+    border: 'rgba(233, 87, 33, 0.2)',
     borderLight: 'rgba(39, 58, 82, 0.1)',
     divider: 'rgba(39, 58, 82, 0.1)',
     
@@ -45,10 +45,10 @@ export const theme = {
     overlay: 'rgba(255, 255, 255, 0.95)',
     overlayLight: 'rgba(255, 255, 255, 0.7)',
     
-    // Legacy gold references (now using orange)
-    gold: '#E54444',
-    goldDark: '#C93939',
-    goldLight: '#FF5555',
+    // Legacy gold references (now using logo orange)
+    gold: '#E95721',
+    goldDark: '#D04A1A',
+    goldLight: '#F06A3A',
   },
   
   spacing: {
@@ -108,7 +108,7 @@ export const theme = {
       elevation: 8,
     },
     primary: {
-      shadowColor: '#E54444',
+      shadowColor: '#E95721',
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.2,
       shadowRadius: 12,
