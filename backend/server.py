@@ -321,7 +321,7 @@ async def register(data: RegisterRequest):
     # Generate OTP for email verification (6-digit)
     otp = generate_otp()
     otp_data = OTPStore(
-        mobile=data.email,  # Using email as identifier
+        mobile=data.email,  # Using email as identifier for OTP
         otp=otp,
         purpose="registration"
     )
@@ -338,14 +338,27 @@ async def register(data: RegisterRequest):
     await db.users.insert_one(user.dict())
     
     # Send email OTP (using email service)
-    from services.email_service import send_otp_email
+    from services.email_service import send_otp_email, notify_admin_new_registration
     email_result = await send_otp_email(data.email, otp)
     
-    # Mock OTP sending (in production, send via email service)
+    # Notify admin about new registration
+    try:
+        await notify_admin_new_registration({
+            "email": data.email,
+            "mobile": data.mobile,
+            "id": user.id,
+            "referral_code": data.referral_code,
+            "invite_code": data.invite_code,
+            "created_at": str(user.created_at)
+        })
+    except Exception as e:
+        logger.warning(f"Failed to notify admin: {e}")
+    
     return {
         "success": True,
         "message": "OTP sent to email",
         "user_id": user.id,
+        "email": data.email,  # Return email for OTP verification
         "mock_otp": otp,  # Remove in production
         "email_sent": email_result.get("success", False)
     }
