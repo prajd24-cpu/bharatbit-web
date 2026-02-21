@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../components/Button';
@@ -46,7 +46,7 @@ export default function LoginScreen() {
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.header}>
-            <Ionicons name="shield-checkmark" size={48} color={theme.colors.gold} />
+            <Ionicons name="shield-checkmark" size={48} color={theme.colors.primary} />
             <Text style={styles.title}>Welcome Back</Text>
             <Text style={styles.subtitle}>Sign in to your private vault</Text>
           </View>
@@ -69,6 +69,15 @@ export default function LoginScreen() {
               icon="lock-closed-outline"
               isPassword
             />
+            
+            {/* Forgot Password Link */}
+            <TouchableOpacity 
+              style={styles.forgotPassword}
+              onPress={() => router.push('/auth/forgot-password')}
+            >
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+            </TouchableOpacity>
+            
             <Button
               title="Sign In"
               onPress={handleLogin}
@@ -119,6 +128,15 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.md,
     color: theme.colors.textSecondary,
     marginTop: theme.spacing.sm,
+  },
+  forgotPassword: {
+    alignSelf: 'flex-end',
+    marginTop: theme.spacing.sm,
+  },
+  forgotPasswordText: {
+    color: theme.colors.primary,
+    fontSize: theme.fontSize.sm,
+    fontWeight: theme.fontWeight.medium,
   },
   footer: {
     alignItems: 'center',
