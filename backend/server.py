@@ -504,6 +504,100 @@ async def get_me(current_user: dict = Depends(get_current_user)):
     }
     return user_data
 
+# ==================== PASSWORD RESET ROUTES ====================
+@api_router.post("/auth/forgot-password")
+async def forgot_password(data: ForgotPasswordRequest):
+    """Send password reset OTP to user's email"""
+    user = await db.users.find_one({"email": data.email})
+    
+    if not user:
+        # Don't reveal if email exists for security
+        raise HTTPException(status_code=404, detail="No account found with this email")
+    
+    # Generate OTP
+    otp = generate_otp()
+    otp_data = OTPStore(
+        mobile=data.email,  # Using email as identifier
+        otp=otp,
+        purpose="password_reset"
+    )
+    await db.otp_store.insert_one(otp_data.dict())
+    
+    # Send email
+    from services.email_service import email_service
+    subject = "Password Reset OTP - BharatBit"
+    html = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #ffffff;">
+        <h1 style="color: #273A52;">Password Reset Request</h1>
+        <p>You requested to reset your password. Use the OTP below:</p>
+        <div style="background: #F8F9FA; border-left: 4px solid #E95721; padding: 20px; margin: 20px 0;">
+            <h2 style="color: #E95721; font-size: 36px; letter-spacing: 8px; margin: 0; text-align: center;">{otp}</h2>
+        </div>
+        <p style="color: #5A6C7D;">This OTP expires in 10 minutes.</p>
+        <p style="color: #8B95A0; font-size: 12px;">If you didn't request this, please ignore this email.</p>
+    </div>
+    """
+    await email_service.send_email(data.email, subject, html)
+    
+    return {
+        "success": True,
+        "message": "Password reset OTP sent to your email",
+        "mock_otp": otp  # Remove in production
+    }
+
+@api_router.post("/auth/reset-password")
+async def reset_password(data: ResetPasswordRequest):
+    """Reset password with OTP verification"""
+    # Verify OTP
+    otp_record = await db.otp_store.find_one({
+        "mobile": data.email,
+        "otp": data.otp,
+        "purpose": "password_reset",
+        "is_used": False
+    })
+    
+    if not otp_record:
+        raise HTTPException(status_code=400, detail="Invalid or expired OTP")
+    
+    if datetime.utcnow() > otp_record["expires_at"]:
+        raise HTTPException(status_code=400, detail="OTP expired")
+    
+    # Mark OTP as used
+    await db.otp_store.update_one(
+        {"_id": otp_record["_id"]},
+        {"$set": {"is_used": True}}
+    )
+    
+    # Update password
+    user = await db.users.find_one({"email": data.email})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    new_hash = hash_password(data.new_password)
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {"password_hash": new_hash, "password_updated_at": datetime.utcnow()}}
+    )
+    
+    # Send confirmation email
+    from services.email_service import email_service
+    await email_service.send_email(
+        data.email,
+        "Password Changed - BharatBit",
+        f"""
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h1 style="color: #10B981;">Password Changed Successfully</h1>
+            <p>Your password has been successfully changed.</p>
+            <p style="color: #5A6C7D;">If you did not make this change, please contact support immediately at support@bharatbit.world</p>
+        </div>
+        """
+    )
+    
+    return {
+        "success": True,
+        "message": "Password reset successful"
+    }
+
 # ==================== KYC ROUTES ====================
 @api_router.post("/kyc/submit")
 async def submit_kyc(data: KYCSubmissionRequest, current_user: dict = Depends(get_current_user)):
