@@ -89,7 +89,7 @@ export default function KYCSubmitScreen() {
 
       await refreshUser();
       Alert.alert('Success', 'KYC submitted successfully. Please wait for admin approval.', [
-        { text: 'OK', onPress: () => router.replace('/kyc/pending') }
+        { text: 'OK', onPress: () => router.replace('/(tabs)/dashboard') }
       ]);
     } catch (error: any) {
       Alert.alert('Error', error.response?.data?.detail || 'KYC submission failed');
@@ -98,13 +98,32 @@ export default function KYCSubmitScreen() {
     }
   };
 
+  const goToDashboard = () => {
+    router.replace('/(tabs)/dashboard');
+  };
+
   if (user?.kyc_status === 'under_review') {
     return (
       <SafeAreaView style={styles.container}>
+        <View style={styles.navHeader}>
+          <TouchableOpacity onPress={goToDashboard} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color={theme.colors.textPrimary} />
+          </TouchableOpacity>
+          <Text style={styles.navTitle}>KYC Status</Text>
+          <TouchableOpacity onPress={goToDashboard} style={styles.homeButton}>
+            <Ionicons name="home" size={24} color={theme.colors.primary} />
+          </TouchableOpacity>
+        </View>
         <View style={styles.centerContent}>
           <Ionicons name="time" size={64} color={theme.colors.warning} />
           <Text style={styles.statusTitle}>KYC Under Review</Text>
           <Text style={styles.statusText}>Your KYC documents are being reviewed. You'll be notified once approved.</Text>
+          <Button
+            title="Go to Dashboard"
+            onPress={goToDashboard}
+            variant="primary"
+            style={{ marginTop: theme.spacing.xl }}
+          />
         </View>
       </SafeAreaView>
     );
@@ -117,16 +136,31 @@ export default function KYCSubmitScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Navigation Header */}
+      <View style={styles.navHeader}>
+        <TouchableOpacity onPress={goToDashboard} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color={theme.colors.textPrimary} />
+        </TouchableOpacity>
+        <Text style={styles.navTitle}>Complete KYC</Text>
+        <TouchableOpacity onPress={goToDashboard} style={styles.homeButton}>
+          <Ionicons name="home" size={24} color={theme.colors.primary} />
+        </TouchableOpacity>
+      </View>
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.header}>
-            <Ionicons name="document-text" size={48} color={theme.colors.gold} />
-            <Text style={styles.title}>Complete KYC</Text>
-            <Text style={styles.subtitle}>Submit your documents for verification</Text>
-          </View>
+          {/* Info Banner */}
+          <Card style={styles.infoBanner}>
+            <View style={styles.infoBannerContent}>
+              <Ionicons name="information-circle" size={24} color={theme.colors.primary} />
+              <Text style={styles.infoBannerText}>
+                Complete your KYC to start trading. All fields marked with * are required.
+              </Text>
+            </View>
+          </Card>
 
           <Card style={styles.section}>
             <Text style={styles.sectionTitle}>PAN Details</Text>
@@ -258,7 +292,7 @@ export default function KYCSubmitScreen() {
             onPress={handleSubmit}
             loading={loading}
             size="lg"
-            style={{ marginTop: theme.spacing.lg }}
+            style={{ marginTop: theme.spacing.lg, marginBottom: theme.spacing.xl }}
           />
         </ScrollView>
       </KeyboardAvoidingView>
@@ -268,7 +302,7 @@ export default function KYCSubmitScreen() {
 
 const ImageUploadButton = ({ label, hasImage, onPress }: any) => (
   <TouchableOpacity style={[styles.uploadButton, hasImage && styles.uploadButtonSuccess]} onPress={onPress}>
-    <Ionicons name={hasImage ? 'checkmark-circle' : 'cloud-upload'} size={24} color={hasImage ? theme.colors.success : theme.colors.gold} />
+    <Ionicons name={hasImage ? 'checkmark-circle' : 'cloud-upload'} size={24} color={hasImage ? theme.colors.success : theme.colors.primary} />
     <Text style={styles.uploadButtonText}>{label}</Text>
   </TouchableOpacity>
 );
@@ -278,7 +312,7 @@ const CheckBox = ({ label, checked, onPress }: any) => (
     <Ionicons
       name={checked ? 'checkbox' : 'square-outline'}
       size={24}
-      color={checked ? theme.colors.gold : theme.colors.textSecondary}
+      color={checked ? theme.colors.primary : theme.colors.textSecondary}
     />
     <Text style={styles.checkboxLabel}>{label}</Text>
   </TouchableOpacity>
@@ -289,26 +323,53 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
+  navHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.borderLight,
+    backgroundColor: theme.colors.background,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  homeButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+  },
+  navTitle: {
+    fontSize: theme.fontSize.lg,
+    fontWeight: theme.fontWeight.bold,
+    color: theme.colors.textPrimary,
+  },
   keyboardView: {
     flex: 1,
   },
   scrollContent: {
     padding: theme.spacing.lg,
   },
-  header: {
-    alignItems: 'center',
-    marginBottom: theme.spacing.xl,
+  infoBanner: {
+    marginBottom: theme.spacing.lg,
+    backgroundColor: theme.colors.primary + '10',
   },
-  title: {
-    fontSize: theme.fontSize.xxl,
-    fontWeight: theme.fontWeight.bold,
-    color: theme.colors.textPrimary,
-    marginTop: theme.spacing.md,
+  infoBannerContent: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: theme.spacing.md,
   },
-  subtitle: {
-    fontSize: theme.fontSize.md,
+  infoBannerText: {
+    flex: 1,
+    fontSize: theme.fontSize.sm,
     color: theme.colors.textSecondary,
-    marginTop: theme.spacing.sm,
+    lineHeight: 20,
   },
   section: {
     marginBottom: theme.spacing.lg,
@@ -316,7 +377,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: theme.fontSize.lg,
     fontWeight: theme.fontWeight.semibold,
-    color: theme.colors.gold,
+    color: theme.colors.primary,
     marginBottom: theme.spacing.md,
   },
   uploadButton: {
@@ -327,7 +388,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.md,
     borderWidth: 1.5,
     borderStyle: 'dashed',
-    borderColor: theme.colors.gold,
+    borderColor: theme.colors.primary,
     marginBottom: theme.spacing.md,
   },
   uploadButtonSuccess: {
