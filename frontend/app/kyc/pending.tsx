@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card } from '../../components/Card';
@@ -37,6 +37,10 @@ export default function KYCPendingScreen() {
     setRefreshing(true);
     await loadKYCStatus();
     setRefreshing(false);
+  };
+
+  const goToDashboard = () => {
+    router.replace('/(tabs)/dashboard');
   };
 
   const getStatusConfig = () => {
@@ -86,6 +90,17 @@ export default function KYCPendingScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Navigation Header */}
+      <View style={styles.navHeader}>
+        <TouchableOpacity onPress={goToDashboard} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color={theme.colors.textPrimary} />
+        </TouchableOpacity>
+        <Text style={styles.navTitle}>KYC Status</Text>
+        <TouchableOpacity onPress={goToDashboard} style={styles.homeButton}>
+          <Ionicons name="home" size={24} color={theme.colors.primary} />
+        </TouchableOpacity>
+      </View>
+
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         refreshControl={
@@ -142,7 +157,7 @@ export default function KYCPendingScreen() {
 
           <Button
             title="Go to Dashboard"
-            onPress={() => router.replace('/(tabs)/dashboard')}
+            onPress={goToDashboard}
             variant="outline"
             style={styles.secondaryButton}
           />
@@ -164,6 +179,33 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  navHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.borderLight,
+    backgroundColor: theme.colors.background,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  homeButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+  },
+  navTitle: {
+    fontSize: theme.fontSize.lg,
+    fontWeight: theme.fontWeight.bold,
+    color: theme.colors.textPrimary,
   },
   scrollContent: {
     padding: theme.spacing.xl,
