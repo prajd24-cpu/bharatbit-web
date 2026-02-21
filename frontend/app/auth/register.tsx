@@ -38,13 +38,13 @@ export default function RegisterScreen() {
     setLoading(true);
     try {
       const result = await register(mobile, email, password, referralCode);
-      Alert.alert('Success', 'OTP sent to your mobile', [
+      Alert.alert('Success', 'OTP sent to your email', [
         {
           text: 'OK',
           onPress: () => {
             router.push({
               pathname: '/auth/verify-otp',
-              params: { mobile, mock_otp: result.mock_otp, purpose: 'registration' }
+              params: { mobile: email, mock_otp: result.mock_otp, purpose: 'registration' }
             });
           }
         }
