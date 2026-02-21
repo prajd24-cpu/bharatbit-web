@@ -270,6 +270,14 @@ class AdminWalletActionRequest(BaseModel):
     action: str  # verify, reject
     rejection_reason: Optional[str] = None
 
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr
+    otp: str
+    new_password: str
+
 # ==================== UTILITY FUNCTIONS ====================
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
