@@ -1,8 +1,26 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { Platform } from 'react-native';
+import * as Notifications from 'expo-notifications';
+import {
+  registerForPushNotificationsAsync,
+  registerPushTokenWithBackend,
+  addNotificationListeners,
+  parseNotificationData
+} from '../services/pushNotifications';
+import { useRouter } from 'expo-router';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
+// Configure notification behavior
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
 
 interface User {
   id: string;
@@ -35,10 +53,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const notificationListenerCleanup = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     loadStoredAuth();
+    
+    // Set up notification listeners
+    if (Platform.OS !== 'web') {
+      notificationListenerCleanup.current = addNotificationListeners(
+        (notification) => {
+          console.log('Notification received:', notification.request.content);
+        },
+        (response) => {
+          const data = parseNotificationData(response);
+          console.log('Notification response:', data);
+          // Navigation handling can be done here based on notification type
+        }
+      );
+    }
+    
+    return () => {
+      if (notificationListenerCleanup.current) {
+        notificationListenerCleanup.current();
+      }
+    };
   }, []);
+
+  // Register push token when token is set
+  useEffect(() => {
+    const setupPushNotifications = async () => {
+      if (token && Platform.OS !== 'web') {
+        try {
+          const pushToken = await registerForPushNotificationsAsync();
+          if (pushToken) {
+            await registerPushTokenWithBackend(pushToken, token);
+          }
+        } catch (error) {
+          console.log('Push notification setup error:', error);
+        }
+      }
+    };
+    
+    setupPushNotifications();
+  }, [token]);
 
   const loadStoredAuth = async () => {
     try {
