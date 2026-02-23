@@ -446,12 +446,22 @@ async def login(data: LoginRequest):
     )
     await db.otp_store.insert_one(otp_data.dict())
     
+    # Send 2FA OTP via email
+    from services.email_service import send_2fa_otp_email
+    email_result = await send_2fa_otp_email(user["email"], otp)
+    
+    # Send 2FA OTP via SMS
+    from services.sms_service import send_sms_otp
+    sms_result = await send_sms_otp(user["mobile"], otp)
+    
     return {
         "success": True,
-        "message": "2FA OTP sent",
+        "message": "2FA OTP sent to email and mobile",
         "requires_2fa": True,
         "mobile": user["mobile"],
-        "mock_otp": otp  # Remove in production
+        "mock_otp": otp,  # Remove in production
+        "email_sent": email_result.get("success", False),
+        "sms_sent": sms_result.get("success", False)
     }
 
 @api_router.post("/auth/verify-2fa")
