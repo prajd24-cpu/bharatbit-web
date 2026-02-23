@@ -58,18 +58,18 @@ api_router.include_router(crypto_router)
 @api_router.get("/payment/bank-details")
 async def get_bank_details():
     return {
-        "account_name": "BharatBit Technologies Pvt Ltd",
-        "account_number": "XXXXXXXXXXXX",
-        "ifsc_code": "HDFC0001234",
-        "bank_name": "HDFC Bank",
-        "branch": "Mumbai Main Branch"
+        "account_name": "G.F.T. INVESTMENTS PRIVATE LIMITED",
+        "account_number": "3458 0500 0533",
+        "ifsc_code": "ICIC0003458",
+        "bank_name": "ICICI Bank",
+        "branch": "BALEWADI PUNE 411045"
     }
 
 @api_router.get("/payment/upi-details")
 async def get_upi_details():
     return {
-        "upi_id": "bharatbit@hdfc",
-        "merchant_name": "BharatBit OTC"
+        "upi_id": "gftinvt@icici",
+        "merchant_name": "G.F.T. INVESTMENTS PRIVATE LIMITED"
     }
 
 # Health check endpoint
