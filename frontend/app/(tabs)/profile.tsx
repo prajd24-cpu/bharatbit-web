@@ -88,6 +88,19 @@ export default function ProfileScreen() {
           <ProfileRow icon="person-circle" label="Role" value={user?.role?.toUpperCase() || ''} />
         </Card>
 
+        {/* KYC Details - Show when KYC is submitted */}
+        {kycData && (
+          <Card>
+            <Text style={styles.sectionTitle}>KYC Details</Text>
+            <ProfileRow icon="card" label="PAN Number" value={kycData.pan_number || ''} />
+            <ProfileRow icon="id-card" label="Aadhaar" value={kycData.aadhaar_number ? `****${kycData.aadhaar_number.slice(-4)}` : ''} />
+            <ProfileRow icon="business" label="Bank" value={kycData.bank_name || ''} />
+            <ProfileRow icon="cash" label="Account" value={kycData.bank_account_number ? `****${kycData.bank_account_number.slice(-4)}` : ''} />
+            <ProfileRow icon="git-branch" label="IFSC" value={kycData.bank_ifsc || ''} />
+            <ProfileRow icon="people" label="Nominee" value={kycData.nominee_name || ''} />
+          </Card>
+        )}
+
         {/* Wallet Management */}
         <Card>
           <Text style={styles.sectionTitle}>Wallet Management</Text>
