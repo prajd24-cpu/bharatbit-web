@@ -17,20 +17,20 @@ export default function Verify2FAScreen() {
   const inputRef = useRef<RNTextInput>(null);
 
   const mobile = params.mobile as string;
-  const mockOTP = params.mock_otp as string;
 
-  // Auto-focus the input when screen loads
+  // Auto-focus the input when screen loads (mobile only)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (inputRef.current) {
-        inputRef.current.focus();
-      }
-    }, 300);
-    return () => clearTimeout(timer);
+    if (Platform.OS !== 'web') {
+      const timer = setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    }
   }, []);
 
   const handleVerify = async () => {
-    Keyboard.dismiss();
     if (!otp || otp.length !== 6) {
       Alert.alert('Error', 'Please enter a valid 6-digit OTP');
       return;
