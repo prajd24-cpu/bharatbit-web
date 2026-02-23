@@ -7,12 +7,14 @@ Build a premium Over-the-Counter (OTC) crypto trading desk mobile and web applic
 - **Branding**: Premium light theme, white background, orange buttons (#E95721), dark navy blue text, "B" logo
 - **Target Audience**: High-net-worth Indian crypto traders
 
+---
+
 ## Implemented Features
 
 ### Authentication (COMPLETE)
 - [x] User registration with Mobile + Country Code Picker (29 countries)
 - [x] Email OTP verification via Resend (LIVE)
-- [x] SMS OTP verification via MSG91 (LIVE) - Completed Feb 23, 2026
+- [x] SMS OTP via MSG91 (LIVE - pending DLT registration for actual delivery)
 - [x] Secure Login with 2FA (Email + SMS OTP)
 - [x] Forgot Password flow with email reset link
 
@@ -36,64 +38,133 @@ Build a premium Over-the-Counter (OTC) crypto trading desk mobile and web applic
 - [x] KYC approval/rejection
 - [x] Order management
 - [x] Wallet address verification
+- [x] Enhanced analytics with charts (NEW - Feb 23, 2026)
+
+### Live Crypto Prices (NEW - Feb 23, 2026)
+- [x] Real-time prices from CoinGecko API
+- [x] 10 supported cryptocurrencies (BTC, ETH, USDT, USDC, BNB, XRP, SOL, ADA, DOGE, MATIC)
+- [x] 7-day price history for charts
+- [x] INR and USD prices with 24h change percentage
+- [x] Dashboard crypto price cards with sparkline charts
+
+### Backend Refactoring (NEW - Feb 23, 2026)
+- [x] Modular architecture with separate routers
+- [x] `/routers/auth.py` - Authentication routes
+- [x] `/routers/admin.py` - Admin routes with analytics
+- [x] `/routers/orders.py` - Order management
+- [x] `/routers/wallets.py` - Wallet management  
+- [x] `/routers/kyc.py` - KYC submission
+- [x] `/routers/rates.py` - Asset rates
+- [x] `/routers/crypto.py` - Live crypto prices
+
+### Push Notifications (STUBBED - Feb 23, 2026)
+- [x] Service structure in place
+- [x] Notification functions for KYC approval/rejection
+- [x] Notification functions for order status updates
+- [ ] Expo push token integration (pending)
+
+---
 
 ## Live Integrations
 | Service | Provider | Status |
 |---------|----------|--------|
 | Email OTP & Notifications | Resend | LIVE |
-| SMS OTP | MSG91 | LIVE |
+| SMS OTP | MSG91 | API Working (DLT pending) |
+| Live Crypto Prices | CoinGecko | LIVE |
 | Database | MongoDB | LIVE |
 
 ## Stubbed/Planned Integrations
 | Service | Provider | Status |
 |---------|----------|--------|
 | KYC Verification | Signzy | Stubbed |
-| Push Notifications | Expo | Stubbed |
-| Live Crypto Prices | TBD | Planned |
+| Push Notifications | Expo | Stubbed (service ready) |
+
+---
 
 ## Tech Stack
 - **Frontend**: Expo (React Native + Web), TypeScript, expo-router
 - **Backend**: FastAPI, Python, Motor (async MongoDB)
 - **Database**: MongoDB
-- **Integrations**: Resend (email), MSG91 (SMS)
+- **Integrations**: Resend (email), MSG91 (SMS), CoinGecko (prices)
 
 ## API Credentials
 - **MSG91 Auth Key**: 495975AzbFFpTNWc699c0cd4P1
 - **Resend API Key**: re_d6KmGr7R_JE8zW7Yp2Gt7mSSiPjc4Vz7D
 - **Admin Account**: admin@bharatbit.com / admin123
 
-## Upcoming Tasks (P1)
-1. Push Notifications for KYC approval and order status
-2. Live Crypto Charts & Auto-Refresh Rates
-3. Enhanced Admin Analytics
+---
 
-## Future Tasks (P2)
-1. Full App Store Deployment (EAS)
-2. WhatsApp Notifications
-3. Refactor server.py into modular routers
+## Code Architecture (Refactored)
+```
+/app/backend/
+├── server.py              # Main entry point
+├── core/
+│   ├── config.py          # Environment configuration
+│   ├── database.py        # MongoDB connection
+│   └── dependencies.py    # Auth & security helpers
+├── models/
+│   └── schemas.py         # Pydantic models
+├── routers/
+│   ├── auth.py            # Authentication
+│   ├── admin.py           # Admin with analytics
+│   ├── orders.py          # Order management
+│   ├── wallets.py         # Wallet management
+│   ├── kyc.py             # KYC submission
+│   ├── rates.py           # Asset rates
+│   └── crypto.py          # Live crypto prices
+└── services/
+    ├── email_service.py   # Resend integration
+    ├── sms_service.py     # MSG91 integration
+    ├── crypto_price_service.py  # CoinGecko (NEW)
+    └── push_service.py    # Push notifications (stubbed)
+```
 
-## Code Architecture
-```
-/app
-├── backend/
-│   ├── server.py          # Main FastAPI app (~1200+ lines, needs refactoring)
-│   └── services/
-│       ├── email_service.py   # Resend integration (LIVE)
-│       ├── sms_service.py     # MSG91 integration (LIVE)
-│       ├── kyc_service.py     # Signzy stub
-│       └── push_notification_service.py  # Expo stub
-├── frontend/
-│   ├── app/
-│   │   ├── (tabs)/        # Main app screens
-│   │   ├── auth/          # Login, Register, OTP, 2FA, Password Reset
-│   │   ├── admin/         # Admin panel
-│   │   ├── kyc/           # KYC submission
-│   │   ├── orders/        # Order management
-│   │   └── wallets/       # Wallet management
-│   └── constants/
-│       └── theme.ts       # Brand colors (#E95721)
-```
+---
+
+## Key API Endpoints
+
+### Authentication
+- `POST /api/auth/register` - Register with OTP
+- `POST /api/auth/verify-otp` - Verify registration OTP
+- `POST /api/auth/login` - Login with 2FA
+- `POST /api/auth/verify-2fa` - Verify 2FA OTP
+- `POST /api/auth/forgot-password` - Request reset
+- `POST /api/auth/reset-password` - Reset password
+
+### Crypto Prices
+- `GET /api/crypto/prices` - Live prices (auth required)
+- `GET /api/crypto/prices/{symbol}/history?days=7` - Price history
+- `GET /api/crypto/supported` - List supported cryptos
+
+### Admin Analytics
+- `GET /api/admin/analytics` - Enhanced analytics with:
+  - `overview`: User counts, order stats, KYC stats
+  - `volume`: Buy/sell volume totals
+  - `charts`: daily_orders (7 days), kyc_status breakdown, asset_breakdown
+
+---
+
+## Pending User Actions
+1. **MSG91 DLT Registration** - Required for SMS delivery in India
+   - Register on DLT platform (Jio/Airtel/Vodafone)
+   - Get Sender ID and Template ID approved
+   - Provide DLT Template ID for code integration
+
+---
+
+## Future Tasks (Backlog)
+- [ ] Full App Store Deployment (EAS)
+- [ ] WhatsApp Notifications (Twilio)
+- [ ] Expo Push Token integration
+- [ ] Advanced charting library for frontend
+
+---
 
 ## Last Updated
 - **Date**: February 23, 2026
-- **Last Task Completed**: MSG91 SMS OTP Integration - Tested and verified working
+- **Session Tasks Completed**:
+  1. MSG91 SMS Integration (API working, DLT pending)
+  2. Backend Refactoring (modular routers)
+  3. Live Crypto Prices (CoinGecko)
+  4. Enhanced Admin Analytics (charts data)
+  5. Push Notification Service (stubbed)
