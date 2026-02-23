@@ -7,6 +7,7 @@ import { Button } from '../../components/Button';
 import { useAuth } from '../../contexts/AuthContext';
 import { theme } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import { CryptoPriceList } from '../../components/CryptoPriceChart';
 import axios from 'axios';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
