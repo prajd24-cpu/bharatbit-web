@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, Alert, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform, TextInput as RNTextInput } from 'react-native';
+import { View, Text, StyleSheet, Alert, KeyboardAvoidingView, Platform, TextInput as RNTextInput } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../components/Button';
@@ -17,21 +17,21 @@ export default function VerifyOTPScreen() {
   const inputRef = useRef<RNTextInput>(null);
 
   const mobile = params.mobile as string;
-  const mockOTP = params.mock_otp as string;
   const purpose = params.purpose as string;
 
-  // Auto-focus the input when screen loads
+  // Auto-focus the input when screen loads (mobile only)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (inputRef.current) {
-        inputRef.current.focus();
-      }
-    }, 300);
-    return () => clearTimeout(timer);
+    if (Platform.OS !== 'web') {
+      const timer = setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    }
   }, []);
 
   const handleVerify = async () => {
-    Keyboard.dismiss();
     if (!otp || otp.length !== 6) {
       Alert.alert('Error', 'Please enter a valid 6-digit OTP');
       return;
@@ -54,59 +54,54 @@ export default function VerifyOTPScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.content}>
-            <View style={styles.header}>
-              <Ionicons name="mail" size={48} color={theme.colors.primary} />
-              <Text style={styles.title}>Verify Account</Text>
-              <Text style={styles.subtitle}>Enter the OTP sent to your email & phone</Text>
-              <Text style={styles.mobile}>{mobile}</Text>
-              {mockOTP && (
-                <View style={styles.mockContainer}>
-                  <Text style={styles.mockLabel}>Mock OTP (Dev Only):</Text>
-                  <Text style={styles.mockOTP}>{mockOTP}</Text>
-                </View>
-              )}
-            </View>
-
-            <Card>
-              <Text style={styles.inputLabel}>Enter OTP</Text>
-              <View style={styles.otpInputContainer}>
-                <RNTextInput
-                  ref={inputRef}
-                  style={styles.otpInput}
-                  value={otp}
-                  onChangeText={setOtp}
-                  placeholder="000000"
-                  placeholderTextColor={theme.colors.textMuted}
-                  keyboardType="number-pad"
-                  maxLength={6}
-                  returnKeyType="done"
-                  onSubmitEditing={handleVerify}
-                  autoFocus={true}
-                />
-              </View>
-              <Button
-                title="Verify"
-                onPress={handleVerify}
-                loading={loading}
-                size="lg"
-                style={{ marginTop: theme.spacing.md }}
-              />
-            </Card>
-
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>Didn't receive the OTP?</Text>
-              <Button
-                title="Resend OTP"
-                onPress={() => Alert.alert('OTP Sent', 'A new OTP has been sent')}
-                variant="outline"
-                size="sm"
-                style={{ marginTop: theme.spacing.sm }}
-              />
-            </View>
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <Ionicons name="mail" size={48} color={theme.colors.primary} />
+            <Text style={styles.title}>Verify Account</Text>
+            <Text style={styles.subtitle}>Enter the OTP sent to your email & phone</Text>
+            <Text style={styles.mobile}>{mobile}</Text>
           </View>
-        </TouchableWithoutFeedback>
+
+          <Card>
+            <Text style={styles.inputLabel}>Enter OTP</Text>
+            <View style={styles.otpInputContainer}>
+              <RNTextInput
+                ref={inputRef}
+                style={styles.otpInput}
+                value={otp}
+                onChangeText={setOtp}
+                placeholder="000000"
+                placeholderTextColor={theme.colors.textMuted}
+                keyboardType="number-pad"
+                inputMode="numeric"
+                maxLength={6}
+                returnKeyType="done"
+                onSubmitEditing={handleVerify}
+                autoFocus={Platform.OS !== 'web'}
+                autoComplete="one-time-code"
+                textContentType="oneTimeCode"
+              />
+            </View>
+            <Button
+              title="Verify"
+              onPress={handleVerify}
+              loading={loading}
+              size="lg"
+              style={{ marginTop: theme.spacing.md }}
+            />
+          </Card>
+
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Didn't receive the OTP?</Text>
+            <Button
+              title="Resend OTP"
+              onPress={() => Alert.alert('OTP Sent', 'A new OTP has been sent')}
+              variant="outline"
+              size="sm"
+              style={{ marginTop: theme.spacing.sm }}
+            />
+          </View>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -144,25 +139,6 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.lg,
     fontWeight: theme.fontWeight.semibold,
     color: theme.colors.primary,
-    marginTop: theme.spacing.xs,
-  },
-  mockContainer: {
-    marginTop: theme.spacing.lg,
-    padding: theme.spacing.md,
-    backgroundColor: theme.colors.card,
-    borderRadius: theme.borderRadius.sm,
-    borderWidth: 1,
-    borderColor: theme.colors.warning,
-  },
-  mockLabel: {
-    fontSize: theme.fontSize.xs,
-    color: theme.colors.warning,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  mockOTP: {
-    fontSize: theme.fontSize.xl,
-    color: theme.colors.primary,
-    fontWeight: theme.fontWeight.bold,
     marginTop: theme.spacing.xs,
   },
   inputLabel: {
