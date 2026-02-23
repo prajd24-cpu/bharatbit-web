@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Ale
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Picker } from '@react-native-picker/picker';
-import QRCode from 'react-native-qrcode-svg';
 import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
 import { Card } from '../../components/Card';
@@ -20,7 +19,8 @@ export default function CreateOrderScreen() {
   const [loading, setLoading] = useState(false);
   const [rates, setRates] = useState<any[]>([]);
   const [bankDetails, setBankDetails] = useState<any>(null);
-  const [upiDetails, setUpiDetails] = useState<any>(null);
+  const [walletBalances, setWalletBalances] = useState<any[]>([]);
+  const [kycData, setKycData] = useState<any>(null);
   
   // Form state
   const [orderType, setOrderType] = useState<'buy' | 'sell'>('buy');
@@ -30,7 +30,7 @@ export default function CreateOrderScreen() {
   const [currentRate, setCurrentRate] = useState<any>(null);
 
   useEffect(() => {
-    loadRatesAndPaymentDetails();
+    loadData();
   }, []);
 
   useEffect(() => {
@@ -40,24 +40,32 @@ export default function CreateOrderScreen() {
     }
   }, [asset, rates]);
 
-  const loadRatesAndPaymentDetails = async () => {
+  const loadData = async () => {
     try {
-      const [ratesRes, bankRes, upiRes] = await Promise.all([
+      const [ratesRes, bankRes, balanceRes, kycRes] = await Promise.all([
         axios.get(`${BACKEND_URL}/api/rates`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
         axios.get(`${BACKEND_URL}/api/payment/bank-details`),
-        axios.get(`${BACKEND_URL}/api/payment/upi-details`)
+        axios.get(`${BACKEND_URL}/api/wallet/balance`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }).catch(() => ({ data: [] })),
+        axios.get(`${BACKEND_URL}/api/kyc/document`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }).catch(() => ({ data: null }))
       ]);
+      
       setRates(ratesRes.data);
       setBankDetails(bankRes.data);
-      setUpiDetails(upiRes.data);
+      setWalletBalances(balanceRes.data || []);
+      setKycData(kycRes.data);
+      
       if (ratesRes.data.length > 0) {
         setAsset(ratesRes.data[0].asset);
       }
     } catch (error) {
       console.error('Error loading data:', error);
-      Alert.alert('Error', 'Failed to load rates and payment details');
+      Alert.alert('Error', 'Failed to load data');
     }
   };
 
@@ -67,14 +75,29 @@ export default function CreateOrderScreen() {
     return parseFloat(quantity) * rate;
   };
 
+  const getAssetBalance = (assetName: string) => {
+    const balance = walletBalances.find(b => b.asset === assetName);
+    return balance ? balance.balance : 0;
+  };
+
   const handleCreateOrder = async () => {
     if (!quantity || parseFloat(quantity) <= 0) {
       Alert.alert('Error', 'Please enter a valid quantity');
       return;
     }
 
-    if (orderType === 'sell' && !walletAddress) {
-      Alert.alert('Error', 'Please enter your wallet address for crypto transfer');
+    // For SELL orders, check if user has enough balance
+    if (orderType === 'sell') {
+      const balance = getAssetBalance(asset);
+      if (parseFloat(quantity) > balance) {
+        Alert.alert('Error', `Insufficient balance. You have ${balance} ${asset}`);
+        return;
+      }
+    }
+
+    // For BUY orders, wallet address is required
+    if (orderType === 'buy' && !walletAddress) {
+      Alert.alert('Error', 'Please enter your wallet address to receive crypto');
       return;
     }
 
@@ -157,6 +180,36 @@ export default function CreateOrderScreen() {
             </View>
           </Card>
 
+          {/* SELL: Show Wallet Balances */}
+          {orderType === 'sell' && (
+            <Card>
+              <Text style={styles.sectionTitle}>Your Wallet Balances</Text>
+              {walletBalances.length > 0 ? (
+                <View style={styles.balanceList}>
+                  {walletBalances.map((bal, idx) => (
+                    <TouchableOpacity 
+                      key={idx} 
+                      style={[
+                        styles.balanceItem,
+                        asset === bal.asset && styles.balanceItemSelected
+                      ]}
+                      onPress={() => setAsset(bal.asset)}
+                    >
+                      <Text style={styles.balanceAsset}>{bal.asset}</Text>
+                      <Text style={styles.balanceAmount}>{bal.balance.toFixed(4)}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              ) : (
+                <View style={styles.emptyBalance}>
+                  <Ionicons name="wallet-outline" size={48} color={theme.colors.textMuted} />
+                  <Text style={styles.emptyText}>No assets in wallet</Text>
+                  <Text style={styles.emptySubtext}>Buy crypto first to start selling</Text>
+                </View>
+              )}
+            </Card>
+          )}
+
           {/* Asset Selection */}
           <Card>
             <Text style={styles.sectionTitle}>Select Asset</Text>
@@ -165,7 +218,7 @@ export default function CreateOrderScreen() {
                 selectedValue={asset}
                 onValueChange={setAsset}
                 style={styles.picker}
-                dropdownIconColor={theme.colors.gold}
+                dropdownIconColor={theme.colors.primary}
               >
                 {rates.map(rate => (
                   <Picker.Item key={rate.asset} label={rate.asset} value={rate.asset} />
@@ -180,6 +233,12 @@ export default function CreateOrderScreen() {
                     ₹{(orderType === 'buy' ? currentRate.buy_rate : currentRate.sell_rate).toLocaleString()}
                   </Text>
                 </View>
+                {orderType === 'sell' && (
+                  <View style={styles.rateRow}>
+                    <Text style={styles.rateLabel}>Available Balance:</Text>
+                    <Text style={styles.balanceValue}>{getAssetBalance(asset)} {asset}</Text>
+                  </View>
+                )}
               </View>
             )}
           </Card>
@@ -187,23 +246,33 @@ export default function CreateOrderScreen() {
           {/* Quantity Input */}
           <Card>
             <Input
-              label="Quantity *"
+              label={orderType === 'sell' ? `Quantity to Sell *` : `Quantity to Buy *`}
               value={quantity}
               onChangeText={setQuantity}
               placeholder="Enter quantity"
               keyboardType="numeric"
               icon="analytics"
             />
+            {orderType === 'sell' && getAssetBalance(asset) > 0 && (
+              <TouchableOpacity 
+                style={styles.maxButton}
+                onPress={() => setQuantity(getAssetBalance(asset).toString())}
+              >
+                <Text style={styles.maxButtonText}>Use Max ({getAssetBalance(asset)} {asset})</Text>
+              </TouchableOpacity>
+            )}
             {quantity && currentRate && (
               <View style={styles.totalDisplay}>
-                <Text style={styles.totalLabel}>Total Amount:</Text>
+                <Text style={styles.totalLabel}>
+                  {orderType === 'buy' ? 'Total to Pay:' : 'You will receive:'}
+                </Text>
                 <Text style={styles.totalAmount}>₹{calculateTotal().toLocaleString()}</Text>
               </View>
             )}
           </Card>
 
-          {/* Wallet Address for SELL orders */}
-          {orderType === 'sell' && (
+          {/* BUY: Wallet Address Input */}
+          {orderType === 'buy' && (
             <Card>
               <Input
                 label="Your Wallet Address *"
@@ -219,7 +288,7 @@ export default function CreateOrderScreen() {
             </Card>
           )}
 
-          {/* Payment Instructions for BUY orders */}
+          {/* BUY: Payment Details */}
           {orderType === 'buy' && bankDetails && (
             <Card>
               <Text style={styles.sectionTitle}>Payment Details</Text>
@@ -228,14 +297,10 @@ export default function CreateOrderScreen() {
               </Text>
               
               <View style={styles.paymentMethod}>
-                <Text style={styles.methodTitle}>Bank Transfer (NEFT/RTGS)</Text>
+                <Text style={styles.methodTitle}>Bank Transfer (NEFT/RTGS/IMPS)</Text>
                 <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Bank Name:</Text>
-                  <Text style={styles.detailValue}>{bankDetails.bank_name}</Text>
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Account Holder:</Text>
-                  <Text style={styles.detailValue}>{bankDetails.account_holder}</Text>
+                  <Text style={styles.detailLabel}>Account Name:</Text>
+                  <Text style={styles.detailValue}>{bankDetails.account_name}</Text>
                 </View>
                 <View style={styles.detailRow}>
                   <Text style={styles.detailLabel}>Account Number:</Text>
@@ -243,26 +308,66 @@ export default function CreateOrderScreen() {
                 </View>
                 <View style={styles.detailRow}>
                   <Text style={styles.detailLabel}>IFSC Code:</Text>
-                  <Text style={styles.detailValue}>{bankDetails.ifsc}</Text>
+                  <Text style={styles.detailValue}>{bankDetails.ifsc_code}</Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>Bank:</Text>
+                  <Text style={styles.detailValue}>{bankDetails.bank_name}</Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>Branch:</Text>
+                  <Text style={styles.detailValue}>{bankDetails.branch}</Text>
                 </View>
               </View>
+            </Card>
+          )}
 
-              {upiDetails && (
-                <View style={styles.paymentMethod}>
-                  <Text style={styles.methodTitle}>UPI Payment</Text>
-                  <Text style={styles.detailValue}>UPI ID: {upiDetails.upi_id}</Text>
-                  <View style={styles.qrContainer}>
-                    <Text style={styles.qrLabel}>Scan QR Code:</Text>
-                    <View style={styles.qrCode}>
-                      <QRCode
-                        value={upiDetails.upi_id}
-                        size={150}
-                        backgroundColor={theme.colors.textPrimary}
-                      />
-                    </View>
-                  </View>
+          {/* SELL: User's Bank Details for Payment */}
+          {orderType === 'sell' && kycData && (
+            <Card>
+              <Text style={styles.sectionTitle}>Payment Will Be Sent To</Text>
+              <Text style={styles.instructionText}>
+                Amount ₹{calculateTotal().toLocaleString()} will be transferred to your registered bank account:
+              </Text>
+              
+              <View style={styles.paymentMethod}>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>Account Holder:</Text>
+                  <Text style={styles.detailValue}>{kycData.account_holder_name}</Text>
                 </View>
-              )}
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>Bank:</Text>
+                  <Text style={styles.detailValue}>{kycData.bank_name}</Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>Account Number:</Text>
+                  <Text style={styles.detailValue}>{kycData.bank_account_number}</Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>IFSC Code:</Text>
+                  <Text style={styles.detailValue}>{kycData.bank_ifsc}</Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>Branch:</Text>
+                  <Text style={styles.detailValue}>{kycData.bank_branch}</Text>
+                </View>
+              </View>
+              
+              <Text style={styles.helperText}>
+                Payment will be processed within 1-24 hours after order confirmation.
+              </Text>
+            </Card>
+          )}
+
+          {/* SELL: No KYC bank details warning */}
+          {orderType === 'sell' && !kycData && (
+            <Card>
+              <View style={styles.warningBox}>
+                <Ionicons name="warning" size={24} color={theme.colors.warning} />
+                <Text style={styles.warningText}>
+                  Bank details not found. Please complete your KYC to sell crypto.
+                </Text>
+              </View>
             </Card>
           )}
 
@@ -270,6 +375,7 @@ export default function CreateOrderScreen() {
             title={`Place ${orderType.toUpperCase()} Order`}
             onPress={handleCreateOrder}
             loading={loading}
+            disabled={orderType === 'sell' && (!kycData || walletBalances.length === 0)}
             size="lg"
             style={{ marginTop: theme.spacing.lg }}
           />
@@ -298,7 +404,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: theme.fontSize.xl,
-    fontWeight: theme.fontWeight.bold,
+    fontWeight: '700',
     color: theme.colors.textPrimary,
   },
   keyboardView: {
@@ -309,8 +415,8 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: theme.fontSize.lg,
-    fontWeight: theme.fontWeight.semibold,
-    color: theme.colors.gold,
+    fontWeight: '600',
+    color: theme.colors.primary,
     marginBottom: theme.spacing.md,
   },
   toggleContainer: {
@@ -327,16 +433,58 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.borderLight,
   },
   toggleButtonActive: {
-    backgroundColor: theme.colors.gold,
-    borderColor: theme.colors.gold,
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
   },
   toggleText: {
     fontSize: theme.fontSize.md,
-    fontWeight: theme.fontWeight.bold,
+    fontWeight: '700',
     color: theme.colors.textSecondary,
   },
   toggleTextActive: {
-    color: theme.colors.background,
+    color: '#FFFFFF',
+  },
+  balanceList: {
+    gap: theme.spacing.sm,
+  },
+  balanceItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: theme.spacing.md,
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.borderLight,
+  },
+  balanceItemSelected: {
+    borderColor: theme.colors.primary,
+    borderWidth: 2,
+  },
+  balanceAsset: {
+    fontSize: theme.fontSize.md,
+    fontWeight: '600',
+    color: theme.colors.textPrimary,
+  },
+  balanceAmount: {
+    fontSize: theme.fontSize.lg,
+    fontWeight: '700',
+    color: theme.colors.primary,
+  },
+  emptyBalance: {
+    alignItems: 'center',
+    padding: theme.spacing.xl,
+  },
+  emptyText: {
+    fontSize: theme.fontSize.md,
+    fontWeight: '600',
+    color: theme.colors.textMuted,
+    marginTop: theme.spacing.md,
+  },
+  emptySubtext: {
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.textMuted,
+    marginTop: theme.spacing.xs,
   },
   pickerContainer: {
     backgroundColor: theme.colors.backgroundSecondary,
@@ -359,6 +507,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: theme.spacing.xs,
   },
   rateLabel: {
     fontSize: theme.fontSize.md,
@@ -366,8 +515,26 @@ const styles = StyleSheet.create({
   },
   rateValue: {
     fontSize: theme.fontSize.xl,
-    fontWeight: theme.fontWeight.bold,
-    color: theme.colors.gold,
+    fontWeight: '700',
+    color: theme.colors.primary,
+  },
+  balanceValue: {
+    fontSize: theme.fontSize.md,
+    fontWeight: '600',
+    color: theme.colors.success,
+  },
+  maxButton: {
+    alignSelf: 'flex-end',
+    marginTop: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.xs,
+    backgroundColor: theme.colors.primary + '20',
+    borderRadius: theme.borderRadius.sm,
+  },
+  maxButtonText: {
+    fontSize: theme.fontSize.sm,
+    fontWeight: '600',
+    color: theme.colors.primary,
   },
   totalDisplay: {
     marginTop: theme.spacing.md,
@@ -375,7 +542,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: theme.borderRadius.md,
     borderWidth: 2,
-    borderColor: theme.colors.gold,
+    borderColor: theme.colors.primary,
   },
   totalLabel: {
     fontSize: theme.fontSize.md,
@@ -383,9 +550,9 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xs,
   },
   totalAmount: {
-    fontSize: theme.fontSize.xxxl,
-    fontWeight: theme.fontWeight.bold,
-    color: theme.colors.gold,
+    fontSize: 28,
+    fontWeight: '700',
+    color: theme.colors.primary,
   },
   helperText: {
     fontSize: theme.fontSize.sm,
@@ -399,15 +566,14 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.md,
   },
   paymentMethod: {
-    marginTop: theme.spacing.md,
     padding: theme.spacing.md,
     backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: theme.borderRadius.md,
   },
   methodTitle: {
     fontSize: theme.fontSize.md,
-    fontWeight: theme.fontWeight.semibold,
-    color: theme.colors.gold,
+    fontWeight: '600',
+    color: theme.colors.primary,
     marginBottom: theme.spacing.sm,
   },
   detailRow: {
@@ -421,22 +587,23 @@ const styles = StyleSheet.create({
   },
   detailValue: {
     fontSize: theme.fontSize.sm,
-    fontWeight: theme.fontWeight.medium,
+    fontWeight: '500',
     color: theme.colors.textPrimary,
+    flex: 1,
+    textAlign: 'right',
   },
-  qrContainer: {
-    marginTop: theme.spacing.md,
+  warningBox: {
+    flexDirection: 'row',
     alignItems: 'center',
-  },
-  qrLabel: {
-    fontSize: theme.fontSize.sm,
-    color: theme.colors.textSecondary,
-    marginBottom: theme.spacing.sm,
-  },
-  qrCode: {
     padding: theme.spacing.md,
-    backgroundColor: theme.colors.textPrimary,
+    backgroundColor: theme.colors.warning + '20',
     borderRadius: theme.borderRadius.md,
+    gap: theme.spacing.sm,
+  },
+  warningText: {
+    flex: 1,
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.warning,
   },
   disclaimer: {
     fontSize: theme.fontSize.xs,
@@ -453,7 +620,7 @@ const styles = StyleSheet.create({
   },
   statusTitle: {
     fontSize: theme.fontSize.xl,
-    fontWeight: theme.fontWeight.bold,
+    fontWeight: '700',
     color: theme.colors.textPrimary,
     marginTop: theme.spacing.lg,
   },
