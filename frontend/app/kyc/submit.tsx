@@ -48,16 +48,33 @@ export default function KYCSubmitScreen() {
   const [loading, setLoading] = useState(false);
   const [currentImagePicker, setCurrentImagePicker] = useState<string | null>(null);
 
-  // Form state
-  const [isOutsideIndia, setIsOutsideIndia] = useState(false);
+  // Determine account type (default to individual for backward compatibility)
+  const accountType = user?.account_type || 'individual';
+  const isIndividual = accountType === 'individual';
+  const isCorporate = accountType === 'corporate';
+
+  // Check if user is outside India based on mobile number
+  const isOutsideIndia = user?.mobile ? !user.mobile.startsWith('+91') : false;
+
+  // Individual KYC form state
   const [panNumber, setPanNumber] = useState('');
   const [panImage, setPanImage] = useState('');
+  const [passportNumber, setPassportNumber] = useState('');
   const [passportImage, setPassportImage] = useState('');
   const [aadhaarNumber, setAadhaarNumber] = useState('');
   const [aadhaarFront, setAadhaarFront] = useState('');
   const [aadhaarBack, setAadhaarBack] = useState('');
   const [selfieImage, setSelfieImage] = useState('');
   const [addressProof, setAddressProof] = useState('');
+
+  // Corporate KYC form state
+  const [companyRegCert, setCompanyRegCert] = useState('');
+  const [gstCertificate, setGstCertificate] = useState('');
+  const [boardResolution, setBoardResolution] = useState('');
+  const [authorizedSignatoryId, setAuthorizedSignatoryId] = useState('');
+  const [authorizedSignatoryName, setAuthorizedSignatoryName] = useState('');
+
+  // Common Bank Details
   const [bankAccountNumber, setBankAccountNumber] = useState('');
   const [bankIFSC, setBankIFSC] = useState('');
   const [bankName, setBankName] = useState('');
@@ -69,26 +86,30 @@ export default function KYCSubmitScreen() {
   const [fatcaAccepted, setFatcaAccepted] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
-  const getImageSetter = (field: string): ((value: string) => void) => {
-    switch (field) {
-      case 'pan': return setPanImage;
-      case 'aadhaarFront': return setAadhaarFront;
-      case 'aadhaarBack': return setAadhaarBack;
-      case 'selfie': return setSelfieImage;
-      case 'address': return setAddressProof;
-      default: return () => {};
-    }
+  const imageSetters: Record<string, (value: string) => void> = {
+    pan: setPanImage,
+    passport: setPassportImage,
+    aadhaarFront: setAadhaarFront,
+    aadhaarBack: setAadhaarBack,
+    selfie: setSelfieImage,
+    address: setAddressProof,
+    companyReg: setCompanyRegCert,
+    gst: setGstCertificate,
+    boardRes: setBoardResolution,
+    authId: setAuthorizedSignatoryId,
   };
 
-  const getImageValue = (field: string): string => {
-    switch (field) {
-      case 'pan': return panImage;
-      case 'aadhaarFront': return aadhaarFront;
-      case 'aadhaarBack': return aadhaarBack;
-      case 'selfie': return selfieImage;
-      case 'address': return addressProof;
-      default: return '';
-    }
+  const imageValues: Record<string, string> = {
+    pan: panImage,
+    passport: passportImage,
+    aadhaarFront,
+    aadhaarBack,
+    selfie: selfieImage,
+    address: addressProof,
+    companyReg: companyRegCert,
+    gst: gstCertificate,
+    boardRes: boardResolution,
+    authId: authorizedSignatoryId,
   };
 
   const requestCameraPermission = async () => {
@@ -113,7 +134,7 @@ export default function KYCSubmitScreen() {
     const hasPermission = await requestCameraPermission();
     if (!hasPermission) return;
 
-    const setter = getImageSetter(field);
+    const setter = imageSetters[field];
     
     try {
       const result = await ImagePicker.launchCameraAsync({
@@ -139,7 +160,7 @@ export default function KYCSubmitScreen() {
     const hasPermission = await requestGalleryPermission();
     if (!hasPermission) return;
 
-    const setter = getImageSetter(field);
+    const setter = imageSetters[field];
     
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -165,39 +186,85 @@ export default function KYCSubmitScreen() {
     setCurrentImagePicker(field);
   };
 
-  const getPickerTitle = (field: string): string => {
-    switch (field) {
-      case 'pan': return 'Upload PAN Card';
-      case 'aadhaarFront': return 'Upload Aadhaar Front';
-      case 'aadhaarBack': return 'Upload Aadhaar Back';
-      case 'selfie': return 'Take Selfie';
-      case 'address': return 'Upload Address Proof';
-      default: return 'Select Image';
+  const pickerTitles: Record<string, string> = {
+    pan: 'Upload PAN Card',
+    passport: 'Upload Passport',
+    aadhaarFront: 'Upload Aadhaar Front',
+    aadhaarBack: 'Upload Aadhaar Back',
+    selfie: 'Take Selfie',
+    address: 'Upload Address Proof',
+    companyReg: 'Upload Company Registration Certificate',
+    gst: 'Upload GST Certificate',
+    boardRes: 'Upload Board Resolution',
+    authId: 'Upload Authorized Signatory ID',
+  };
+
+  const validateIndividualKYC = () => {
+    if (!panNumber || !panImage) {
+      Alert.alert('Error', 'PAN Card details are required');
+      return false;
     }
+    if (!aadhaarNumber || !aadhaarFront || !aadhaarBack) {
+      Alert.alert('Error', 'Aadhaar Card details are required');
+      return false;
+    }
+    if (!selfieImage) {
+      Alert.alert('Error', 'Selfie is required');
+      return false;
+    }
+    if (!addressProof) {
+      Alert.alert('Error', 'Address proof is required');
+      return false;
+    }
+    if (isOutsideIndia && !passportImage) {
+      Alert.alert('Error', 'Passport is mandatory for non-Indian clients');
+      return false;
+    }
+    return true;
+  };
+
+  const validateCorporateKYC = () => {
+    if (!companyRegCert) {
+      Alert.alert('Error', 'Company Registration Certificate is required');
+      return false;
+    }
+    if (!gstCertificate) {
+      Alert.alert('Error', 'GST Certificate is required');
+      return false;
+    }
+    if (!boardResolution) {
+      Alert.alert('Error', 'Board Resolution is required');
+      return false;
+    }
+    if (!authorizedSignatoryId || !authorizedSignatoryName) {
+      Alert.alert('Error', 'Authorized Signatory details are required');
+      return false;
+    }
+    return true;
+  };
+
+  const validateCommonFields = () => {
+    if (!bankAccountNumber || !bankIFSC || !bankName || !nomineeName) {
+      Alert.alert('Error', 'Please fill all bank and nominee details');
+      return false;
+    }
+    if (!fatcaAccepted || !termsAccepted) {
+      Alert.alert('Error', 'Please accept FATCA declaration and Terms & Conditions');
+      return false;
+    }
+    return true;
   };
 
   const handleSubmit = async () => {
-    if (!panNumber || !panImage || !aadhaarNumber || !aadhaarFront || !aadhaarBack || !selfieImage || !addressProof ||
-        !bankAccountNumber || !bankIFSC || !bankName || !nomineeName) {
-      Alert.alert('Error', 'Please fill all required fields and upload all documents');
-      return;
-    }
-
-    if (!fatcaAccepted || !termsAccepted) {
-      Alert.alert('Error', 'Please accept FATCA declaration and Terms & Conditions');
-      return;
-    }
+    // Validate based on account type
+    if (isIndividual && !validateIndividualKYC()) return;
+    if (isCorporate && !validateCorporateKYC()) return;
+    if (!validateCommonFields()) return;
 
     setLoading(true);
     try {
-      await axios.post(`${BACKEND_URL}/api/kyc/submit`, {
-        pan_number: panNumber,
-        pan_image: panImage,
-        aadhaar_number: aadhaarNumber,
-        aadhaar_front: aadhaarFront,
-        aadhaar_back: aadhaarBack,
-        selfie_image: selfieImage,
-        address_proof: addressProof,
+      const kycData: Record<string, any> = {
+        // Common bank details
         bank_account_number: bankAccountNumber,
         bank_ifsc: bankIFSC,
         bank_name: bankName,
@@ -206,7 +273,31 @@ export default function KYCSubmitScreen() {
         nominee_name: nomineeName,
         nominee_relationship: nomineeRelationship,
         nominee_dob: nomineeDOB,
-      }, {
+      };
+
+      if (isIndividual) {
+        // Individual KYC data
+        kycData.pan_number = panNumber;
+        kycData.pan_image = panImage;
+        kycData.aadhaar_number = aadhaarNumber;
+        kycData.aadhaar_front = aadhaarFront;
+        kycData.aadhaar_back = aadhaarBack;
+        kycData.selfie_image = selfieImage;
+        kycData.address_proof = addressProof;
+        if (isOutsideIndia) {
+          kycData.passport_number = passportNumber;
+          kycData.passport_image = passportImage;
+        }
+      } else {
+        // Corporate KYC data
+        kycData.company_registration_cert = companyRegCert;
+        kycData.gst_certificate = gstCertificate;
+        kycData.board_resolution = boardResolution;
+        kycData.authorized_signatory_id = authorizedSignatoryId;
+        kycData.authorized_signatory_name = authorizedSignatoryName;
+      }
+
+      await axios.post(`${BACKEND_URL}/api/kyc/submit`, kycData, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -222,7 +313,7 @@ export default function KYCSubmitScreen() {
   };
 
   const renderImageUploader = (field: string, label: string, required: boolean = true) => {
-    const imageValue = getImageValue(field);
+    const imageValue = imageValues[field];
     const isSelfie = field === 'selfie';
     
     return (
@@ -233,6 +324,7 @@ export default function KYCSubmitScreen() {
         <TouchableOpacity 
           style={[styles.uploaderBox, imageValue && styles.uploaderBoxWithImage]}
           onPress={() => openImagePicker(field)}
+          data-testid={`upload-${field}`}
         >
           {imageValue ? (
             <View style={styles.imagePreviewContainer}>
@@ -272,50 +364,136 @@ export default function KYCSubmitScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Account Type Badge */}
+      <View style={styles.accountTypeBadge}>
+        <Ionicons 
+          name={isIndividual ? "person" : "business"} 
+          size={18} 
+          color={theme.colors.primary} 
+        />
+        <Text style={styles.accountTypeBadgeText}>
+          {isIndividual ? 'Individual Account' : 'Corporate Account'}
+        </Text>
+        {user?.company_name && (
+          <Text style={styles.companyNameText}>({user.company_name})</Text>
+        )}
+      </View>
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* PAN Card */}
-          <Card>
-            <Text style={styles.sectionTitle}>PAN Card Details</Text>
-            <Input
-              label="PAN Number"
-              value={panNumber}
-              onChangeText={(text) => setPanNumber(text.toUpperCase())}
-              placeholder="ABCDE1234F"
-              autoCapitalize="characters"
-              maxLength={10}
-              icon="card"
-            />
-            {renderImageUploader('pan', 'PAN Card Photo')}
-          </Card>
+          {/* INDIVIDUAL KYC FORM */}
+          {isIndividual && (
+            <>
+              {/* Passport (Required for Non-Indian clients) */}
+              {isOutsideIndia && (
+                <Card>
+                  <View style={styles.alertBox}>
+                    <Ionicons name="information-circle" size={24} color={theme.colors.primary} />
+                    <Text style={styles.alertText}>
+                      Passport is mandatory for clients outside India
+                    </Text>
+                  </View>
+                  <Text style={styles.sectionTitle}>Passport Details</Text>
+                  <Input
+                    label="Passport Number"
+                    value={passportNumber}
+                    onChangeText={setPassportNumber}
+                    placeholder="Enter passport number"
+                    autoCapitalize="characters"
+                    icon="document"
+                  />
+                  {renderImageUploader('passport', 'Passport Photo Page')}
+                </Card>
+              )}
 
-          {/* Aadhaar Card */}
-          <Card>
-            <Text style={styles.sectionTitle}>Aadhaar Card Details</Text>
-            <Input
-              label="Aadhaar Number"
-              value={aadhaarNumber}
-              onChangeText={setAadhaarNumber}
-              placeholder="1234 5678 9012"
-              keyboardType="numeric"
-              maxLength={14}
-              icon="id-card"
-            />
-            {renderImageUploader('aadhaarFront', 'Aadhaar Front')}
-            {renderImageUploader('aadhaarBack', 'Aadhaar Back')}
-          </Card>
+              {/* PAN Card */}
+              <Card>
+                <Text style={styles.sectionTitle}>PAN Card Details</Text>
+                <Input
+                  label="PAN Number"
+                  value={panNumber}
+                  onChangeText={(text) => setPanNumber(text.toUpperCase())}
+                  placeholder="ABCDE1234F"
+                  autoCapitalize="characters"
+                  maxLength={10}
+                  icon="card"
+                />
+                {renderImageUploader('pan', 'PAN Card Photo')}
+              </Card>
 
-          {/* Selfie & Address Proof */}
-          <Card>
-            <Text style={styles.sectionTitle}>Identity Verification</Text>
-            {renderImageUploader('selfie', 'Live Selfie (Face clearly visible)')}
-            {renderImageUploader('address', 'Address Proof (Utility Bill/Bank Statement)')}
-          </Card>
+              {/* Aadhaar Card */}
+              <Card>
+                <Text style={styles.sectionTitle}>Aadhaar Card Details</Text>
+                <Input
+                  label="Aadhaar Number"
+                  value={aadhaarNumber}
+                  onChangeText={setAadhaarNumber}
+                  placeholder="1234 5678 9012"
+                  keyboardType="numeric"
+                  maxLength={14}
+                  icon="id-card"
+                />
+                {renderImageUploader('aadhaarFront', 'Aadhaar Front')}
+                {renderImageUploader('aadhaarBack', 'Aadhaar Back')}
+              </Card>
 
-          {/* Bank Details */}
+              {/* Selfie & Address Proof */}
+              <Card>
+                <Text style={styles.sectionTitle}>Identity Verification</Text>
+                {renderImageUploader('selfie', 'Live Selfie (Face clearly visible)')}
+                {renderImageUploader('address', 'Address Proof (Utility Bill/Bank Statement)')}
+              </Card>
+            </>
+          )}
+
+          {/* CORPORATE KYC FORM */}
+          {isCorporate && (
+            <>
+              <Card>
+                <Text style={styles.sectionTitle}>Company Registration Certificate</Text>
+                <Text style={styles.sectionDesc}>
+                  Upload Certificate of Incorporation or Registration
+                </Text>
+                {renderImageUploader('companyReg', 'Company Registration Certificate')}
+              </Card>
+
+              <Card>
+                <Text style={styles.sectionTitle}>GST Certificate</Text>
+                <Text style={styles.sectionDesc}>
+                  Upload valid GST Registration Certificate
+                </Text>
+                {renderImageUploader('gst', 'GST Certificate')}
+              </Card>
+
+              <Card>
+                <Text style={styles.sectionTitle}>Board Resolution</Text>
+                <Text style={styles.sectionDesc}>
+                  Upload Board Resolution authorizing crypto trading
+                </Text>
+                {renderImageUploader('boardRes', 'Board Resolution Document')}
+              </Card>
+
+              <Card>
+                <Text style={styles.sectionTitle}>Authorized Signatory</Text>
+                <Text style={styles.sectionDesc}>
+                  Details of person authorized to operate this account
+                </Text>
+                <Input
+                  label="Authorized Signatory Name"
+                  value={authorizedSignatoryName}
+                  onChangeText={setAuthorizedSignatoryName}
+                  placeholder="Full name as per ID"
+                  icon="person"
+                />
+                {renderImageUploader('authId', 'Authorized Signatory ID Proof (PAN/Aadhaar/Passport)')}
+              </Card>
+            </>
+          )}
+
+          {/* Bank Details - Common for both */}
           <Card>
             <Text style={styles.sectionTitle}>Bank Account Details</Text>
             <Input
@@ -390,18 +568,23 @@ export default function KYCSubmitScreen() {
             <TouchableOpacity 
               style={styles.checkboxRow}
               onPress={() => setFatcaAccepted(!fatcaAccepted)}
+              data-testid="fatca-checkbox"
             >
               <View style={[styles.checkbox, fatcaAccepted && styles.checkboxChecked]}>
                 {fatcaAccepted && <Ionicons name="checkmark" size={16} color="#FFFFFF" />}
               </View>
               <Text style={styles.checkboxText}>
-                I confirm that I am not a tax resident of any country other than India (FATCA Declaration)
+                {isIndividual 
+                  ? 'I confirm that I am not a tax resident of any country other than India (FATCA Declaration)'
+                  : 'I confirm that the company is not a tax resident of any country other than India (FATCA Declaration)'
+                }
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
               style={styles.checkboxRow}
               onPress={() => setTermsAccepted(!termsAccepted)}
+              data-testid="terms-checkbox"
             >
               <View style={[styles.checkbox, termsAccepted && styles.checkboxChecked]}>
                 {termsAccepted && <Ionicons name="checkmark" size={16} color="#FFFFFF" />}
@@ -419,6 +602,7 @@ export default function KYCSubmitScreen() {
             disabled={!fatcaAccepted || !termsAccepted}
             size="lg"
             style={{ marginTop: theme.spacing.md }}
+            data-testid="submit-kyc-btn"
           />
 
           <Text style={styles.disclaimer}>
@@ -433,7 +617,7 @@ export default function KYCSubmitScreen() {
         onClose={() => setCurrentImagePicker(null)}
         onCameraPress={() => currentImagePicker && takePhoto(currentImagePicker)}
         onGalleryPress={() => currentImagePicker && pickFromGallery(currentImagePicker)}
-        title={currentImagePicker ? getPickerTitle(currentImagePicker) : ''}
+        title={currentImagePicker ? pickerTitles[currentImagePicker] || 'Select Image' : ''}
       />
     </SafeAreaView>
   );
@@ -457,6 +641,24 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: theme.colors.textPrimary,
   },
+  accountTypeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.md,
+    backgroundColor: `${theme.colors.primary}15`,
+    gap: theme.spacing.xs,
+  },
+  accountTypeBadgeText: {
+    fontSize: theme.fontSize.sm,
+    fontWeight: '600',
+    color: theme.colors.primary,
+  },
+  companyNameText: {
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.textSecondary,
+  },
   keyboardView: {
     flex: 1,
   },
@@ -468,7 +670,27 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.lg,
     fontWeight: '600',
     color: theme.colors.primary,
+    marginBottom: theme.spacing.sm,
+  },
+  sectionDesc: {
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.textSecondary,
     marginBottom: theme.spacing.md,
+  },
+  alertBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: `${theme.colors.primary}10`,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    marginBottom: theme.spacing.md,
+    gap: theme.spacing.sm,
+  },
+  alertText: {
+    flex: 1,
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.primary,
+    fontWeight: '500',
   },
   uploaderContainer: {
     marginTop: theme.spacing.md,
