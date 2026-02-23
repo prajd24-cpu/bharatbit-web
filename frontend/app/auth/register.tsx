@@ -343,6 +343,35 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
+  accountTypeContainer: {
+    flexDirection: 'row',
+    gap: theme.spacing.sm,
+    marginBottom: theme.spacing.md,
+  },
+  accountTypeButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: theme.spacing.sm,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: 2,
+    borderColor: theme.colors.borderLight,
+    backgroundColor: theme.colors.backgroundSecondary,
+  },
+  accountTypeButtonActive: {
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.primary,
+  },
+  accountTypeText: {
+    fontSize: theme.fontSize.sm,
+    fontWeight: theme.fontWeight.medium,
+    color: theme.colors.textSecondary,
+  },
+  accountTypeTextActive: {
+    color: '#FFFFFF',
+  },
   phoneInputContainer: {
     flexDirection: 'row',
     marginBottom: theme.spacing.md,
@@ -362,7 +391,7 @@ const styles = StyleSheet.create({
   countryCodeFlag: {
     fontSize: 20,
   },
-  countryCodeText: {
+  countryCodeButtonText: {
     fontSize: theme.fontSize.md,
     fontWeight: theme.fontWeight.medium,
     color: theme.colors.textPrimary,
@@ -448,7 +477,7 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.md,
     color: theme.colors.textPrimary,
   },
-  countryCode: {
+  countryCodeText: {
     fontSize: theme.fontSize.md,
     fontWeight: theme.fontWeight.medium,
     color: theme.colors.textSecondary,
