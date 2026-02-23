@@ -124,3 +124,12 @@ async def get_wallet_ledger(current_user: dict = Depends(get_current_user)):
     for entry in entries:
         entry.pop("_id", None)
     return entries
+
+# Alias routes for /wallet (without 's') - backwards compatibility
+@wallet_alias_router.get("/balance")
+async def get_wallet_balance_alias(current_user: dict = Depends(get_current_user)):
+    return await get_wallet_balance(current_user)
+
+@wallet_alias_router.get("/ledger")
+async def get_wallet_ledger_alias(current_user: dict = Depends(get_current_user)):
+    return await get_wallet_ledger(current_user)
