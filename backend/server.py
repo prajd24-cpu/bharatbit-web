@@ -68,8 +68,9 @@ async def get_bank_details():
 @api_router.get("/payment/upi-details")
 async def get_upi_details():
     return {
-        "upi_id": "gftinvt@icici",
-        "merchant_name": "G.F.T. INVESTMENTS PRIVATE LIMITED"
+        "upi_id": None,
+        "merchant_name": None,
+        "message": "UPI payments temporarily unavailable"
     }
 
 # Health check endpoint
