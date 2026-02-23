@@ -115,7 +115,9 @@ async def verify_otp(data: VerifyOTPRequest):
                 "mobile": user["mobile"],
                 "email": user["email"],
                 "role": user["role"],
-                "kyc_status": user["kyc_status"]
+                "kyc_status": user["kyc_status"],
+                "account_type": user.get("account_type", "individual"),
+                "company_name": user.get("company_name")
             }
         }
     
@@ -204,6 +206,8 @@ async def verify_2fa(data: Verify2FARequest):
             "email": user["email"],
             "role": user["role"],
             "kyc_status": user["kyc_status"],
+            "account_type": user.get("account_type", "individual"),
+            "company_name": user.get("company_name"),
             "is_frozen": user.get("is_frozen", False)
         }
     }
@@ -216,6 +220,8 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         "email": current_user["email"],
         "role": current_user["role"],
         "kyc_status": current_user["kyc_status"],
+        "account_type": current_user.get("account_type", "individual"),
+        "company_name": current_user.get("company_name"),
         "is_frozen": current_user.get("is_frozen", False),
         "relationship_manager": current_user.get("relationship_manager"),
         "rm_phone": current_user.get("rm_phone"),
