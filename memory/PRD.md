@@ -1,11 +1,12 @@
 # BharatBit OTC Desk - Product Requirements Document
 
 ## Original Problem Statement
-Build a premium Over-the-Counter (OTC) crypto trading desk mobile and web application named "BharatBit OTC Desk" for high-net-worth Indian clients.
+Build a premium Over-the-Counter (OTC) crypto trading desk mobile and web application named "BharatBit OTC Desk" for high-net-worth Indian and international clients.
 
 ## Core Requirements
 - **Branding**: Premium light theme, white background, orange buttons (#E95721), dark navy blue text, "B" logo
-- **Target Audience**: High-net-worth Indian crypto traders
+- **Target Audience**: High-net-worth Indian and international crypto traders
+- **Account Types**: Individual and Corporate/Entity accounts
 
 ---
 
@@ -13,13 +14,27 @@ Build a premium Over-the-Counter (OTC) crypto trading desk mobile and web applic
 
 ### Authentication (COMPLETE)
 - [x] User registration with Mobile + Country Code Picker (29 countries)
+- [x] **Account Type Selection**: Individual or Corporate/Entity (NEW - Feb 23, 2026)
+- [x] Company Name field for Corporate accounts (NEW - Feb 23, 2026)
 - [x] Email OTP verification via Resend (LIVE)
 - [x] SMS OTP via MSG91 (LIVE - pending DLT registration for actual delivery)
 - [x] Secure Login with 2FA (Email + SMS OTP)
 - [x] Forgot Password flow with email reset link
 
-### KYC Module (COMPLETE)
-- [x] Multi-step KYC form (PAN, Aadhaar, Selfie)
+### KYC Module (ENHANCED - Feb 23, 2026)
+- [x] Multi-step KYC form with conditional fields based on account type
+- [x] **Individual KYC Documents**:
+  - PAN Card (number + image)
+  - Aadhaar Card (front + back)
+  - Live Selfie
+  - Address Proof
+  - Passport (mandatory for non-Indian clients)
+- [x] **Corporate KYC Documents**: (NEW - Feb 23, 2026)
+  - Company Registration Certificate
+  - GST Certificate
+  - Board Resolution
+  - Authorized Signatory ID Proof
+- [x] Camera capture and gallery upload options
 - [x] KYC status banner on dashboard
 - [x] Admin approval workflow
 
