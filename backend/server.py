@@ -21,6 +21,7 @@ from routers import (
     admin_router,
     orders_router,
     wallets_router,
+    wallet_alias_router,
     kyc_router,
     rates_router,
     crypto_router
