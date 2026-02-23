@@ -1,6 +1,6 @@
 from .schemas import (
     # Enums
-    KYCStatus, OrderType, OrderStatus, UserRole, TransactionType, WalletVerificationStatus,
+    AccountType, KYCStatus, OrderType, OrderStatus, UserRole, TransactionType, WalletVerificationStatus,
     # Database Models
     User, KYCDocument, Order, WalletLedger, AssetRate, OTPStore, PasswordResetToken, SavedWallet,
     # Request Models
