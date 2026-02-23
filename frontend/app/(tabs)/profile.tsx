@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -7,10 +7,31 @@ import { Button } from '../../components/Button';
 import { useAuth } from '../../contexts/AuthContext';
 import { theme } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import axios from 'axios';
+
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 export default function ProfileScreen() {
-  const { user, logout } = useAuth();
+  const { user, token, logout } = useAuth();
   const router = useRouter();
+  const [kycData, setKycData] = useState<any>(null);
+
+  useEffect(() => {
+    if (user?.kyc_status !== 'pending') {
+      loadKycData();
+    }
+  }, [user]);
+
+  const loadKycData = async () => {
+    try {
+      const res = await axios.get(`${BACKEND_URL}/api/kyc/document`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setKycData(res.data);
+    } catch (error) {
+      console.log('No KYC data found');
+    }
+  };
 
   const handleLogout = () => {
     Alert.alert(
