@@ -18,14 +18,14 @@ export default function Verify2FAScreen() {
 
   const mobile = params.mobile as string;
 
-  // Auto-focus the input when screen loads (mobile only)
+  // Auto-focus the input when screen loads (mobile native only)
   useEffect(() => {
     if (Platform.OS !== 'web') {
       const timer = setTimeout(() => {
         if (inputRef.current) {
           inputRef.current.focus();
         }
-      }, 300);
+      }, 500);
       return () => clearTimeout(timer);
     }
   }, []);
@@ -47,6 +47,57 @@ export default function Verify2FAScreen() {
     }
   };
 
+  const handleOtpChange = (text: string) => {
+    // Only allow numbers
+    const numericValue = text.replace(/[^0-9]/g, '');
+    if (numericValue.length <= 6) {
+      setOtp(numericValue);
+    }
+  };
+
+  // Web-specific input for better mobile browser support
+  const renderWebInput = () => (
+    <input
+      type="tel"
+      inputMode="numeric"
+      pattern="[0-9]*"
+      maxLength={6}
+      value={otp}
+      onChange={(e) => handleOtpChange(e.target.value)}
+      placeholder="000000"
+      autoComplete="one-time-code"
+      style={{
+        width: '100%',
+        fontSize: 28,
+        textAlign: 'center',
+        letterSpacing: 12,
+        padding: 16,
+        border: 'none',
+        outline: 'none',
+        backgroundColor: 'transparent',
+        color: theme.colors.textPrimary,
+        fontFamily: 'monospace',
+      }}
+    />
+  );
+
+  // Native input for iOS/Android
+  const renderNativeInput = () => (
+    <RNTextInput
+      ref={inputRef}
+      style={styles.otpInput}
+      value={otp}
+      onChangeText={handleOtpChange}
+      placeholder="000000"
+      placeholderTextColor={theme.colors.textMuted}
+      keyboardType="number-pad"
+      maxLength={6}
+      returnKeyType="done"
+      onSubmitEditing={handleVerify}
+      textContentType="oneTimeCode"
+    />
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -62,29 +113,16 @@ export default function Verify2FAScreen() {
           </View>
 
           <Card>
-            <Text style={styles.inputLabel}>Enter 2FA OTP</Text>
+            <Text style={styles.inputLabel}>Enter 6-Digit OTP</Text>
             <View style={styles.otpInputContainer}>
-              <RNTextInput
-                ref={inputRef}
-                style={styles.otpInput}
-                value={otp}
-                onChangeText={setOtp}
-                placeholder="000000"
-                placeholderTextColor={theme.colors.textMuted}
-                keyboardType="number-pad"
-                inputMode="numeric"
-                maxLength={6}
-                returnKeyType="done"
-                onSubmitEditing={handleVerify}
-                autoFocus={Platform.OS !== 'web'}
-                autoComplete="one-time-code"
-                textContentType="oneTimeCode"
-              />
+              {Platform.OS === 'web' ? renderWebInput() : renderNativeInput()}
             </View>
+            <Text style={styles.otpHint}>Tap the box above to enter OTP</Text>
             <Button
               title="Verify & Login"
               onPress={handleVerify}
               loading={loading}
+              disabled={otp.length !== 6}
               size="lg"
               style={{ marginTop: theme.spacing.md }}
             />
@@ -134,30 +172,12 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.md,
     color: theme.colors.textSecondary,
     marginTop: theme.spacing.sm,
+    textAlign: 'center',
   },
   mobile: {
     fontSize: theme.fontSize.lg,
     fontWeight: theme.fontWeight.semibold,
     color: theme.colors.primary,
-    marginTop: theme.spacing.xs,
-  },
-  mockContainer: {
-    marginTop: theme.spacing.lg,
-    padding: theme.spacing.md,
-    backgroundColor: theme.colors.card,
-    borderRadius: theme.borderRadius.sm,
-    borderWidth: 1,
-    borderColor: theme.colors.warning,
-  },
-  mockLabel: {
-    fontSize: theme.fontSize.xs,
-    color: theme.colors.warning,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  mockOTP: {
-    fontSize: theme.fontSize.xl,
-    color: theme.colors.primary,
-    fontWeight: theme.fontWeight.bold,
     marginTop: theme.spacing.xs,
   },
   inputLabel: {
@@ -167,21 +187,31 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.sm,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+    textAlign: 'center',
   },
   otpInputContainer: {
-    backgroundColor: theme.colors.card,
+    backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: theme.borderRadius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.borderLight,
+    borderWidth: 2,
+    borderColor: theme.colors.primary,
+    minHeight: 60,
+    justifyContent: 'center',
   },
   otpInput: {
-    fontSize: 24,
+    fontSize: 28,
     textAlign: 'center',
-    letterSpacing: 8,
+    letterSpacing: 12,
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.md,
     color: theme.colors.textPrimary,
     minHeight: 56,
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+  },
+  otpHint: {
+    fontSize: theme.fontSize.xs,
+    color: theme.colors.textMuted,
+    textAlign: 'center',
+    marginTop: theme.spacing.xs,
   },
   footer: {
     alignItems: 'center',
