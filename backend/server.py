@@ -345,9 +345,13 @@ async def register(data: RegisterRequest):
     )
     await db.users.insert_one(user.dict())
     
-    # Send email OTP (using email service)
+    # Send email OTP
     from services.email_service import send_otp_email, notify_admin_new_registration
     email_result = await send_otp_email(data.email, otp)
+    
+    # Send SMS OTP to mobile
+    from services.sms_service import send_sms_otp
+    sms_result = await send_sms_otp(data.mobile, otp)
     
     # Notify admin about new registration
     try:
@@ -364,11 +368,12 @@ async def register(data: RegisterRequest):
     
     return {
         "success": True,
-        "message": "OTP sent to email",
+        "message": "OTP sent to email and mobile",
         "user_id": user.id,
         "email": data.email,  # Return email for OTP verification
         "mock_otp": otp,  # Remove in production
-        "email_sent": email_result.get("success", False)
+        "email_sent": email_result.get("success", False),
+        "sms_sent": sms_result.get("success", False)
     }
 
 @api_router.post("/auth/verify-otp")
