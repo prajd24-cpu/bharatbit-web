@@ -12,7 +12,7 @@ from models import (
     User, OTPStore, PasswordResetToken,
     RegisterRequest, LoginRequest, VerifyOTPRequest, Verify2FARequest,
     ForgotPasswordRequest, ResetPasswordRequest, KYCStatus, UserRole,
-    RegisterPushTokenRequest
+    RegisterPushTokenRequest, AccountType
 )
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -23,6 +23,10 @@ async def register(data: RegisterRequest):
     existing = await db.users.find_one({"$or": [{"mobile": data.mobile}, {"email": data.email}]})
     if existing:
         raise HTTPException(status_code=400, detail="User already exists")
+    
+    # Validate corporate accounts have company name
+    if data.account_type == AccountType.CORPORATE and not data.company_name:
+        raise HTTPException(status_code=400, detail="Company name is required for corporate accounts")
     
     otp = generate_otp()
     otp_data = OTPStore(
@@ -36,6 +40,8 @@ async def register(data: RegisterRequest):
         mobile=data.mobile,
         email=data.email,
         password_hash=hash_password(data.password),
+        account_type=data.account_type,
+        company_name=data.company_name,
         referral_code=data.referral_code,
         invite_code=data.invite_code
     )
@@ -55,6 +61,8 @@ async def register(data: RegisterRequest):
             "email": data.email,
             "mobile": data.mobile,
             "id": user.id,
+            "account_type": data.account_type,
+            "company_name": data.company_name,
             "referral_code": data.referral_code,
             "invite_code": data.invite_code,
             "created_at": str(user.created_at)
@@ -67,6 +75,7 @@ async def register(data: RegisterRequest):
         "message": "OTP sent to email and mobile",
         "user_id": user.id,
         "email": data.email,
+        "account_type": data.account_type,
         "email_sent": email_result.get("success", False),
         "sms_sent": sms_result.get("success", False)
     }
