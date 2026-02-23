@@ -45,9 +45,11 @@ const COUNTRY_CODES = [
 export default function RegisterScreen() {
   const router = useRouter();
   const { register } = useAuth();
+  const [accountType, setAccountType] = useState<'individual' | 'entity'>('individual');
   const [countryCode, setCountryCode] = useState(COUNTRY_CODES[0]); // Default to India
   const [mobile, setMobile] = useState('');
   const [email, setEmail] = useState('');
+  const [companyName, setCompanyName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [referralCode, setReferralCode] = useState('');
