@@ -49,9 +49,28 @@ api_router.include_router(auth_router)
 api_router.include_router(admin_router)
 api_router.include_router(orders_router)
 api_router.include_router(wallets_router)
+api_router.include_router(wallet_alias_router)
 api_router.include_router(kyc_router)
 api_router.include_router(rates_router)
 api_router.include_router(crypto_router)
+
+# Payment routes (for backwards compatibility)
+@api_router.get("/payment/bank-details")
+async def get_bank_details():
+    return {
+        "account_name": "BharatBit Technologies Pvt Ltd",
+        "account_number": "XXXXXXXXXXXX",
+        "ifsc_code": "HDFC0001234",
+        "bank_name": "HDFC Bank",
+        "branch": "Mumbai Main Branch"
+    }
+
+@api_router.get("/payment/upi-details")
+async def get_upi_details():
+    return {
+        "upi_id": "bharatbit@hdfc",
+        "merchant_name": "BharatBit OTC"
+    }
 
 # Health check endpoint
 @api_router.get("/health")
