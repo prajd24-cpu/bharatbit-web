@@ -53,59 +53,54 @@ export default function Verify2FAScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.content}>
-            <View style={styles.header}>
-              <Ionicons name="shield-checkmark" size={48} color={theme.colors.primary} />
-              <Text style={styles.title}>Two-Factor Authentication</Text>
-              <Text style={styles.subtitle}>Enter the OTP sent to your email & phone</Text>
-              <Text style={styles.mobile}>{mobile}</Text>
-              {mockOTP && (
-                <View style={styles.mockContainer}>
-                  <Text style={styles.mockLabel}>Mock OTP (Dev Only):</Text>
-                  <Text style={styles.mockOTP}>{mockOTP}</Text>
-                </View>
-              )}
-            </View>
-
-            <Card>
-              <Text style={styles.inputLabel}>Enter 2FA OTP</Text>
-              <View style={styles.otpInputContainer}>
-                <RNTextInput
-                  ref={inputRef}
-                  style={styles.otpInput}
-                  value={otp}
-                  onChangeText={setOtp}
-                  placeholder="000000"
-                  placeholderTextColor={theme.colors.textMuted}
-                  keyboardType="number-pad"
-                  maxLength={6}
-                  returnKeyType="done"
-                  onSubmitEditing={handleVerify}
-                  autoFocus={true}
-                />
-              </View>
-              <Button
-                title="Verify & Login"
-                onPress={handleVerify}
-                loading={loading}
-                size="lg"
-                style={{ marginTop: theme.spacing.md }}
-              />
-            </Card>
-
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>Didn't receive the OTP?</Text>
-              <Button
-                title="Resend OTP"
-                onPress={() => Alert.alert('OTP Sent', 'A new OTP has been sent')}
-                variant="outline"
-                size="sm"
-                style={{ marginTop: theme.spacing.sm }}
-              />
-            </View>
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <Ionicons name="shield-checkmark" size={48} color={theme.colors.primary} />
+            <Text style={styles.title}>Two-Factor Authentication</Text>
+            <Text style={styles.subtitle}>Enter the OTP sent to your email & phone</Text>
+            <Text style={styles.mobile}>{mobile}</Text>
           </View>
-        </TouchableWithoutFeedback>
+
+          <Card>
+            <Text style={styles.inputLabel}>Enter 2FA OTP</Text>
+            <View style={styles.otpInputContainer}>
+              <RNTextInput
+                ref={inputRef}
+                style={styles.otpInput}
+                value={otp}
+                onChangeText={setOtp}
+                placeholder="000000"
+                placeholderTextColor={theme.colors.textMuted}
+                keyboardType="number-pad"
+                inputMode="numeric"
+                maxLength={6}
+                returnKeyType="done"
+                onSubmitEditing={handleVerify}
+                autoFocus={Platform.OS !== 'web'}
+                autoComplete="one-time-code"
+                textContentType="oneTimeCode"
+              />
+            </View>
+            <Button
+              title="Verify & Login"
+              onPress={handleVerify}
+              loading={loading}
+              size="lg"
+              style={{ marginTop: theme.spacing.md }}
+            />
+          </Card>
+
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Didn't receive the OTP?</Text>
+            <Button
+              title="Resend OTP"
+              onPress={() => Alert.alert('OTP Sent', 'A new OTP has been sent')}
+              variant="outline"
+              size="sm"
+              style={{ marginTop: theme.spacing.sm }}
+            />
+          </View>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
