@@ -525,6 +525,21 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: theme.colors.primary,
   },
+  rateNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: theme.spacing.sm,
+    paddingTop: theme.spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.borderLight,
+    gap: theme.spacing.xs,
+  },
+  rateNoticeText: {
+    flex: 1,
+    fontSize: theme.fontSize.xs,
+    color: theme.colors.warning,
+    fontStyle: 'italic',
+  },
   balanceValue: {
     fontSize: theme.fontSize.md,
     fontWeight: '600',
