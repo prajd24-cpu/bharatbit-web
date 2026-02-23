@@ -156,7 +156,8 @@ class RegisterRequest(BaseModel):
     invite_code: Optional[str] = None
 
 class LoginRequest(BaseModel):
-    email: EmailStr
+    identifier: Optional[str] = None  # Can be email or mobile
+    email: Optional[EmailStr] = None  # For backwards compatibility
     password: str
 
 class VerifyOTPRequest(BaseModel):
