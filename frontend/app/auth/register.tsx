@@ -81,7 +81,7 @@ export default function RegisterScreen() {
     setLoading(true);
     try {
       const result = await register(fullMobile, email, password, referralCode);
-      Alert.alert('Success', 'OTP sent to your email', [
+      Alert.alert('Success', 'OTP sent to your email and phone', [
         {
           text: 'OK',
           onPress: () => {
