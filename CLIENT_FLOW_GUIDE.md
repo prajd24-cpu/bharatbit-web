@@ -2,7 +2,7 @@
 
 ## 🎯 What Clients See & How to Test
 
-### **Preview URL:** https://crypto-desk-demo.preview.emergentagent.com
+### **Preview URL:** https://crypto-otc-hub.preview.emergentagent.com
 
 ---
 

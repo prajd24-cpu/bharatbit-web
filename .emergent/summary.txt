@@ -1,103 +1,171 @@
 <analysis>
+
 <original_problem_statement>
-The user wants to build a premium Over-the-Counter (OTC) crypto trading desk mobile and web application named BharatBit OTC Desk. The application is targeted at high-net-worth Indian clients and should have a user experience similar to a Swiss private banking app.
+The user wants to build a premium Over-the-Counter (OTC) crypto trading desk mobile and web application named BharatBit OTC Desk. The application is targeted at high-net-worth Indian clients and should have a premium and secure user experience.
 
 **PRODUCT REQUIREMENTS:**
-- **Branding:** Premium, discreet, elegant, secure. Dark luxury theme (initially requested, later changed by user to a light theme).
+- **Branding:** Premium, light theme with a white background, orange buttons (), and dark navy blue text. A specific B logo has been provided and integrated.
 - **Core Features:**
-    1.  **User Registration:** Mobile + OTP, Email verification, invite/referral code.
-    2.  **Full KYC Module:** PAN, Aadhaar, Selfie, Address proof, Bank details, Nominee, FATCA, etc. with an admin approval workflow.
-    3.  **Secure Login:** 2FA, Biometrics.
-    4.  **Dashboard:** Portfolio summary, active orders, wallet ledger, assigned Relationship Manager (RM) details.
-    5.  **Place OTC Order:** Buy/Sell Crypto, INR Settlement, live indicative rates, payment proof upload.
-    6.  **Order History:** View, filter, and export past orders.
-    7.  **Wallet & Ledger:** Complete transparent ledger of all transactions.
-    8.  **Admin Panel:** User management, KYC approval, order management, manual ledger entries, custom rate setting, analytics.
-- **UI/UX:** Initially a dark theme with gold accents, but later changed by the user to a **light theme** with a white background, orange buttons, and dark navy blue text. The welcome screen was also simplified to show only Sign In and Create Account buttons with an invitation only message.
-- **Tech Stack:** Expo (React Native) for cross-platform frontend, FastAPI backend, MongoDB database.
-- **Integrations:** The user requested integrations for Email OTP (initially SMS), Signzy for KYC, and Razorpay for payments, but also wants to display their static bank details for manual transfers (IMPS/NEFT/RTGS).
-- **Additional Features Requested:** Push notifications for KYC approval, enhanced admin analytics, live crypto charts, auto-refreshing rates, and WhatsApp notifications.
+    1.  **User Registration:** Mobile + Country Code Picker, Email + OTP verification (via Email and SMS).
+    2.  **Full KYC Module:** Admin approval workflow for PAN, Aadhaar, Selfie, etc.
+    3.  **Secure Login:** 2FA (Email and SMS OTP), Biometrics.
+    4.  **Dashboard:** Portfolio summary, active orders, prominent KYC status banner.
+    5.  **Place OTC Order:** Buy/Sell Crypto with INR Settlement.
+    6.  **Wallet Management:** Users must be able to add their external crypto wallet addresses and provide proof of ownership (e.g., a screenshot) for admin verification.
+    7.  **Admin Panel:** User management, KYC approval, Order management, Wallet address verification.
+    8.  **Forgot Password:** A complete flow for users to reset their password via an email link.
+- **Integrations:**
+    - **Email:** Resend (LIVE, configured with user's API key and verified domain).
+    - **SMS:** MSG91 (IN PROGRESS, configured with user's Auth Key).
+    - **KYC:** Signzy (Planned, stubbed).
+- **Notifications:**
+    - Email notifications to admins (, ) for new user registrations, KYC submissions, and order events.
+    - Push notifications for KYC approval and order status changes (Planned, stubbed).
 </original_problem_statement>
 
 **User's preferred language**: English
 
 **what currently exists?**
-A full-stack application has been built based on the user's requirements.
-- **Backend (FastAPI):** Features complete APIs for user authentication (registration, login, JWT), a full KYC workflow, order management, wallet/ledger functionality, and a comprehensive admin panel. The user's actual bank details for G.F.T. Investments Private Limited have been hardcoded into a backend endpoint as requested.
-- **Frontend (Expo/React Native):** The application has a complete UI flow, including a simplified welcome screen, authentication screens (Login, Register, OTP, 2FA), a multi-step KYC submission form (including selfie upload), and a tab-based main interface (Dashboard, Orders, Wallet, Profile). The UI follows the user's latest request for a light theme: white background, orange buttons, and navy blue text.
-- **Integrations:** Service modules and stubs have been created for real integrations (Email, KYC, Payments, Push Notifications), but they currently operate in mock mode as no API keys have been provided.
+A full-stack application (Expo/React Native frontend, FastAPI backend) that is functional and supports both mobile and web.
+- **Backend (FastAPI):** Includes complete APIs for user authentication (registration with email/SMS OTP, login, 2FA, forgot password), a full KYC workflow, OTC order management, wallet ledger, and a newly added feature for users to submit external wallet addresses for admin verification.
+- **Frontend (Expo/React Native):** A complete UI with a tab-based layout. It features authentication screens, a multi-step KYC form, a dashboard with a conditional KYC banner, and a new section for managing saved wallet addresses. The UI uses the user's specified logo and color scheme ().
+- **Integrations:**
+    - **Resend is LIVE** for sending all email OTPs and admin notifications.
+    - **MSG91 is integrated** in the backend to send SMS OTPs, but is pending testing.
 
 **Last working item**:
-    - Last item agent was working: The user reported a new bug where the keyboard does not appear when they try to type in the OTP/2FA input fields. The agent identified that the  prop was missing and started adding  to the first  of the OTP components to automatically trigger the keyboard on screen load. The fix was applied to  but not yet to .
+    - Last item agent was working: Integrating MSG91 to send SMS OTPs for user registration and 2FA login. The agent created a new , added the user's MSG91 Auth Key to the backend  file, and modified the  and  endpoints in  to trigger SMS sending alongside the existing email OTP.
     - Status: IN PROGRESS
     - Agent Testing Done: N
-    - Which testing method agent to use? manual testing by curl
+    - Which testing method agent to use? backend testing agent
     - User Testing Done: N
 
 **All Pending/In progress Issue list**:
-  - Issue 1: Keyboard not appearing on OTP/2FA screens (P0)
-  - Issue 2: Preview environment is unstable due to ngrok (P2)
+  - Issue 1: Complete and Test MSG91 SMS OTP Integration (P0)
+  - Issue 2: Preview environment instability (P2)
 
   Issues Detail:
-  - Issue 1:
-     - Description: The user is unable to type in the OTP and 2FA verification screens because the keyboard does not automatically appear, nor does it appear when the input fields are tapped. This is a critical bug as it blocks the registration and login flows.
-     - Attempted fixes: The agent started adding  to the first  in the  file. This fix needs to be completed for the  as well and then thoroughly tested.
+  - Issue 1: 
+     - Description: The backend has been updated to send SMS OTPs via MSG91 during registration and 2FA login. However, this functionality has not been tested to confirm it works. Additionally, the frontend OTP screen might need a UI update to inform the user to check both their email and phone for the code.
      - Next debug checklist:
-        1. Apply the  fix to the  in .
-        2. Ensure the  and  wrappers are correctly implemented on both screens to handle both keyboard appearance and dismissal.
-        3. Restart the expo server and test the full registration and login flows to confirm the keyboard appears and can be dismissed correctly.
-     - Why fix this issue and what will be achieved with the fix? Fixing this will unblock the core user authentication flows, allowing new users to register and existing users to log in.
+        1. Use the backend testing agent to test the  endpoint. Verify that a new user registration successfully triggers a call to the MSG91 API.
+        2. Manually test the login flow for a user with 2FA enabled to ensure the SMS is sent.
+        3. Review  and  to ensure the on-screen text is clear (e.g., Enter the OTP sent to your email and phone).
+     - Why fix this issue and what will be achieved with the fix? This will complete a key user request for multi-channel OTP verification, enhancing security and user convenience.
      - Status: IN PROGRESS
      - Is recurring issue? N
-     - Should Test frontend/backend/both after fix? Frontend
+     - Should Test frontend/backend/both after fix? Both
      - Blocked on other issue: None
+  - Issue 2: 
+     - Description: The  tunnel for the live preview is highly unstable, frequently disconnecting or timing out. This is an environmental problem, not a code issue.
+     - Attempted fixes: The agent has been restarting the 
+  Usage: expo [command] [options]
 
-  - Issue 2:
-     - Description: The  tunnel used to provide the live preview URL is extremely unstable. It frequently fails to connect, restarts in a loop, or returns HTTP 520/502 errors. This severely hinders the user's ability to test and provide feedback.
-     - Attempted fixes: The agent has repeatedly tried restarting the expo service, waiting for the tunnel to stabilize, and has used the . These are temporary workarounds for an underlying infrastructure problem. The agent has also provided the user with a  for a more stable production deployment.
-     - Next debug checklist: This is an environmental issue, not a code issue. The best path forward is to either tolerate the instability, encourage the user to follow the deployment guide, or test features via backend API calls where possible. No further debugging by the agent is likely to resolve this permanently.
-     - Why fix this issue and what will be achieved with the fix? Resolving this would provide a stable testing environment for the user, leading to a smoother development and feedback loop.
+  Options:
+  
+    -V, --version                     output the version number
+    --non-interactive                 Fail, if an interactive prompt would be required to continue.
+    -h, --help                        output usage information
+  
+  Commands:
+
+    init [name]                       Create a new Expo project
+    start [path]                      Start a local dev server for the app
+    start:web [path]                  Start a Webpack dev server for the web app
+    export [path]                     Export the static files of the app for hosting it on a web server
+    install [packages...]             Install a module or other package to a project
+    run:android [path]                Run the Android app binary locally
+    run:ios [path]                    Run the iOS app binary locally
+    send [path]                       Share the project's URL to an email address
+
+    login                             Login to an Expo account
+    logout                            Logout of an Expo account
+    register                          Sign up for a new Expo account
+    whoami                            Return the currently authenticated account
+
+    client:install:ios                Install Expo Go for iOS on the simulator
+    client:install:android            Install Expo Go for Android on a connected device or emulator
+
+    config [path]                     Show the project config
+    doctor [path]                     Diagnose issues with the project
+    upgrade [sdk-version]             Upgrade the project packages and config for the given SDK version
+
+    customize:web [path]              Eject the default web files for customization
+    prebuild [path]                   Create native iOS and Android project files before building natively.
+                                      Learn more: https://docs.expo.dev/workflow/customizing/
+
+    build:web [path]                  Build the web app for production
+
+    credentials:manager [path]        Superseded by eas credentials in eas-cli
+
+    url [path]                        Log a URL for opening the project in Expo Go
+    url:ipa [path]                    Log the download URL for the standalone iOS binary
+    url:apk [path]                    Log the download URL for the standalone Android binary
+
+    webhooks [path]                   List all webhooks for a project
+    webhooks:add [path]               Add a webhook to a project
+    webhooks:remove [path]            Delete a webhook
+    webhooks:update [path]            Update an existing webhook
+
+    build:ios [path]                  Superseded by eas build in eas-cli
+    build:android [path]              Superseded by eas build in eas-cli
+    build:status [path]               Superseded by eas build:list in eas-cli
+    eject [path]                      Superseded by expo prebuild
+    fetch:ios:certs [path]            Superseded by eas credentials in eas-cli
+    fetch:android:keystore [path]     Superseded by eas credentials in eas-cli
+    fetch:android:hashes [path]       Superseded by eas credentials in eas-cli
+    fetch:android:upload-cert [path]  Superseded by eas credentials in eas-cli
+    publish [path]                    Superseded by eas update in eas-cli
+    publish:set [path]                Superseded by eas update:republish in eas-cli
+    publish:rollback [path]           Superseded by eas update:republish in eas-cli
+    publish:history [path]            Superseded by eas update:list in eas-cli
+    publish:details [path]            Superseded by eas update:view in eas-cli
+    push:android:upload [path]        Superseded by eas credentials in eas-cli
+    push:android:show [path]          Superseded by eas credentials in eas-cli
+    push:android:clear [path]         Superseded by eas credentials in eas-cli
+    upload:android [path]             Superseded by eas submit in eas-cli
+    upload:ios [path]                 Superseded by eas submit in eas-cli
+    client:ios [path]                 Superseded by Expo Dev Clients
+
+[08:21:32]   Run a command with --help for more info 💡
+[08:21:32]     $ expo start --help
+[08:21:32] service repeatedly as a temporary workaround.
+     - Next debug checklist: Do not attempt to fix the tunnel. Inform the user if it's down and suggest waiting or proceeding with backend work that can be tested independently.
+     - Why fix this issue and what will be achieved with the fix? A stable tunnel would improve the user's testing experience. However, it is outside the agent's control.
      - Status: BLOCKED
      - Is recurring issue? Y
      - Should Test frontend/backend/both after fix? Frontend
      - Blocked on other issue: None
 
 **In progress Task List**:
-  There are no in-progress tasks, as the last action was a bug fix.
+  There are no other in-progress tasks besides the MSG91 integration issue listed above.
 
 **Upcoming and Future Tasks**
-  Upcoming Tasks:
-    - **P0: Implement Real Integrations:**
-        - **Email OTP:** Switch from mock OTP to a real email service using SendGrid/Resend. The user does not have API keys yet. The  is ready for key insertion.
-        - **KYC Verification:** Integrate Signzy for automatic PAN/Aadhaar verification. The  is ready for API keys.
-        - **Payment Gateway:** Integrate Razorpay for dynamic UPI QR codes and payment webhooks.  is ready for API keys.
+    Upcoming Tasks:
     - **P1: Implement Push Notifications:**
-        - Use  to send a push notification to the user when their KYC is approved by an admin. The package is installed, but the logic needs to be built in the backend and handled in the frontend.
-
-  Future Tasks:
-    - **P1: Enhanced Admin Analytics:** The admin panel has a basic structure. This task involves adding more detailed analytics, charts, and data visualizations.
-    - **P1: Live Crypto Charts & Auto-Refresh Rates:** Implement a feature to display live price charts for cryptocurrencies and ensure the indicative rates on the order screen auto-refresh. This will likely require integrating a third-party crypto data API (e.g., via WebSocket or polling).
-    - **P2: WhatsApp Notifications:** Build the structure to send notifications via WhatsApp, likely requiring a provider like Twilio for WhatsApp Business API.
+        - **File:**  (stub exists)
+        - **Task:** Implement logic using  to send push notifications to users upon KYC approval and order status updates. This requires backend implementation and frontend handling.
+    Future Tasks:
+    - **P1: Live Crypto Charts & Auto-Refresh Rates:** Implement a feature to display live price charts and auto-refreshing indicative rates on the order screen.
+    - **P1: Enhanced Admin Analytics:** Add more detailed analytics, charts, and data visualizations to the admin panel.
+    - **P2: Full App Store Deployment:** Guide the user through building and submitting the mobile app to the Apple App Store and Google Play Store using Expo Application Services (EAS).
+    - **P2: WhatsApp Notifications:** Integrate a provider like Twilio to send notifications via WhatsApp.
 
 **Completed work in this session**
-- **Full-Stack Application Scaffolding:** Created a complete Expo (React Native) frontend and FastAPI backend.
-- **Core Feature Implementation:**
-  - Complete User Authentication flow (Registration, Login, 2FA)
-  - Full KYC Submission Module (with PAN, Aadhaar, Selfie upload)
-  - OTC Order Placement and History
-  - Wallet and Transaction Ledger system
-  - Comprehensive Admin Panel for management
-- **UI/UX Iterations:**
-  - Initial dark/gold theme implementation.
-  - Revision to a royal blue/orange theme based on user feedback.
-  - Revision to a green/red theme based on  website.
-  - Final revision to a **light theme** (white background, orange buttons, navy blue text) with a simplified welcome screen, as per user's final request.
-- **Bug Fixes:** Resolved a keyboard *dismissal* issue on OTP screens.
-- **Bank Details Integration:** Hardcoded the user's company bank account details (ICICI Bank for G.F.T. Investments) into the backend to be displayed during the payment flow.
-- **Documentation:** Created , , and  to assist the user.
+- **Critical Bug Fix:** Resolved the issue where the keyboard would not appear on OTP/2FA screens by refactoring the components to use native  and .
+- **Feature: Saved Wallet Addresses:** Implemented the full end-to-end feature for users to add external crypto wallets with proof of ownership, including backend models, APIs, admin verification routes, and frontend screens.
+- **Feature: Forgot Password:** Implemented a complete forgot/reset password flow with backend APIs and frontend screens.
+- **Integration: Resend Email (LIVE):** Integrated the Resend API with the user's key and verified domain. The app now sends live emails for OTPs and admin notifications.
+- **UI/UX Improvements:**
+    - Added a country code picker to the registration screen.
+    - Updated the app's logo and branding, standardizing the theme color to .
+    - Improved the KYC flow by adding a prominent banner on the dashboard and adding proper back/home navigation to the KYC screens.
+- **Performance Optimization:** Performed a pre-deployment health check and resolved N+1 query issues in the backend by using MongoDB aggregation pipelines.
+- **Bug Fix:** Fixed a critical registration bug where the OTP verification was failing due to a mismatch between email and mobile identifiers.
+- **Web App Support:** Confirmed the application works as a web app and guided the user on how to access and share the preview link for web-based client testing.
 
 **Earlier issues found/mentioned but not fixed**
-   - The primary and only major unfixed issue is the **persistent ngrok tunnel instability**, which is an environmental/infrastructure problem, not a code defect. It has been documented extensively in the Pending/In progress Issue list.
+   - The only outstanding issue is the recurring  instability, which is an environmental problem.
 
 **Known issue recurrence from previous fork**
   - N/A
@@ -106,94 +174,167 @@ A full-stack application has been built based on the user's requirements.
 
 
 **Key Technical Concepts**
-- **Frontend:** Expo (React Native), TypeScript,  for file-based navigation,  (implied for state management, or a similar context-based approach),  for document uploads.
-- **Backend:** FastAPI, Python, Pydantic for data validation, JWT for authentication, bcrypt for password hashing.
-- **Database:** MongoDB with  (async driver).
-- **Architecture:** Monorepo structure with distinct  and  directories. API-driven communication between frontend and backend.
+- **Frontend:** Expo (React Native, Web), TypeScript, , .
+- **Backend:** FastAPI, Python, Pydantic, JWT, bcrypt, Motor (async MongoDB).
+- **Database:** MongoDB.
+- **Integrations:** Resend (Email), MSG91 (SMS).
+- **Architecture:** Monorepo, API-driven. Backend logic is monolithic in .
 
 **key DB schema**
   - **users**: 
   - **kyc_details**: 
   - **orders**: 
-  - **wallets**: 
+  - **wallet_addresses**:  (New)
   - **transactions**: 
-  - **rates**: 
+  - **otp_store**: 
 
 **changes in tech stack**
-  - N/A
+  -  package added to backend.
+  -  package added to frontend.
+  -  package added for image manipulation (icon generation).
 
 **All files of reference**
-- : The single source of truth for all backend logic, APIs, and database models. Contains the hardcoded bank details.
-- : File being edited to fix the keyboard appearance bug.
-- : File that also needs the keyboard appearance fix.
-- : Defines the application's color scheme (currently white/orange/navy).
-- : The simplified welcome screen.
-- : The multi-step KYC form, including the selfie upload feature.
-- : Instructions for deploying the application to a production environment.
-- : Guide explaining the user flow for payments and KYC.
+- : Heavily modified. Contains all new backend logic for wallet management, forgot password, and SMS integration.
+- : New file for MSG91 integration.
+- : Updated with  and .
+- : Updated with country code picker.
+-  & : New files for wallet management feature.
+-  & : New files for password reset feature.
+- : Updated to show a conditional KYC banner.
+- : Updated with the new primary color.
+- : Updated with new logo, icons, and splash screen settings.
 
 **Areas that need refactoring**:
-- The  file has grown very large (over 800 lines). It could be refactored by splitting routes into multiple files using FastAPI's  for better organization (e.g., , , etc.).
-- Bank details are hardcoded in . While requested by the user, this is not ideal. A better approach would be to store them in a configuration collection in the database, allowing an admin to update them without code changes.
+- The  file is now excessively long and complex. It urgently needs to be broken down into smaller, manageable modules using FastAPI's  (e.g., , , ).
 
 **key api endpoints**
-- , , 
-- , 
-- , 
-- , 
--  (This is where the user's hardcoded bank details are served)
-- 
+- , ,  (All updated for SMS)
+-  (New)
+-  (New)
+-  (New)
+-  (New)
+-  (New)
 
 **Critical Info for New Agent**
-- **The preview environment is highly unstable.** Do not waste time trying to fix the  tunnel. If the preview is down, inform the user and suggest either waiting or focusing on backend work that can be tested via .
-- **The user is very particular about the UI.** The current light theme (white bg, orange buttons, navy text) is what they approved. Do not deviate without explicit instruction.
-- The **keyboard bug on OTP screens is the highest priority (P0)**. The login/registration flow is currently broken.
-- **Bank details are hardcoded** in  per the user's request. Be aware of this if any payment-related changes are requested.
-- The project is functionally complete in mock mode. The next major phase is wiring up the real integrations for which the user does not yet have API keys.
+- **PRIORITY 1 is testing the MSG91 SMS integration.** The backend code is written, but it's unverified.
+- **The user is actively testing on the web version.** Ensure the web preview is working and address any web-specific bugs.
+- **The preview environment (ngrok) is extremely unstable.** Do not waste time debugging the tunnel. Restart the 
+  Usage: expo [command] [options]
+
+  Options:
+  
+    -V, --version                     output the version number
+    --non-interactive                 Fail, if an interactive prompt would be required to continue.
+    -h, --help                        output usage information
+  
+  Commands:
+
+    init [name]                       Create a new Expo project
+    start [path]                      Start a local dev server for the app
+    start:web [path]                  Start a Webpack dev server for the web app
+    export [path]                     Export the static files of the app for hosting it on a web server
+    install [packages...]             Install a module or other package to a project
+    run:android [path]                Run the Android app binary locally
+    run:ios [path]                    Run the iOS app binary locally
+    send [path]                       Share the project's URL to an email address
+
+    login                             Login to an Expo account
+    logout                            Logout of an Expo account
+    register                          Sign up for a new Expo account
+    whoami                            Return the currently authenticated account
+
+    client:install:ios                Install Expo Go for iOS on the simulator
+    client:install:android            Install Expo Go for Android on a connected device or emulator
+
+    config [path]                     Show the project config
+    doctor [path]                     Diagnose issues with the project
+    upgrade [sdk-version]             Upgrade the project packages and config for the given SDK version
+
+    customize:web [path]              Eject the default web files for customization
+    prebuild [path]                   Create native iOS and Android project files before building natively.
+                                      Learn more: https://docs.expo.dev/workflow/customizing/
+
+    build:web [path]                  Build the web app for production
+
+    credentials:manager [path]        Superseded by eas credentials in eas-cli
+
+    url [path]                        Log a URL for opening the project in Expo Go
+    url:ipa [path]                    Log the download URL for the standalone iOS binary
+    url:apk [path]                    Log the download URL for the standalone Android binary
+
+    webhooks [path]                   List all webhooks for a project
+    webhooks:add [path]               Add a webhook to a project
+    webhooks:remove [path]            Delete a webhook
+    webhooks:update [path]            Update an existing webhook
+
+    build:ios [path]                  Superseded by eas build in eas-cli
+    build:android [path]              Superseded by eas build in eas-cli
+    build:status [path]               Superseded by eas build:list in eas-cli
+    eject [path]                      Superseded by expo prebuild
+    fetch:ios:certs [path]            Superseded by eas credentials in eas-cli
+    fetch:android:keystore [path]     Superseded by eas credentials in eas-cli
+    fetch:android:hashes [path]       Superseded by eas credentials in eas-cli
+    fetch:android:upload-cert [path]  Superseded by eas credentials in eas-cli
+    publish [path]                    Superseded by eas update in eas-cli
+    publish:set [path]                Superseded by eas update:republish in eas-cli
+    publish:rollback [path]           Superseded by eas update:republish in eas-cli
+    publish:history [path]            Superseded by eas update:list in eas-cli
+    publish:details [path]            Superseded by eas update:view in eas-cli
+    push:android:upload [path]        Superseded by eas credentials in eas-cli
+    push:android:show [path]          Superseded by eas credentials in eas-cli
+    push:android:clear [path]         Superseded by eas credentials in eas-cli
+    upload:android [path]             Superseded by eas submit in eas-cli
+    upload:ios [path]                 Superseded by eas submit in eas-cli
+    client:ios [path]                 Superseded by Expo Dev Clients
+
+[08:21:32]   Run a command with --help for more info 💡
+[08:21:32]     $ expo start --help
+[08:21:32] service and inform the user if issues persist.
+- **Email integration via Resend is LIVE and working.**
+- The user has been confused about deployment. For this project:
+    - The **web app** can be deployed via Emergent's Deploy button for a permanent URL.
+    - The **mobile app** requires using Expo Application Services (EAS) to build and submit to app stores, which is a separate process.
 
 **documents created in this job**
   - 
-  - 
-  - 
-  - 
 
-**Last 10 User Messages and any pending HUMAN messages**
-10.  - User rejected the blue/orange theme and requested to match . (Completed)
-9.  - User agreed to wait for the unstable preview tunnel to reconnect. (Completed)
-8.  - User rejected the  theme and provided a screenshot for the correct colors. (Completed)
-7.  - User provided very specific UI instructions: light theme, simplified welcome screen. (Completed)
-6.  - User approved the new UI and asked for the next steps. (Completed)
-5.  - User chose to proceed with real integrations and adding new features. (In Progress/Upcoming)
-4.  - User clarified integration/feature priorities: Email OTP, display bank details, Signzy, push notifications, analytics, charts, WhatsApp. (In Progress/Upcoming)
-3.  - User asked for clarification on payment flow, KYC documents (selfie), and where to add their bank details. (Completed)
-2.  - User provided their actual company bank details to be added to the app. (Completed)
-1.  - **LATEST/PENDING**: User reported a critical bug blocking login/registration.
+**Last 10 User Messages and any pending HUMAN messages** 
+- **10. **: User reported a critical bug in registration. (Completed - Fixed OTP logic)
+- **9. **: User confirmed their domain is verified on Resend. (Completed - Agent updated .env)
+- **8. **: User requested the Forgot Password feature. (Completed)
+- **7. **: User asked for SMS OTP and a country code picker. (Completed)
+- **6. **: User prioritized the country code picker UI. (Completed)
+- **5. **: User is ready to integrate MSG91 for SMS. (In Progress)
+- **4. **: User needed help finding the MSG91 Auth Key. (Completed - Agent provided guidance)
+- **3. **: User shared a screenshot and asked for next steps to get the key. (Completed - Agent provided guidance)
+- **2. **: User asked which option to select in MSG91 setup. (Completed - Agent advised OTP)
+- **1. **: **LATEST**: User provided the MSG91 Auth Key for integration.
 
 **Project Health Check:**
-- **Broken:** The preview environment due to persistent  tunnel failures. The OTP/2FA authentication flow due to the keyboard bug.
-- **Mocked:** All external service integrations (SMS, Email, KYC, Payments, Push Notifications).
+- **Broken:** The stability of the  preview environment remains a persistent problem.
+- **Mocked:** Push Notifications ( is a stub), KYC Vendor ( is a stub).
 
 **3rd Party Integrations**
-- **Planned (Stubs Created):**
-    - Twilio / MSG91 (for SMS, currently replaced by Email OTP)
-    - SendGrid / Resend (for Email OTP)
-    - Signzy (for KYC verification)
-    - Razorpay (for payment gateway)
-    - WhatsApp (via a provider like Twilio)
-- No integrations are currently active or use any API keys.
+- **Resend (Email OTP & Notifications)** — LIVE, requires User API Key (provided).
+- **MSG91 (SMS OTP)** — IN PROGRESS, requires User API Key (provided).
+- **Signzy (KYC)** — Planned (stubbed), will require User API Key.
+- **Expo Push Notifications** — Planned (stubbed).
 
 **Testing status**
-  - Testing agent used after significant changes: NO
-  - Troubleshoot agent used after agent stuck in loop: YES (for the ngrok issue)
+  - Testing agent used after significant changes: NO (not since the latest SMS integration changes).
+  - Troubleshoot agent used after agent stuck in loop: YES (for ngrok issues, though it's an environmental problem).
   - Test files created: []
-  - Known regressions: [Keyboard not appearing on OTP/2FA screens. This might be a regression from a previous fix that handled keyboard *dismissal*.]
+  - Known regressions: []
 
 **Credentials to test flow:**
 - **Admin User:**
   - Email: 
   - Password: 
+- **MSG91 Auth Key:** 
+- **Resend API Key:** 
 
 **What agent forgot to execute**
-- The agent did not forget, but the fix for the keyboard-not-appearing bug is incomplete. It was applied to  but needs to be applied to  as well.
-- The new features requested by the user (Push Notifications, Charts, Analytics) have been acknowledged and stubbed out, but are not fully implemented. This is the next major work package after the critical bug fix.
+- The agent has implemented the backend logic for MSG91 SMS sending but has not tested it.
+- The agent has not checked if the frontend OTP screens need text changes to reflect that OTPs are now sent via both Email and SMS.
+
 </analysis>
