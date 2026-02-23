@@ -157,7 +157,6 @@ async def login(data: LoginRequest):
         "message": "2FA OTP sent to email and mobile",
         "requires_2fa": True,
         "mobile": user["mobile"],
-        "mock_otp": otp,
         "email_sent": email_result.get("success", False),
         "sms_sent": sms_result.get("success", False)
     }
