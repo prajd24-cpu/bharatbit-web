@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert, Platform, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Alert, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '../../contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -40,26 +40,28 @@ export default function Verify2FAScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Ionicons name="shield-checkmark" size={48} color="#E95721" style={styles.icon} />
+        <Ionicons name="shield-checkmark" size={48} color="#E95721" />
         <Text style={styles.title}>Two-Factor Authentication</Text>
         <Text style={styles.subtitle}>Enter the OTP sent to your email & phone</Text>
         <Text style={styles.mobile}>{mobile}</Text>
 
-        <View style={styles.inputWrapper}>
-          <Text style={styles.label}>ENTER 6-DIGIT OTP</Text>
+        <Text style={styles.label}>ENTER 6-DIGIT OTP</Text>
+        
+        {/* Very visible input box */}
+        <View style={styles.inputBox}>
           <TextInput
             style={styles.input}
             value={otp}
             onChangeText={handleOtpChange}
-            placeholder="Enter OTP"
-            placeholderTextColor="#999"
+            placeholder="______"
+            placeholderTextColor="#CCCCCC"
             keyboardType="numeric"
             maxLength={6}
-            autoFocus={false}
-            returnKeyType="done"
-            onSubmitEditing={handleVerify}
           />
         </View>
+        
+        {/* Show what user typed */}
+        <Text style={styles.otpDisplay}>Entered: {otp || '------'}</Text>
 
         <TouchableOpacity 
           style={[styles.button, otp.length !== 6 && styles.buttonDisabled]}
@@ -88,82 +90,89 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+    paddingTop: 50,
   },
   content: {
     flex: 1,
-    padding: 24,
-    paddingTop: 60,
+    paddingHorizontal: 24,
     alignItems: 'center',
   },
-  icon: {
-    marginBottom: 16,
-  },
   title: {
-    fontSize: 24,
-    fontWeight: '700',
+    fontSize: 22,
+    fontWeight: 'bold',
     color: '#1a1a2e',
+    marginTop: 16,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 14,
+    color: '#666666',
     marginTop: 8,
     textAlign: 'center',
   },
   mobile: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
     color: '#E95721',
     marginTop: 4,
-  },
-  inputWrapper: {
-    width: '100%',
-    marginTop: 32,
     marginBottom: 24,
   },
   label: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#666',
-    marginBottom: 8,
-    letterSpacing: 0.5,
+    color: '#333333',
+    marginBottom: 12,
+    alignSelf: 'flex-start',
   },
-  input: {
+  inputBox: {
     width: '100%',
-    height: 56,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 12,
-    borderWidth: 2,
+    height: 60,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 3,
     borderColor: '#E95721',
-    paddingHorizontal: 16,
-    fontSize: 20,
-    color: '#1a1a2e',
-    textAlign: 'center',
-    letterSpacing: 8,
-  },
-  button: {
-    width: '100%',
-    height: 56,
-    backgroundColor: '#E95721',
-    borderRadius: 12,
+    borderRadius: 10,
+    marginBottom: 8,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  input: {
+    width: '100%',
+    height: '100%',
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#000000',
+    textAlign: 'center',
+    letterSpacing: 10,
+    paddingHorizontal: 10,
+  },
+  otpDisplay: {
+    fontSize: 14,
+    color: '#666666',
+    marginBottom: 24,
+  },
+  button: {
+    width: '100%',
+    height: 50,
+    backgroundColor: '#E95721',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 16,
+  },
   buttonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#CCCCCC',
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   resendButton: {
-    marginTop: 24,
-    padding: 12,
+    marginTop: 20,
+    padding: 10,
   },
   resendText: {
     color: '#E95721',
     fontSize: 14,
-    fontWeight: '500',
   },
 });
