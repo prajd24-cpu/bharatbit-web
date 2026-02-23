@@ -42,10 +42,12 @@ const COUNTRY_CODES = [
   { code: '+92', country: 'Pakistan', flag: '🇵🇰' },
 ];
 
+type AccountType = 'individual' | 'corporate';
+
 export default function RegisterScreen() {
   const router = useRouter();
   const { register } = useAuth();
-  const [accountType, setAccountType] = useState<'individual' | 'entity'>('individual');
+  const [accountType, setAccountType] = useState<AccountType>('individual');
   const [countryCode, setCountryCode] = useState(COUNTRY_CODES[0]); // Default to India
   const [mobile, setMobile] = useState('');
   const [email, setEmail] = useState('');
@@ -68,6 +70,11 @@ export default function RegisterScreen() {
       return;
     }
 
+    if (accountType === 'corporate' && !companyName) {
+      Alert.alert('Error', 'Company name is required for corporate accounts');
+      return;
+    }
+
     if (password !== confirmPassword) {
       Alert.alert('Error', 'Passwords do not match');
       return;
@@ -82,7 +89,7 @@ export default function RegisterScreen() {
 
     setLoading(true);
     try {
-      const result = await register(fullMobile, email, password, referralCode);
+      const result = await register(fullMobile, email, password, referralCode, accountType, companyName);
       Alert.alert('Success', 'OTP sent to your email and phone', [
         {
           text: 'OK',
@@ -112,7 +119,7 @@ export default function RegisterScreen() {
     >
       <Text style={styles.countryFlag}>{item.flag}</Text>
       <Text style={styles.countryName}>{item.country}</Text>
-      <Text style={styles.countryCode}>{item.code}</Text>
+      <Text style={styles.countryCodeText}>{item.code}</Text>
     </TouchableOpacity>
   );
 
@@ -130,6 +137,58 @@ export default function RegisterScreen() {
           </View>
 
           <Card>
+            {/* Account Type Selection */}
+            <Text style={styles.inputLabel}>Account Type *</Text>
+            <View style={styles.accountTypeContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.accountTypeButton,
+                  accountType === 'individual' && styles.accountTypeButtonActive
+                ]}
+                onPress={() => setAccountType('individual')}
+                data-testid="account-type-individual"
+              >
+                <Ionicons 
+                  name="person" 
+                  size={24} 
+                  color={accountType === 'individual' ? '#FFFFFF' : theme.colors.textSecondary} 
+                />
+                <Text style={[
+                  styles.accountTypeText,
+                  accountType === 'individual' && styles.accountTypeTextActive
+                ]}>Individual</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.accountTypeButton,
+                  accountType === 'corporate' && styles.accountTypeButtonActive
+                ]}
+                onPress={() => setAccountType('corporate')}
+                data-testid="account-type-corporate"
+              >
+                <Ionicons 
+                  name="business" 
+                  size={24} 
+                  color={accountType === 'corporate' ? '#FFFFFF' : theme.colors.textSecondary} 
+                />
+                <Text style={[
+                  styles.accountTypeText,
+                  accountType === 'corporate' && styles.accountTypeTextActive
+                ]}>Corporate / Entity</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Company Name - Only for Corporate */}
+            {accountType === 'corporate' && (
+              <Input
+                label="Company Name *"
+                value={companyName}
+                onChangeText={setCompanyName}
+                placeholder="Enter company name"
+                icon="business-outline"
+              />
+            )}
+
             {/* Mobile Number with Country Code */}
             <Text style={styles.inputLabel}>Mobile Number *</Text>
             <View style={styles.phoneInputContainer}>
@@ -138,7 +197,7 @@ export default function RegisterScreen() {
                 onPress={() => setShowCountryPicker(true)}
               >
                 <Text style={styles.countryCodeFlag}>{countryCode.flag}</Text>
-                <Text style={styles.countryCodeText}>{countryCode.code}</Text>
+                <Text style={styles.countryCodeButtonText}>{countryCode.code}</Text>
                 <Ionicons name="chevron-down" size={16} color={theme.colors.textSecondary} />
               </TouchableOpacity>
               <TextInput
@@ -191,6 +250,7 @@ export default function RegisterScreen() {
               loading={loading}
               size="lg"
               style={{ marginTop: theme.spacing.md }}
+              data-testid="register-submit-btn"
             />
           </Card>
 
