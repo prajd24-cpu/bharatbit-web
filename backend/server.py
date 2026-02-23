@@ -81,6 +81,17 @@ async def health_check():
 # Include the main router
 app.include_router(api_router)
 
+# Root route - returns API info
+@app.get("/")
+async def root():
+    return {
+        "name": "BharatBit OTC Desk API",
+        "version": "2.0.0",
+        "status": "running",
+        "docs": "/docs",
+        "health": "/api/health"
+    }
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
