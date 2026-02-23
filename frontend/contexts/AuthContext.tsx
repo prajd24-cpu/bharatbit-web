@@ -10,6 +10,8 @@ interface User {
   email: string;
   role: string;
   kyc_status: string;
+  account_type?: string;
+  company_name?: string;
   relationship_manager?: string;
   rm_phone?: string;
   rm_whatsapp?: string;
@@ -21,7 +23,7 @@ interface AuthContextType {
   loading: boolean;
   login: (identifier: string, password: string) => Promise<any>;
   verify2FA: (mobile: string, otp: string) => Promise<void>;
-  register: (mobile: string, email: string, password: string, referralCode?: string) => Promise<any>;
+  register: (mobile: string, email: string, password: string, referralCode?: string, accountType?: string, companyName?: string) => Promise<any>;
   verifyOTP: (mobile: string, otp: string, purpose: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -54,13 +56,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (mobile: string, email: string, password: string, referralCode?: string) => {
+  const register = async (mobile: string, email: string, password: string, referralCode?: string, accountType?: string, companyName?: string) => {
     try {
       const response = await axios.post(`${BACKEND_URL}/api/auth/register`, {
         mobile,
         email,
         password,
-        referral_code: referralCode
+        referral_code: referralCode,
+        account_type: accountType || 'individual',
+        company_name: companyName
       });
       return response.data;
     } catch (error: any) {
