@@ -133,6 +133,11 @@ export default function DashboardScreen() {
           </View>
         </Card>
 
+        {/* Live Crypto Prices */}
+        {token && user?.kyc_status === 'approved' && (
+          <CryptoPriceList token={token} />
+        )}
+
         {/* Quick Actions */}
         <View style={styles.actionsGrid}>
           <TouchableOpacity
