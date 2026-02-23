@@ -55,12 +55,25 @@ Build a premium Over-the-Counter (OTC) crypto trading desk mobile and web applic
 - [x] Wallet address verification
 - [x] Enhanced analytics with charts (NEW - Feb 23, 2026)
 
-### Live Crypto Prices (NEW - Feb 23, 2026)
+### Live Crypto Prices (ENHANCED - Feb 23, 2026)
 - [x] Real-time prices from CoinGecko API
 - [x] 10 supported cryptocurrencies (BTC, ETH, USDT, USDC, BNB, XRP, SOL, ADA, DOGE, MATIC)
 - [x] 7-day price history for charts
 - [x] INR and USD prices with 24h change percentage
-- [x] Dashboard crypto price cards with sparkline charts
+- [x] **Dashboard crypto price cards with sparkline charts** (Re-integrated)
+
+### Push Notifications (IMPLEMENTED - Feb 23, 2026)
+- [x] Backend push notification service (Expo Push)
+- [x] Push notifications for KYC approval/rejection
+- [x] Push notifications for order status updates
+- [x] Frontend push token registration on login
+- [x] Notification listeners with screen navigation support
+- [ ] Full testing on physical device pending
+
+### Web App Access
+- [x] **Live Web URL**: https://crypto-desk-preview.preview.emergentagent.com
+- [x] Works directly in browser without Expo Go
+- [x] Supports registration, login, KYC, orders, and portfolio management
 
 ### Backend Refactoring (NEW - Feb 23, 2026)
 - [x] Modular architecture with separate routers
