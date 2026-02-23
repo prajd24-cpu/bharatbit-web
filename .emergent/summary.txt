@@ -1,64 +1,54 @@
-<analysis>
-
-<original_problem_statement>
-The user wants to build a premium Over-the-Counter (OTC) crypto trading desk mobile and web application named BharatBit OTC Desk. The application is targeted at high-net-worth Indian clients and should have a premium and secure user experience.
+<analysis>**original_problem_statement**:
+The user wants to build a premium Over-the-Counter (OTC) crypto trading desk mobile and web application named BharatBit OTC Desk. The application is targeted at high-net-worth Indian and international clients and should have a premium and secure user experience.
 
 **PRODUCT REQUIREMENTS:**
-- **Branding:** Premium, light theme with a white background, orange buttons (), and dark navy blue text. A specific B logo has been provided and integrated.
+- **Branding:** Premium, light theme with a white background, orange buttons (), and dark navy blue text. A specific B logo has been integrated.
 - **Core Features:**
-    1.  **User Registration:** Mobile + Country Code Picker, Email + OTP verification (via Email and SMS).
-    2.  **Full KYC Module:** Admin approval workflow for PAN, Aadhaar, Selfie, etc.
+    1.  **User Registration:** Mobile + Country Code, Email + OTP (Email/SMS). Support for Individual and Corporate/Entity account types.
+    2.  **Full KYC Module:** Admin approval workflow. Different document requirements for Individual (PAN, Aadhaar, Selfie) vs. Corporate accounts. Passport is mandatory for non-Indian clients. Must support both file uploads and live camera captures.
     3.  **Secure Login:** 2FA (Email and SMS OTP), Biometrics.
-    4.  **Dashboard:** Portfolio summary, active orders, prominent KYC status banner.
-    5.  **Place OTC Order:** Buy/Sell Crypto with INR Settlement.
-    6.  **Wallet Management:** Users must be able to add their external crypto wallet addresses and provide proof of ownership (e.g., a screenshot) for admin verification.
-    7.  **Admin Panel:** User management, KYC approval, Order management, Wallet address verification.
-    8.  **Forgot Password:** A complete flow for users to reset their password via an email link.
+    4.  **Dashboard:** Portfolio summary, active orders, live crypto price charts, prominent KYC status banner.
+    5.  **Place OTC Order:**
+        - **Buy Flow:** Standard buy order.
+        - **Sell Flow:** User must see their available asset balances, select an asset to sell, and see their registered bank account where funds will be sent.
+        - **Disclaimer:** All prices shown are indicative/for reference only, and final execution price will be confirmed manually.
+    6.  **Wallet Management:** Users can add external crypto wallet addresses with proof of ownership for admin verification.
+    7.  **Admin Panel:** User management, KYC approval, Order management, Wallet address verification, enhanced analytics dashboards.
+    8.  **Forgot Password Flow**.
 - **Integrations:**
-    - **Email:** Resend (LIVE, configured with user's API key and verified domain).
-    - **SMS:** MSG91 (IN PROGRESS, configured with user's Auth Key).
+    - **Email:** Resend (LIVE).
+    - **SMS:** MSG91 (Integrated, but delivery is BLOCKED pending user's DLT registration).
+    - **Live Prices:** CoinGecko (Integrated).
     - **KYC:** Signzy (Planned, stubbed).
-- **Notifications:**
-    - Email notifications to admins (, ) for new user registrations, KYC submissions, and order events.
-    - Push notifications for KYC approval and order status changes (Planned, stubbed).
-</original_problem_statement>
+- **Notifications:** Push notifications for KYC/order status changes (Partially implemented).
 
 **User's preferred language**: English
 
 **what currently exists?**
-A full-stack application (Expo/React Native frontend, FastAPI backend) that is functional and supports both mobile and web.
-- **Backend (FastAPI):** Includes complete APIs for user authentication (registration with email/SMS OTP, login, 2FA, forgot password), a full KYC workflow, OTC order management, wallet ledger, and a newly added feature for users to submit external wallet addresses for admin verification.
-- **Frontend (Expo/React Native):** A complete UI with a tab-based layout. It features authentication screens, a multi-step KYC form, a dashboard with a conditional KYC banner, and a new section for managing saved wallet addresses. The UI uses the user's specified logo and color scheme ().
+A full-stack application (Expo/React Native frontend, FastAPI backend) supporting both mobile and web.
+- **Backend:** The monolithic  has been successfully refactored into a modular architecture using FastAPI  for auth, admin, orders, wallets, etc. It includes APIs for user authentication (supporting both Individual/Corporate types in the model), a multi-step KYC workflow, OTC order management, wallet services, and live crypto price fetching from CoinGecko.
+- **Frontend:** A complete UI with a tab-based layout. It features authentication screens, a multi-step KYC form with camera/upload capabilities, a dashboard, and an order creation screen. The sell-side order flow has been refactored to show user balances and bank details.
 - **Integrations:**
-    - **Resend is LIVE** for sending all email OTPs and admin notifications.
-    - **MSG91 is integrated** in the backend to send SMS OTPs, but is pending testing.
+    - **Resend** is LIVE for emails.
+    - **MSG91** is integrated for SMS, but SMS delivery fails because the user needs to complete DLT registration in India. The agent has informed the user what is needed (Template ID, Sender ID).
+    - **CoinGecko** is integrated for live crypto prices.
 
 **Last working item**:
-    - Last item agent was working: Integrating MSG91 to send SMS OTPs for user registration and 2FA login. The agent created a new , added the user's MSG91 Auth Key to the backend  file, and modified the  and  endpoints in  to trigger SMS sending alongside the existing email OTP.
+    - Last item agent was working: Adding Individual vs. Corporate/Entity account types. The agent updated the backend user model and registration endpoint to include an  field. It was in the process of updating the frontend registration screen to include this choice and making the KYC form conditional based on the selection.
     - Status: IN PROGRESS
     - Agent Testing Done: N
-    - Which testing method agent to use? backend testing agent
+    - Which testing method agent to use? both
     - User Testing Done: N
 
 **All Pending/In progress Issue list**:
-  - Issue 1: Complete and Test MSG91 SMS OTP Integration (P0)
-  - Issue 2: Preview environment instability (P2)
+  - Issue 1: Preview Environment Instability (P0)
+  - Issue 2: MSG91 SMS Delivery Failure (P0)
+  - Issue 3: Complete Account Type Implementation (Individual vs. Corporate) (P0)
 
   Issues Detail:
   - Issue 1: 
-     - Description: The backend has been updated to send SMS OTPs via MSG91 during registration and 2FA login. However, this functionality has not been tested to confirm it works. Additionally, the frontend OTP screen might need a UI update to inform the user to check both their email and phone for the code.
-     - Next debug checklist:
-        1. Use the backend testing agent to test the  endpoint. Verify that a new user registration successfully triggers a call to the MSG91 API.
-        2. Manually test the login flow for a user with 2FA enabled to ensure the SMS is sent.
-        3. Review  and  to ensure the on-screen text is clear (e.g., Enter the OTP sent to your email and phone).
-     - Why fix this issue and what will be achieved with the fix? This will complete a key user request for multi-channel OTP verification, enhancing security and user convenience.
-     - Status: IN PROGRESS
-     - Is recurring issue? N
-     - Should Test frontend/backend/both after fix? Both
-     - Blocked on other issue: None
-  - Issue 2: 
-     - Description: The  tunnel for the live preview is highly unstable, frequently disconnecting or timing out. This is an environmental problem, not a code issue.
-     - Attempted fixes: The agent has been restarting the 
+     - Description: The application preview provided by  is extremely unstable and frequently times out or returns  /  errors. This is a recurring environmental issue that has wasted significant time on restarts and cache clearing. It severely hinders frontend development and user testing.
+     - Attempted fixes: Numerous 
   Usage: expo [command] [options]
 
   Options:
@@ -127,214 +117,170 @@ A full-stack application (Expo/React Native frontend, FastAPI backend) that is f
     upload:ios [path]                 Superseded by eas submit in eas-cli
     client:ios [path]                 Superseded by Expo Dev Clients
 
-[08:21:32]   Run a command with --help for more info 💡
-[08:21:32]     $ expo start --help
-[08:21:32] service repeatedly as a temporary workaround.
-     - Next debug checklist: Do not attempt to fix the tunnel. Inform the user if it's down and suggest waiting or proceeding with backend work that can be tested independently.
-     - Why fix this issue and what will be achieved with the fix? A stable tunnel would improve the user's testing experience. However, it is outside the agent's control.
+[14:32:37]   Run a command with --help for more info 💡
+[14:32:37]     $ expo start --help
+[14:32:37] service restarts, clearing Metro cache (), and verifying local service health. The issue is with the tunnel infrastructure itself.
+     - Next debug checklist: 
+        1. Acknowledge this is an environmental issue.
+        2. When it fails, perform a clean restart: frontend: ERROR (no such process)
+frontend: ERROR (no such process).
+        3. Wait up to 2 minutes for the tunnel to stabilize before testing.
+        4. If it persists, focus on backend work that can be tested with  and inform the user about the preview outage.
+     - Why fix this issue and what will be achieved with the fix? A stable preview is critical for user feedback and frontend debugging.
      - Status: BLOCKED
      - Is recurring issue? Y
      - Should Test frontend/backend/both after fix? Frontend
      - Blocked on other issue: None
+  - Issue 2: 
+     - Description: The MSG91 integration is complete in the code, but OTP SMS messages are not being delivered to the user's phone. The agent investigated and found that this is due to mandatory DLT (Distributed Ledger Technology) registration required for sending programmatic SMS in India.
+     - Attempted fixes: Agent confirmed the API call is correct and receives a  from MSG91, but the delivery fails downstream. The agent researched the DLT requirement and informed the user.
+     - Next debug checklist: 
+        1. Wait for the user to provide the **DLT Template ID** and **Approved Sender ID**.
+        2. Update  to include the  in the MSG91 API payload.
+        3. Retest the registration flow to confirm SMS delivery.
+     - Why fix this issue and what will be achieved with the fix? This will complete the 2FA security requirement and a core feature request.
+     - Status: BLOCKED
+     - Is recurring issue? N
+     - Should Test frontend/backend/both after fix? Both
+     - Blocked on other issue: User action required (DLT Registration).
+  - Issue 3: 
+     - Description: The user requested two account types: Individual and Corporate/Entity, with different KYC requirements for each. The agent has started implementation.
+     - Attempted fixes: The  field was added to the backend User model and registration endpoint.
+     - Next debug checklist:
+        1. Modify  to add a selector (e.g., Radio buttons) for Individual or Corporate.
+        2. Modify  to conditionally render different form fields based on the user's . (e.g., show PAN/Aadhaar for Individual, show company registration documents for Corporate).
+        3. Update the backend KYC submission endpoint in  to handle the different data structures for each account type.
+     - Why fix this issue and what will be achieved with the fix? This fulfills a key business requirement to onboard different types of clients.
+     - Status: IN PROGRESS
+     - Is recurring issue? N
+     - Should Test frontend/backend/both after fix? Both
+     - Blocked on other issue: None
 
 **In progress Task List**:
-  There are no other in-progress tasks besides the MSG91 integration issue listed above.
+  - Task 1:  Complete Account Type Implementation
+     - Where to resume: Modify the frontend at  and  to reflect the new account types.
+     - What will be achieved with this? Users will be able to sign up as either an Individual or a Corporate entity, with a corresponding tailored KYC process.
+     - Status: IN PROGRESS
+     - Should Test frontend/backend/both after fix? Both
+     - Blocked on something: No
 
 **Upcoming and Future Tasks**
     Upcoming Tasks:
-    - **P1: Implement Push Notifications:**
-        - **File:**  (stub exists)
-        - **Task:** Implement logic using  to send push notifications to users upon KYC approval and order status updates. This requires backend implementation and frontend handling.
+    - **P1: Implement Frontend for Live Crypto Charts**: The backend API () and a component () exist. The component caused build issues and was removed from the dashboard. It needs to be debugged and re-integrated into .
+    - **P1: Implement Push Notifications**: The backend service () is partially implemented. It needs to be triggered from relevant backend events (e.g., in  on KYC approval) and handled on the frontend.
     Future Tasks:
-    - **P1: Live Crypto Charts & Auto-Refresh Rates:** Implement a feature to display live price charts and auto-refreshing indicative rates on the order screen.
-    - **P1: Enhanced Admin Analytics:** Add more detailed analytics, charts, and data visualizations to the admin panel.
-    - **P2: Full App Store Deployment:** Guide the user through building and submitting the mobile app to the Apple App Store and Google Play Store using Expo Application Services (EAS).
-    - **P2: WhatsApp Notifications:** Integrate a provider like Twilio to send notifications via WhatsApp.
+    - **P1: Enhanced Admin Analytics Frontend**: The backend API () is ready. The frontend needs a new view or component to display this data with charts.
+    - **P2: Full App Store Deployment**: Guide the user through building and submitting the mobile app via Expo Application Services (EAS).
+    - **P2: WhatsApp Notifications**: Integrate a provider like Twilio for WhatsApp messages.
 
 **Completed work in this session**
-- **Critical Bug Fix:** Resolved the issue where the keyboard would not appear on OTP/2FA screens by refactoring the components to use native  and .
-- **Feature: Saved Wallet Addresses:** Implemented the full end-to-end feature for users to add external crypto wallets with proof of ownership, including backend models, APIs, admin verification routes, and frontend screens.
-- **Feature: Forgot Password:** Implemented a complete forgot/reset password flow with backend APIs and frontend screens.
-- **Integration: Resend Email (LIVE):** Integrated the Resend API with the user's key and verified domain. The app now sends live emails for OTPs and admin notifications.
-- **UI/UX Improvements:**
-    - Added a country code picker to the registration screen.
-    - Updated the app's logo and branding, standardizing the theme color to .
-    - Improved the KYC flow by adding a prominent banner on the dashboard and adding proper back/home navigation to the KYC screens.
-- **Performance Optimization:** Performed a pre-deployment health check and resolved N+1 query issues in the backend by using MongoDB aggregation pipelines.
-- **Bug Fix:** Fixed a critical registration bug where the OTP verification was failing due to a mismatch between email and mobile identifiers.
-- **Web App Support:** Confirmed the application works as a web app and guided the user on how to access and share the preview link for web-based client testing.
+- **Backend Refactoring**: Successfully migrated the entire backend from a single  file to a modular structure using FastAPI routers in the  directory.
+- **Deployment Issue Fixes**: Resolved multiple  errors from deployment logs by adding alias routes (e.g., ) to maintain backward compatibility with frontend calls.
+- **Sell-Side Order Flow Overhaul**: Rewrote the Create Order screen () to correctly handle Sell orders by displaying the user's asset balance and their registered bank account details. Added disclaimers that prices are indicative.
+- **KYC Form Enhancements**: Upgraded the KYC form () to support both live camera capture and file uploads for documents. Added conditional logic for requiring a Passport for non-Indian clients.
+- **Mobile Glitch Fixes**:
+    - Removed the debug OTP from being displayed on the screen during login.
+    - Fixed the mobile navigation bar from overlapping the app's tab bar by implementing .
+    - Corrected the logout flow to properly redirect the user to the login screen.
+- **Payment Details Update**: Updated the hardcoded company bank details and removed the UPI ID as requested by the user.
 
 **Earlier issues found/mentioned but not fixed**
-   - The only outstanding issue is the recurring  instability, which is an environmental problem.
+   - **Frontend Linting Errors**: The agent noted multiple TypeScript parsing errors during linting but ignored them as they didn't seem to be breaking the build at the time. These could cause future issues and should be addressed.
 
 **Known issue recurrence from previous fork**
-  - N/A
+  - **Issue recurrence in previous fork**: The instability of the  preview environment was noted in the previous handoff summary.
+  - **Recurrence count**: High. This has been a persistent blocker throughout the session.
+  - **Status**: BLOCKED
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Frontend:** Expo (React Native, Web), TypeScript, , .
-- **Backend:** FastAPI, Python, Pydantic, JWT, bcrypt, Motor (async MongoDB).
+- **Frontend:** Expo (React Native, Web), TypeScript, .
+- **Backend:** FastAPI, Python, Pydantic, JWT, Motor (async MongoDB), Modular Router architecture.
 - **Database:** MongoDB.
-- **Integrations:** Resend (Email), MSG91 (SMS).
-- **Architecture:** Monorepo, API-driven. Backend logic is monolithic in .
+- **Integrations:** Resend (Email), MSG91 (SMS), CoinGecko (Live Prices).
 
 **key DB schema**
-  - **users**: 
+  - **users**:  (added )
   - **kyc_details**: 
+  - **corporate_kyc_details**: 
   - **orders**: 
-  - **wallet_addresses**:  (New)
-  - **transactions**: 
-  - **otp_store**: 
+  - **wallet_addresses**: 
 
 **changes in tech stack**
-  -  package added to backend.
-  -  package added to frontend.
-  -  package added for image manipulation (icon generation).
+  -  added to backend for fetching crypto prices.
 
 **All files of reference**
-- : Heavily modified. Contains all new backend logic for wallet management, forgot password, and SMS integration.
-- : New file for MSG91 integration.
-- : Updated with  and .
-- : Updated with country code picker.
--  & : New files for wallet management feature.
--  & : New files for password reset feature.
-- : Updated to show a conditional KYC banner.
-- : Updated with the new primary color.
-- : Updated with new logo, icons, and splash screen settings.
+- : Refactored to use routers.
+- : Entire new directory with modular endpoints.
+- : Heavily modified to add camera/upload, passport logic.
+- : Rewritten to support the new Sell flow.
+- : Modified to fix logout and display more user details.
+- : Modified to fix navigation bar overlap.
+- : Updated with new bank details.
 
 **Areas that need refactoring**:
-- The  file is now excessively long and complex. It urgently needs to be broken down into smaller, manageable modules using FastAPI's  (e.g., , , ).
+- The  component needs to be debugged and fixed, as it was causing the Metro bundler to fail.
+- The frontend has lingering TypeScript linting errors that should be cleaned up.
 
 **key api endpoints**
-- , ,  (All updated for SMS)
+- ,  (updated for  and flexible )
+- ,  (New)
 -  (New)
--  (New)
--  (New)
--  (New)
--  (New)
+-  (Alias for  to fix deployment errors)
+- ,  (New, hardcoded details)
 
 **Critical Info for New Agent**
-- **PRIORITY 1 is testing the MSG91 SMS integration.** The backend code is written, but it's unverified.
-- **The user is actively testing on the web version.** Ensure the web preview is working and address any web-specific bugs.
-- **The preview environment (ngrok) is extremely unstable.** Do not waste time debugging the tunnel. Restart the 
-  Usage: expo [command] [options]
+- **PRIORITY 1: Fix the preview environment or work around it.** The  tunnel is extremely unreliable. Expect to restart the frontend service frequently. If the preview is down, prioritize backend work that can be tested via .
+- **PRIORITY 2: Complete the Individual vs. Corporate account feature.** This is the last active request from the user and is half-finished.
+- **PRIORITY 3: The MSG91 SMS integration is BLOCKED.** Do not attempt to debug SMS delivery further until the user provides the **DLT Template ID** and **Sender ID**. The code is ready for these values.
+- The deployment logs provided by the user showing  errors were from an older build. The agent has already added the necessary alias routes to fix this. The next deployment should resolve those errors.
 
-  Options:
-  
-    -V, --version                     output the version number
-    --non-interactive                 Fail, if an interactive prompt would be required to continue.
-    -h, --help                        output usage information
-  
-  Commands:
-
-    init [name]                       Create a new Expo project
-    start [path]                      Start a local dev server for the app
-    start:web [path]                  Start a Webpack dev server for the web app
-    export [path]                     Export the static files of the app for hosting it on a web server
-    install [packages...]             Install a module or other package to a project
-    run:android [path]                Run the Android app binary locally
-    run:ios [path]                    Run the iOS app binary locally
-    send [path]                       Share the project's URL to an email address
-
-    login                             Login to an Expo account
-    logout                            Logout of an Expo account
-    register                          Sign up for a new Expo account
-    whoami                            Return the currently authenticated account
-
-    client:install:ios                Install Expo Go for iOS on the simulator
-    client:install:android            Install Expo Go for Android on a connected device or emulator
-
-    config [path]                     Show the project config
-    doctor [path]                     Diagnose issues with the project
-    upgrade [sdk-version]             Upgrade the project packages and config for the given SDK version
-
-    customize:web [path]              Eject the default web files for customization
-    prebuild [path]                   Create native iOS and Android project files before building natively.
-                                      Learn more: https://docs.expo.dev/workflow/customizing/
-
-    build:web [path]                  Build the web app for production
-
-    credentials:manager [path]        Superseded by eas credentials in eas-cli
-
-    url [path]                        Log a URL for opening the project in Expo Go
-    url:ipa [path]                    Log the download URL for the standalone iOS binary
-    url:apk [path]                    Log the download URL for the standalone Android binary
-
-    webhooks [path]                   List all webhooks for a project
-    webhooks:add [path]               Add a webhook to a project
-    webhooks:remove [path]            Delete a webhook
-    webhooks:update [path]            Update an existing webhook
-
-    build:ios [path]                  Superseded by eas build in eas-cli
-    build:android [path]              Superseded by eas build in eas-cli
-    build:status [path]               Superseded by eas build:list in eas-cli
-    eject [path]                      Superseded by expo prebuild
-    fetch:ios:certs [path]            Superseded by eas credentials in eas-cli
-    fetch:android:keystore [path]     Superseded by eas credentials in eas-cli
-    fetch:android:hashes [path]       Superseded by eas credentials in eas-cli
-    fetch:android:upload-cert [path]  Superseded by eas credentials in eas-cli
-    publish [path]                    Superseded by eas update in eas-cli
-    publish:set [path]                Superseded by eas update:republish in eas-cli
-    publish:rollback [path]           Superseded by eas update:republish in eas-cli
-    publish:history [path]            Superseded by eas update:list in eas-cli
-    publish:details [path]            Superseded by eas update:view in eas-cli
-    push:android:upload [path]        Superseded by eas credentials in eas-cli
-    push:android:show [path]          Superseded by eas credentials in eas-cli
-    push:android:clear [path]         Superseded by eas credentials in eas-cli
-    upload:android [path]             Superseded by eas submit in eas-cli
-    upload:ios [path]                 Superseded by eas submit in eas-cli
-    client:ios [path]                 Superseded by Expo Dev Clients
-
-[08:21:32]   Run a command with --help for more info 💡
-[08:21:32]     $ expo start --help
-[08:21:32] service and inform the user if issues persist.
-- **Email integration via Resend is LIVE and working.**
-- The user has been confused about deployment. For this project:
-    - The **web app** can be deployed via Emergent's Deploy button for a permanent URL.
-    - The **mobile app** requires using Expo Application Services (EAS) to build and submit to app stores, which is a separate process.
-
-**documents created in this job**
-  - 
+**documents and test reports created in this job**
+  - /app/memory/PRD.md (Updated)
+  - /app/test_reports/iteration_1.json
+  - /app/test_reports/iteration_2.json
 
 **Last 10 User Messages and any pending HUMAN messages** 
-- **10. **: User reported a critical bug in registration. (Completed - Fixed OTP logic)
-- **9. **: User confirmed their domain is verified on Resend. (Completed - Agent updated .env)
-- **8. **: User requested the Forgot Password feature. (Completed)
-- **7. **: User asked for SMS OTP and a country code picker. (Completed)
-- **6. **: User prioritized the country code picker UI. (Completed)
-- **5. **: User is ready to integrate MSG91 for SMS. (In Progress)
-- **4. **: User needed help finding the MSG91 Auth Key. (Completed - Agent provided guidance)
-- **3. **: User shared a screenshot and asked for next steps to get the key. (Completed - Agent provided guidance)
-- **2. **: User asked which option to select in MSG91 setup. (Completed - Agent advised OTP)
-- **1. **: **LATEST**: User provided the MSG91 Auth Key for integration.
+- **10. **: User initiated a deployment. (Status: Followed by bug reports).
+- **9. **: User provided deployment logs showing 404 errors. (Status: Completed, agent added alias routes).
+- **8. **: User reported 3 bugs on the deployed mobile app: OTP shown on screen, navigation bar overlap, and incorrect KYC flow. (Status: Completed, agent fixed all 3).
+- **7. **: User provided correct bank account details. (Status: Completed, agent updated them).
+- **6. **: User requested UPI removal and a major fix to the Sell order flow. (Status: Completed, agent implemented both).
+- **5. **: User requested to add a disclaimer that prices are indicative. (Status: Completed, agent added text).
+- **4. **: User provided the same deployment logs again. (Status: Completed, agent confirmed fixes are in place for next deployment).
+- **3. **: User reported the logout button doesn't redirect. (Status: Completed, agent fixed it).
+- **2. **: User requested camera functionality in the KYC form. (Status: Completed, agent implemented it).
+- **1.  and **: **LATEST**: User requested mandatory passport for international clients and the Corporate account type. (Status: IN PROGRESS).
 
 **Project Health Check:**
-- **Broken:** The stability of the  preview environment remains a persistent problem.
-- **Mocked:** Push Notifications ( is a stub), KYC Vendor ( is a stub).
+- **Broken:**
+    - The frontend preview environment ( tunnel).
+    - SMS OTP delivery (Blocked on user's DLT registration).
+- **Mocked:**
+    - Signzy KYC Integration ( is a stub).
+    - Push Notifications ( is partially implemented but not triggered).
 
 **3rd Party Integrations**
-- **Resend (Email OTP & Notifications)** — LIVE, requires User API Key (provided).
-- **MSG91 (SMS OTP)** — IN PROGRESS, requires User API Key (provided).
-- **Signzy (KYC)** — Planned (stubbed), will require User API Key.
+- **Resend (Email)** — LIVE, requires User API Key.
+- **MSG91 (SMS)** — INTEGRATED, requires User API Key. **DELIVERY BLOCKED** pending user DLT registration.
+- **CoinGecko (Crypto Prices)** — LIVE, using  library (no key required for free tier).
 - **Expo Push Notifications** — Planned (stubbed).
+- **Signzy (KYC)** — Planned (stubbed).
 
 **Testing status**
-  - Testing agent used after significant changes: NO (not since the latest SMS integration changes).
-  - Troubleshoot agent used after agent stuck in loop: YES (for ngrok issues, though it's an environmental problem).
+  - Testing agent used after significant changes: YES, used after backend refactoring.
+  - Troubleshoot agent used after agent stuck in loop: NO.
   - Test files created: []
-  - Known regressions: []
+  - Known regressions: The  component breaks the Metro bundler.
 
 **Credentials to test flow:**
-- **Admin User:**
-  - Email: 
-  - Password: 
+- **Admin User:**  / 
 - **MSG91 Auth Key:** 
-- **Resend API Key:** 
+- **Resend API Key:**  (This should be in the .env file)
 
 **What agent forgot to execute**
-- The agent has implemented the backend logic for MSG91 SMS sending but has not tested it.
-- The agent has not checked if the frontend OTP screens need text changes to reflect that OTPs are now sent via both Email and SMS.
-
-</analysis>
+- The agent was in the middle of implementing the Corporate vs. Individual account type feature and did not complete the frontend portion ( and ).
+- The agent identified but did not fix the TypeScript linting errors in the frontend codebase.
+- The frontend implementation for Admin Analytics and re-integration of the Crypto Price Chart on the dashboard are still pending.</analysis>

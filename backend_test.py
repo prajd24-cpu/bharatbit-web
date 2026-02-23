@@ -429,7 +429,7 @@ class BharatBitAPITester:
 
 def main():
     # Use the production backend URL from frontend .env
-    backend_url = "https://crypto-otc-hub.preview.emergentagent.com"
+    backend_url = "https://crypto-desk-preview.preview.emergentagent.com"
     
     tester = BharatBitAPITester(backend_url)
     tester.run_all_tests()
