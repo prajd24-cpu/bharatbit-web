@@ -270,9 +270,10 @@ export default function CreateOrderScreen() {
             {quantity && currentRate && (
               <View style={styles.totalDisplay}>
                 <Text style={styles.totalLabel}>
-                  {orderType === 'buy' ? 'Total to Pay:' : 'You will receive:'}
+                  {orderType === 'buy' ? 'Estimated Amount to Pay:' : 'Estimated Amount You Will Receive:'}
                 </Text>
                 <Text style={styles.totalAmount}>₹{calculateTotal().toLocaleString()}</Text>
+                <Text style={styles.estimateNote}>*Final amount confirmed at execution</Text>
               </View>
             )}
           </Card>
