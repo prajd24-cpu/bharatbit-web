@@ -57,9 +57,9 @@ export default function VerifyOTPScreen() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.content}>
             <View style={styles.header}>
-              <Ionicons name="phone-portrait" size={48} color={theme.colors.primary} />
-              <Text style={styles.title}>Verify Mobile</Text>
-              <Text style={styles.subtitle}>Enter the OTP sent to</Text>
+              <Ionicons name="mail" size={48} color={theme.colors.primary} />
+              <Text style={styles.title}>Verify Account</Text>
+              <Text style={styles.subtitle}>Enter the OTP sent to your email & phone</Text>
               <Text style={styles.mobile}>{mobile}</Text>
               {mockOTP && (
                 <View style={styles.mockContainer}>

@@ -58,7 +58,7 @@ export default function Verify2FAScreen() {
             <View style={styles.header}>
               <Ionicons name="shield-checkmark" size={48} color={theme.colors.primary} />
               <Text style={styles.title}>Two-Factor Authentication</Text>
-              <Text style={styles.subtitle}>Enter the OTP sent to</Text>
+              <Text style={styles.subtitle}>Enter the OTP sent to your email & phone</Text>
               <Text style={styles.mobile}>{mobile}</Text>
               {mockOTP && (
                 <View style={styles.mockContainer}>
