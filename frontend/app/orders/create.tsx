@@ -228,7 +228,7 @@ export default function CreateOrderScreen() {
             {currentRate && (
               <View style={styles.rateDisplay}>
                 <View style={styles.rateRow}>
-                  <Text style={styles.rateLabel}>Current {orderType === 'buy' ? 'Buy' : 'Sell'} Rate:</Text>
+                  <Text style={styles.rateLabel}>Indicative {orderType === 'buy' ? 'Buy' : 'Sell'} Rate:</Text>
                   <Text style={styles.rateValue}>
                     ₹{(orderType === 'buy' ? currentRate.buy_rate : currentRate.sell_rate).toLocaleString()}
                   </Text>
@@ -239,6 +239,12 @@ export default function CreateOrderScreen() {
                     <Text style={styles.balanceValue}>{getAssetBalance(asset)} {asset}</Text>
                   </View>
                 )}
+                <View style={styles.rateNotice}>
+                  <Ionicons name="information-circle" size={16} color={theme.colors.warning} />
+                  <Text style={styles.rateNoticeText}>
+                    Rate is indicative only. Final rate will be confirmed at time of execution.
+                  </Text>
+                </View>
               </View>
             )}
           </Card>
