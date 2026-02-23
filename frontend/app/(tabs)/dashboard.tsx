@@ -112,9 +112,6 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         )}
 
-        {/* Live Crypto Prices */}
-        {token && <CryptoPriceList token={token} />}
-
         {/* Portfolio Summary */}
         <Card style={styles.portfolioCard}>
           <View style={styles.cardHeader}>
