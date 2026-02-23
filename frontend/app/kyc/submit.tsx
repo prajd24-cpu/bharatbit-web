@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert, TouchableOpacity, Image, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
@@ -13,10 +13,40 @@ import axios from 'axios';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
+interface ImagePickerModalProps {
+  visible: boolean;
+  onClose: () => void;
+  onCameraPress: () => void;
+  onGalleryPress: () => void;
+  title: string;
+}
+
+const ImagePickerModal: React.FC<ImagePickerModalProps> = ({ visible, onClose, onCameraPress, onGalleryPress, title }) => (
+  <Modal visible={visible} transparent animationType="slide">
+    <View style={styles.modalOverlay}>
+      <View style={styles.modalContent}>
+        <Text style={styles.modalTitle}>{title}</Text>
+        <TouchableOpacity style={styles.modalOption} onPress={onCameraPress}>
+          <Ionicons name="camera" size={28} color={theme.colors.primary} />
+          <Text style={styles.modalOptionText}>Take Photo</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.modalOption} onPress={onGalleryPress}>
+          <Ionicons name="images" size={28} color={theme.colors.primary} />
+          <Text style={styles.modalOptionText}>Choose from Gallery</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.modalCancel} onPress={onClose}>
+          <Text style={styles.modalCancelText}>Cancel</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </Modal>
+);
+
 export default function KYCSubmitScreen() {
   const router = useRouter();
   const { user, token, refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [currentImagePicker, setCurrentImagePicker] = useState<string | null>(null);
 
   // Form state
   const [panNumber, setPanNumber] = useState('');
@@ -37,17 +67,110 @@ export default function KYCSubmitScreen() {
   const [fatcaAccepted, setFatcaAccepted] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
-  const pickImage = async (setter: (value: string) => void) => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.5,
-      base64: true,
-    });
+  const getImageSetter = (field: string): ((value: string) => void) => {
+    switch (field) {
+      case 'pan': return setPanImage;
+      case 'aadhaarFront': return setAadhaarFront;
+      case 'aadhaarBack': return setAadhaarBack;
+      case 'selfie': return setSelfieImage;
+      case 'address': return setAddressProof;
+      default: return () => {};
+    }
+  };
 
-    if (!result.canceled && result.assets[0].base64) {
-      setter(`data:image/jpeg;base64,${result.assets[0].base64}`);
+  const getImageValue = (field: string): string => {
+    switch (field) {
+      case 'pan': return panImage;
+      case 'aadhaarFront': return aadhaarFront;
+      case 'aadhaarBack': return aadhaarBack;
+      case 'selfie': return selfieImage;
+      case 'address': return addressProof;
+      default: return '';
+    }
+  };
+
+  const requestCameraPermission = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Required', 'Camera permission is required to take photos.');
+      return false;
+    }
+    return true;
+  };
+
+  const requestGalleryPermission = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Required', 'Gallery permission is required to select photos.');
+      return false;
+    }
+    return true;
+  };
+
+  const takePhoto = async (field: string) => {
+    const hasPermission = await requestCameraPermission();
+    if (!hasPermission) return;
+
+    const setter = getImageSetter(field);
+    
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: field === 'selfie' ? [1, 1] : [4, 3],
+        quality: 0.7,
+        base64: true,
+      });
+
+      if (!result.canceled && result.assets[0].base64) {
+        setter(`data:image/jpeg;base64,${result.assets[0].base64}`);
+      }
+    } catch (error) {
+      console.error('Camera error:', error);
+      Alert.alert('Error', 'Failed to take photo. Please try again.');
+    }
+    
+    setCurrentImagePicker(null);
+  };
+
+  const pickFromGallery = async (field: string) => {
+    const hasPermission = await requestGalleryPermission();
+    if (!hasPermission) return;
+
+    const setter = getImageSetter(field);
+    
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: field === 'selfie' ? [1, 1] : [4, 3],
+        quality: 0.7,
+        base64: true,
+      });
+
+      if (!result.canceled && result.assets[0].base64) {
+        setter(`data:image/jpeg;base64,${result.assets[0].base64}`);
+      }
+    } catch (error) {
+      console.error('Gallery error:', error);
+      Alert.alert('Error', 'Failed to select photo. Please try again.');
+    }
+    
+    setCurrentImagePicker(null);
+  };
+
+  const openImagePicker = (field: string) => {
+    setCurrentImagePicker(field);
+  };
+
+  const getPickerTitle = (field: string): string => {
+    switch (field) {
+      case 'pan': return 'Upload PAN Card';
+      case 'aadhaarFront': return 'Upload Aadhaar Front';
+      case 'aadhaarBack': return 'Upload Aadhaar Back';
+      case 'selfie': return 'Take Selfie';
+      case 'address': return 'Upload Address Proof';
+      default: return 'Select Image';
     }
   };
 
@@ -81,69 +204,69 @@ export default function KYCSubmitScreen() {
         nominee_name: nomineeName,
         nominee_relationship: nomineeRelationship,
         nominee_dob: nomineeDOB,
-        fatca_declaration: fatcaAccepted,
-        terms_accepted: termsAccepted,
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
       await refreshUser();
-      Alert.alert('Success', 'KYC submitted successfully. Please wait for admin approval.', [
-        { text: 'OK', onPress: () => router.replace('/(tabs)/dashboard') }
+      Alert.alert('Success', 'KYC submitted successfully. It is now under review.', [
+        { text: 'OK', onPress: () => router.replace('/kyc/pending') }
       ]);
     } catch (error: any) {
-      Alert.alert('Error', error.response?.data?.detail || 'KYC submission failed');
+      Alert.alert('Error', error.response?.data?.detail || 'Failed to submit KYC');
     } finally {
       setLoading(false);
     }
   };
 
-  const goToDashboard = () => {
-    router.replace('/(tabs)/dashboard');
-  };
-
-  if (user?.kyc_status === 'under_review') {
+  const renderImageUploader = (field: string, label: string, required: boolean = true) => {
+    const imageValue = getImageValue(field);
+    const isSelfie = field === 'selfie';
+    
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.navHeader}>
-          <TouchableOpacity onPress={goToDashboard} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color={theme.colors.textPrimary} />
-          </TouchableOpacity>
-          <Text style={styles.navTitle}>KYC Status</Text>
-          <TouchableOpacity onPress={goToDashboard} style={styles.homeButton}>
-            <Ionicons name="home" size={24} color={theme.colors.primary} />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.centerContent}>
-          <Ionicons name="time" size={64} color={theme.colors.warning} />
-          <Text style={styles.statusTitle}>KYC Under Review</Text>
-          <Text style={styles.statusText}>Your KYC documents are being reviewed. You'll be notified once approved.</Text>
-          <Button
-            title="Go to Dashboard"
-            onPress={goToDashboard}
-            variant="primary"
-            style={{ marginTop: theme.spacing.xl }}
-          />
-        </View>
-      </SafeAreaView>
+      <View style={styles.uploaderContainer}>
+        <Text style={styles.uploaderLabel}>
+          {label} {required && <Text style={styles.required}>*</Text>}
+        </Text>
+        <TouchableOpacity 
+          style={[styles.uploaderBox, imageValue && styles.uploaderBoxWithImage]}
+          onPress={() => openImagePicker(field)}
+        >
+          {imageValue ? (
+            <View style={styles.imagePreviewContainer}>
+              <Image source={{ uri: imageValue }} style={[styles.imagePreview, isSelfie && styles.selfiePreview]} />
+              <View style={styles.imageOverlay}>
+                <Ionicons name="camera" size={24} color="#FFFFFF" />
+                <Text style={styles.imageOverlayText}>Change</Text>
+              </View>
+            </View>
+          ) : (
+            <View style={styles.uploaderPlaceholder}>
+              <Ionicons name={isSelfie ? "person-circle" : "cloud-upload"} size={48} color={theme.colors.textMuted} />
+              <Text style={styles.uploaderText}>
+                {isSelfie ? 'Take Selfie or Upload' : 'Tap to capture or upload'}
+              </Text>
+              <View style={styles.uploaderIcons}>
+                <Ionicons name="camera" size={20} color={theme.colors.primary} />
+                <Text style={styles.orText}>or</Text>
+                <Ionicons name="images" size={20} color={theme.colors.primary} />
+              </View>
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
     );
-  }
-
-  if (user?.kyc_status === 'approved') {
-    router.replace('/(tabs)/dashboard');
-    return null;
-  }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Navigation Header */}
-      <View style={styles.navHeader}>
-        <TouchableOpacity onPress={goToDashboard} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={theme.colors.textPrimary} />
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={28} color={theme.colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={styles.navTitle}>Complete KYC</Text>
-        <TouchableOpacity onPress={goToDashboard} style={styles.homeButton}>
-          <Ionicons name="home" size={24} color={theme.colors.primary} />
+        <Text style={styles.headerTitle}>KYC Verification</Text>
+        <TouchableOpacity onPress={() => router.replace('/(tabs)/dashboard')}>
+          <Ionicons name="home" size={28} color={theme.colors.textPrimary} />
         </TouchableOpacity>
       </View>
 
@@ -152,202 +275,184 @@ export default function KYCSubmitScreen() {
         style={styles.keyboardView}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* Info Banner */}
-          <Card style={styles.infoBanner}>
-            <View style={styles.infoBannerContent}>
-              <Ionicons name="information-circle" size={24} color={theme.colors.primary} />
-              <Text style={styles.infoBannerText}>
-                Complete your KYC to start trading. All fields marked with * are required.
-              </Text>
-            </View>
-          </Card>
-
-          <Card style={styles.section}>
-            <Text style={styles.sectionTitle}>PAN Details</Text>
+          {/* PAN Card */}
+          <Card>
+            <Text style={styles.sectionTitle}>PAN Card Details</Text>
             <Input
-              label="PAN Number *"
+              label="PAN Number"
               value={panNumber}
-              onChangeText={setPanNumber}
+              onChangeText={(text) => setPanNumber(text.toUpperCase())}
               placeholder="ABCDE1234F"
               autoCapitalize="characters"
               maxLength={10}
+              icon="card"
             />
-            <ImageUploadButton
-              label="Upload PAN Card *"
-              hasImage={!!panImage}
-              onPress={() => pickImage(setPanImage)}
-            />
+            {renderImageUploader('pan', 'PAN Card Photo')}
           </Card>
 
-          <Card style={styles.section}>
-            <Text style={styles.sectionTitle}>Aadhaar Details</Text>
+          {/* Aadhaar Card */}
+          <Card>
+            <Text style={styles.sectionTitle}>Aadhaar Card Details</Text>
             <Input
-              label="Aadhaar Number *"
+              label="Aadhaar Number"
               value={aadhaarNumber}
               onChangeText={setAadhaarNumber}
               placeholder="1234 5678 9012"
-              keyboardType="number-pad"
-              maxLength={12}
+              keyboardType="numeric"
+              maxLength={14}
+              icon="id-card"
             />
-            <ImageUploadButton
-              label="Upload Aadhaar Front *"
-              hasImage={!!aadhaarFront}
-              onPress={() => pickImage(setAadhaarFront)}
-            />
-            <ImageUploadButton
-              label="Upload Aadhaar Back *"
-              hasImage={!!aadhaarBack}
-              onPress={() => pickImage(setAadhaarBack)}
-            />
+            {renderImageUploader('aadhaarFront', 'Aadhaar Front')}
+            {renderImageUploader('aadhaarBack', 'Aadhaar Back')}
           </Card>
 
-          <Card style={styles.section}>
-            <Text style={styles.sectionTitle}>Selfie & Address Proof</Text>
-            <ImageUploadButton
-              label="Upload Selfie *"
-              hasImage={!!selfieImage}
-              onPress={() => pickImage(setSelfieImage)}
-            />
-            <ImageUploadButton
-              label="Upload Address Proof *"
-              hasImage={!!addressProof}
-              onPress={() => pickImage(setAddressProof)}
-            />
+          {/* Selfie & Address Proof */}
+          <Card>
+            <Text style={styles.sectionTitle}>Identity Verification</Text>
+            {renderImageUploader('selfie', 'Live Selfie (Face clearly visible)')}
+            {renderImageUploader('address', 'Address Proof (Utility Bill/Bank Statement)')}
           </Card>
 
-          <Card style={styles.section}>
-            <Text style={styles.sectionTitle}>Bank Details</Text>
+          {/* Bank Details */}
+          <Card>
+            <Text style={styles.sectionTitle}>Bank Account Details</Text>
             <Input
-              label="Account Holder Name *"
+              label="Account Holder Name"
               value={accountHolderName}
               onChangeText={setAccountHolderName}
               placeholder="As per bank records"
+              icon="person"
             />
             <Input
-              label="Account Number *"
-              value={bankAccountNumber}
-              onChangeText={setBankAccountNumber}
-              placeholder="Bank account number"
-              keyboardType="number-pad"
-            />
-            <Input
-              label="IFSC Code *"
-              value={bankIFSC}
-              onChangeText={setBankIFSC}
-              placeholder="ABCD0123456"
-              autoCapitalize="characters"
-            />
-            <Input
-              label="Bank Name *"
+              label="Bank Name"
               value={bankName}
               onChangeText={setBankName}
-              placeholder="Bank name"
+              placeholder="e.g., HDFC Bank"
+              icon="business"
             />
             <Input
-              label="Branch Name"
+              label="Account Number"
+              value={bankAccountNumber}
+              onChangeText={setBankAccountNumber}
+              placeholder="Enter account number"
+              keyboardType="numeric"
+              icon="card"
+            />
+            <Input
+              label="IFSC Code"
+              value={bankIFSC}
+              onChangeText={(text) => setBankIFSC(text.toUpperCase())}
+              placeholder="e.g., HDFC0001234"
+              autoCapitalize="characters"
+              icon="git-branch"
+            />
+            <Input
+              label="Branch"
               value={bankBranch}
               onChangeText={setBankBranch}
-              placeholder="Branch location"
+              placeholder="Branch name & location"
+              icon="location"
             />
           </Card>
 
-          <Card style={styles.section}>
+          {/* Nominee Details */}
+          <Card>
             <Text style={styles.sectionTitle}>Nominee Details</Text>
             <Input
-              label="Nominee Name *"
+              label="Nominee Name"
               value={nomineeName}
               onChangeText={setNomineeName}
-              placeholder="Full name"
+              placeholder="Full name of nominee"
+              icon="people"
             />
             <Input
-              label="Relationship *"
+              label="Relationship"
               value={nomineeRelationship}
               onChangeText={setNomineeRelationship}
-              placeholder="Father/Mother/Spouse/Child"
+              placeholder="e.g., Father, Mother, Spouse"
+              icon="heart"
             />
             <Input
               label="Date of Birth"
               value={nomineeDOB}
               onChangeText={setNomineeDOB}
               placeholder="DD/MM/YYYY"
+              icon="calendar"
             />
           </Card>
 
-          <Card style={styles.section}>
+          {/* Declarations */}
+          <Card>
             <Text style={styles.sectionTitle}>Declarations</Text>
-            <CheckBox
-              label="I accept FATCA declaration *"
-              checked={fatcaAccepted}
+            
+            <TouchableOpacity 
+              style={styles.checkboxRow}
               onPress={() => setFatcaAccepted(!fatcaAccepted)}
-            />
-            <CheckBox
-              label="I accept Terms & Risk Disclosure *"
-              checked={termsAccepted}
+            >
+              <View style={[styles.checkbox, fatcaAccepted && styles.checkboxChecked]}>
+                {fatcaAccepted && <Ionicons name="checkmark" size={16} color="#FFFFFF" />}
+              </View>
+              <Text style={styles.checkboxText}>
+                I confirm that I am not a tax resident of any country other than India (FATCA Declaration)
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.checkboxRow}
               onPress={() => setTermsAccepted(!termsAccepted)}
-            />
+            >
+              <View style={[styles.checkbox, termsAccepted && styles.checkboxChecked]}>
+                {termsAccepted && <Ionicons name="checkmark" size={16} color="#FFFFFF" />}
+              </View>
+              <Text style={styles.checkboxText}>
+                I agree to the Terms & Conditions and Privacy Policy. I confirm all information provided is accurate.
+              </Text>
+            </TouchableOpacity>
           </Card>
 
           <Button
             title="Submit KYC"
             onPress={handleSubmit}
             loading={loading}
+            disabled={!fatcaAccepted || !termsAccepted}
             size="lg"
-            style={{ marginTop: theme.spacing.lg, marginBottom: theme.spacing.xl }}
+            style={{ marginTop: theme.spacing.md }}
           />
+
+          <Text style={styles.disclaimer}>
+            Your documents will be securely stored and verified. KYC verification typically takes 1-3 business days.
+          </Text>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Image Picker Modal */}
+      <ImagePickerModal
+        visible={currentImagePicker !== null}
+        onClose={() => setCurrentImagePicker(null)}
+        onCameraPress={() => currentImagePicker && takePhoto(currentImagePicker)}
+        onGalleryPress={() => currentImagePicker && pickFromGallery(currentImagePicker)}
+        title={currentImagePicker ? getPickerTitle(currentImagePicker) : ''}
+      />
     </SafeAreaView>
   );
 }
-
-const ImageUploadButton = ({ label, hasImage, onPress }: any) => (
-  <TouchableOpacity style={[styles.uploadButton, hasImage && styles.uploadButtonSuccess]} onPress={onPress}>
-    <Ionicons name={hasImage ? 'checkmark-circle' : 'cloud-upload'} size={24} color={hasImage ? theme.colors.success : theme.colors.primary} />
-    <Text style={styles.uploadButtonText}>{label}</Text>
-  </TouchableOpacity>
-);
-
-const CheckBox = ({ label, checked, onPress }: any) => (
-  <TouchableOpacity style={styles.checkbox} onPress={onPress}>
-    <Ionicons
-      name={checked ? 'checkbox' : 'square-outline'}
-      size={24}
-      color={checked ? theme.colors.primary : theme.colors.textSecondary}
-    />
-    <Text style={styles.checkboxLabel}>{label}</Text>
-  </TouchableOpacity>
-);
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  navHeader: {
+  header: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.md,
+    alignItems: 'center',
+    padding: theme.spacing.lg,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.borderLight,
-    backgroundColor: theme.colors.background,
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  homeButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-  },
-  navTitle: {
-    fontSize: theme.fontSize.lg,
-    fontWeight: theme.fontWeight.bold,
+  headerTitle: {
+    fontSize: theme.fontSize.xl,
+    fontWeight: '700',
     color: theme.colors.textPrimary,
   },
   keyboardView: {
@@ -355,78 +460,166 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: theme.spacing.lg,
+    paddingBottom: 100,
   },
-  infoBanner: {
-    marginBottom: theme.spacing.lg,
-    backgroundColor: theme.colors.primary + '10',
+  sectionTitle: {
+    fontSize: theme.fontSize.lg,
+    fontWeight: '600',
+    color: theme.colors.primary,
+    marginBottom: theme.spacing.md,
   },
-  infoBannerContent: {
+  uploaderContainer: {
+    marginTop: theme.spacing.md,
+  },
+  uploaderLabel: {
+    fontSize: theme.fontSize.md,
+    fontWeight: '500',
+    color: theme.colors.textPrimary,
+    marginBottom: theme.spacing.sm,
+  },
+  required: {
+    color: theme.colors.error,
+  },
+  uploaderBox: {
+    borderWidth: 2,
+    borderColor: theme.colors.borderLight,
+    borderStyle: 'dashed',
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.colors.backgroundSecondary,
+    minHeight: 150,
+  },
+  uploaderBoxWithImage: {
+    padding: 0,
+    borderStyle: 'solid',
+    borderColor: theme.colors.success,
+  },
+  uploaderPlaceholder: {
+    alignItems: 'center',
+  },
+  uploaderText: {
+    fontSize: theme.fontSize.md,
+    color: theme.colors.textMuted,
+    marginTop: theme.spacing.sm,
+    textAlign: 'center',
+  },
+  uploaderIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: theme.spacing.sm,
+    gap: theme.spacing.sm,
+  },
+  orText: {
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.textMuted,
+  },
+  imagePreviewContainer: {
+    width: '100%',
+    position: 'relative',
+  },
+  imagePreview: {
+    width: '100%',
+    height: 200,
+    borderRadius: theme.borderRadius.md - 2,
+    resizeMode: 'cover',
+  },
+  selfiePreview: {
+    height: 250,
+  },
+  imageOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    padding: theme.spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: theme.spacing.xs,
+    borderBottomLeftRadius: theme.borderRadius.md - 2,
+    borderBottomRightRadius: theme.borderRadius.md - 2,
+  },
+  imageOverlayText: {
+    color: '#FFFFFF',
+    fontSize: theme.fontSize.sm,
+    fontWeight: '600',
+  },
+  checkboxRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: theme.spacing.md,
+    marginBottom: theme.spacing.md,
+    gap: theme.spacing.sm,
   },
-  infoBannerText: {
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderWidth: 2,
+    borderColor: theme.colors.border,
+    borderRadius: theme.borderRadius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 2,
+  },
+  checkboxChecked: {
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
+  },
+  checkboxText: {
     flex: 1,
     fontSize: theme.fontSize.sm,
     color: theme.colors.textSecondary,
     lineHeight: 20,
   },
-  section: {
-    marginBottom: theme.spacing.lg,
+  disclaimer: {
+    fontSize: theme.fontSize.xs,
+    color: theme.colors.textMuted,
+    textAlign: 'center',
+    marginTop: theme.spacing.lg,
+    fontStyle: 'italic',
   },
-  sectionTitle: {
-    fontSize: theme.fontSize.lg,
-    fontWeight: theme.fontWeight.semibold,
-    color: theme.colors.primary,
-    marginBottom: theme.spacing.md,
-  },
-  uploadButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: theme.spacing.md,
-    backgroundColor: theme.colors.backgroundSecondary,
-    borderRadius: theme.borderRadius.md,
-    borderWidth: 1.5,
-    borderStyle: 'dashed',
-    borderColor: theme.colors.primary,
-    marginBottom: theme.spacing.md,
-  },
-  uploadButtonSuccess: {
-    borderColor: theme.colors.success,
-    borderStyle: 'solid',
-  },
-  uploadButtonText: {
-    marginLeft: theme.spacing.md,
-    fontSize: theme.fontSize.md,
-    color: theme.colors.textPrimary,
-    fontWeight: theme.fontWeight.medium,
-  },
-  checkbox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: theme.spacing.md,
-  },
-  checkboxLabel: {
-    marginLeft: theme.spacing.md,
-    fontSize: theme.fontSize.md,
-    color: theme.colors.textPrimary,
-  },
-  centerContent: {
+  modalOverlay: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: theme.borderRadius.xl,
+    borderTopRightRadius: theme.borderRadius.xl,
     padding: theme.spacing.xl,
   },
-  statusTitle: {
+  modalTitle: {
     fontSize: theme.fontSize.xl,
-    fontWeight: theme.fontWeight.bold,
+    fontWeight: '700',
     color: theme.colors.textPrimary,
-    marginTop: theme.spacing.lg,
-  },
-  statusText: {
-    fontSize: theme.fontSize.md,
-    color: theme.colors.textSecondary,
     textAlign: 'center',
-    marginTop: theme.spacing.md,
+    marginBottom: theme.spacing.xl,
+  },
+  modalOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: theme.spacing.lg,
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderRadius: theme.borderRadius.md,
+    marginBottom: theme.spacing.md,
+    gap: theme.spacing.md,
+  },
+  modalOptionText: {
+    fontSize: theme.fontSize.lg,
+    fontWeight: '500',
+    color: theme.colors.textPrimary,
+  },
+  modalCancel: {
+    padding: theme.spacing.lg,
+    alignItems: 'center',
+    marginTop: theme.spacing.sm,
+  },
+  modalCancelText: {
+    fontSize: theme.fontSize.md,
+    fontWeight: '600',
+    color: theme.colors.error,
   },
 });
