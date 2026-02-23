@@ -49,8 +49,10 @@ export default function KYCSubmitScreen() {
   const [currentImagePicker, setCurrentImagePicker] = useState<string | null>(null);
 
   // Form state
+  const [isOutsideIndia, setIsOutsideIndia] = useState(false);
   const [panNumber, setPanNumber] = useState('');
   const [panImage, setPanImage] = useState('');
+  const [passportImage, setPassportImage] = useState('');
   const [aadhaarNumber, setAadhaarNumber] = useState('');
   const [aadhaarFront, setAadhaarFront] = useState('');
   const [aadhaarBack, setAadhaarBack] = useState('');
