@@ -388,7 +388,7 @@ export default function CreateOrderScreen() {
           />
 
           <Text style={styles.disclaimer}>
-            By placing this order, you agree to our terms and conditions. Orders are processed manually and may take 1-24 hours.
+            By placing this order, you agree to our terms and conditions. All orders are executed manually with price confirmation. Rates shown are indicative only and final execution rate may vary based on market conditions. Orders are typically processed within 1-24 hours.
           </Text>
         </ScrollView>
       </KeyboardAvoidingView>
