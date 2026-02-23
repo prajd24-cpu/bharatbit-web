@@ -183,3 +183,61 @@ Build a premium Over-the-Counter (OTC) crypto trading desk mobile and web applic
   3. Live Crypto Prices (CoinGecko)
   4. Enhanced Admin Analytics (charts data)
   5. Push Notification Service (stubbed)
+  6. **Account Type Feature (Individual vs Corporate)** (NEW - Feb 23, 2026)
+     - Registration screen with account type selector
+     - Corporate requires company_name field
+     - Conditional KYC form rendering
+     - Backend validation and storage
+  7. **Enhanced KYC for Corporate Accounts** (NEW - Feb 23, 2026)
+     - Company Registration Certificate
+     - GST Certificate
+     - Board Resolution
+     - Authorized Signatory ID proof
+
+---
+
+## Database Schema Updates (Feb 23, 2026)
+
+### users collection
+```json
+{
+  "id": "uuid",
+  "mobile": "+919876543210",
+  "email": "user@example.com",
+  "password_hash": "...",
+  "account_type": "individual" | "corporate",  // NEW
+  "company_name": "Company Pvt Ltd",  // NEW - for corporate accounts
+  "kyc_status": "pending" | "under_review" | "approved" | "rejected",
+  "role": "user" | "admin",
+  ...
+}
+```
+
+### kyc_documents collection
+```json
+{
+  "id": "uuid",
+  "user_id": "user-uuid",
+  // Individual fields
+  "pan_number": "ABCDE1234F",
+  "pan_image": "base64...",
+  "aadhaar_number": "1234 5678 9012",
+  "aadhaar_front": "base64...",
+  "aadhaar_back": "base64...",
+  "selfie_image": "base64...",
+  "address_proof": "base64...",
+  "passport_number": "...",  // For non-Indian clients
+  "passport_image": "base64...",
+  // Corporate fields (NEW)
+  "company_registration_cert": "base64...",
+  "gst_certificate": "base64...",
+  "board_resolution": "base64...",
+  "authorized_signatory_id": "base64...",
+  "authorized_signatory_name": "John Doe",
+  // Common fields
+  "bank_account_number": "...",
+  "bank_ifsc": "HDFC0001234",
+  "bank_name": "HDFC Bank",
+  ...
+}
+```
