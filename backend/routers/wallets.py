@@ -11,6 +11,9 @@ from models import (
 router = APIRouter(prefix="/wallets", tags=["Wallets"])
 logger = logging.getLogger(__name__)
 
+# Create alias router for /wallet (without 's') for backwards compatibility
+wallet_alias_router = APIRouter(prefix="/wallet", tags=["Wallets"])
+
 @router.post("/save")
 async def save_wallet(data: SaveWalletRequest, current_user: dict = Depends(get_current_user)):
     existing = await db.saved_wallets.find_one({
