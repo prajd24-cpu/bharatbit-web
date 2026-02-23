@@ -67,7 +67,6 @@ async def register(data: RegisterRequest):
         "message": "OTP sent to email and mobile",
         "user_id": user.id,
         "email": data.email,
-        "mock_otp": otp,
         "email_sent": email_result.get("success", False),
         "sms_sent": sms_result.get("success", False)
     }
