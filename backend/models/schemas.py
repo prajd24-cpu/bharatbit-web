@@ -5,6 +5,10 @@ from enum import Enum
 import uuid
 
 # ==================== ENUMS ====================
+class AccountType(str, Enum):
+    INDIVIDUAL = "individual"
+    CORPORATE = "corporate"
+
 class KYCStatus(str, Enum):
     PENDING = "pending"
     UNDER_REVIEW = "under_review"
@@ -42,6 +46,8 @@ class User(BaseModel):
     email: EmailStr
     password_hash: str
     role: UserRole = UserRole.USER
+    account_type: AccountType = AccountType.INDIVIDUAL
+    company_name: Optional[str] = None  # For corporate accounts
     is_mobile_verified: bool = False
     is_email_verified: bool = False
     is_2fa_enabled: bool = False
@@ -152,6 +158,8 @@ class RegisterRequest(BaseModel):
     mobile: str
     email: EmailStr
     password: str
+    account_type: AccountType = AccountType.INDIVIDUAL
+    company_name: Optional[str] = None  # Required for corporate accounts
     referral_code: Optional[str] = None
     invite_code: Optional[str] = None
 
