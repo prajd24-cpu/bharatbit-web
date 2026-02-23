@@ -576,6 +576,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: theme.colors.primary,
   },
+  estimateNote: {
+    fontSize: theme.fontSize.xs,
+    color: theme.colors.textMuted,
+    fontStyle: 'italic',
+    marginTop: theme.spacing.xs,
+  },
   helperText: {
     fontSize: theme.fontSize.sm,
     color: theme.colors.textMuted,
