@@ -185,13 +185,23 @@ class ResetPasswordRequest(BaseModel):
     new_password: str
 
 class KYCSubmitRequest(BaseModel):
-    pan_number: str
-    pan_image: str
-    aadhaar_number: str
-    aadhaar_front: str
-    aadhaar_back: str
-    selfie_image: str
-    address_proof: str
+    # Individual KYC fields
+    pan_number: Optional[str] = None
+    pan_image: Optional[str] = None
+    aadhaar_number: Optional[str] = None
+    aadhaar_front: Optional[str] = None
+    aadhaar_back: Optional[str] = None
+    selfie_image: Optional[str] = None
+    address_proof: Optional[str] = None
+    passport_number: Optional[str] = None
+    passport_image: Optional[str] = None
+    # Corporate KYC fields
+    company_registration_cert: Optional[str] = None
+    gst_certificate: Optional[str] = None
+    board_resolution: Optional[str] = None
+    authorized_signatory_id: Optional[str] = None
+    authorized_signatory_name: Optional[str] = None
+    # Common fields
     bank_account_number: str
     bank_ifsc: str
     bank_name: str
