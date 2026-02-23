@@ -115,7 +115,19 @@ async def verify_otp(data: VerifyOTPRequest):
 
 @router.post("/login")
 async def login(data: LoginRequest):
-    user = await db.users.find_one({"email": data.email})
+    # Support both identifier and email fields
+    search_value = data.identifier or data.email
+    if not search_value:
+        raise HTTPException(status_code=400, detail="Email or identifier required")
+    
+    # Search by email or mobile
+    user = await db.users.find_one({
+        "$or": [
+            {"email": search_value},
+            {"mobile": search_value},
+            {"mobile": f"+91{search_value}"}  # Support without country code
+        ]
+    })
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
