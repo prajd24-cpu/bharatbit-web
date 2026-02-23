@@ -1,12 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button } from '../../components/Button';
-import { Input } from '../../components/Input';
-import { Card } from '../../components/Card';
 import { useAuth } from '../../contexts/AuthContext';
-import { theme } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function VerifyOTPScreen() {
@@ -20,7 +15,6 @@ export default function VerifyOTPScreen() {
   const purpose = params.purpose as string;
 
   const handleOtpChange = (text: string) => {
-    // Only allow numbers, max 6 digits
     const numericValue = text.replace(/[^0-9]/g, '');
     if (numericValue.length <= 6) {
       setOtp(numericValue);
@@ -45,97 +39,132 @@ export default function VerifyOTPScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.header}>
-            <Ionicons name="mail" size={48} color={theme.colors.primary} />
-            <Text style={styles.title}>Verify Account</Text>
-            <Text style={styles.subtitle}>Enter the OTP sent to your email & phone</Text>
-            <Text style={styles.mobile}>{mobile}</Text>
-          </View>
+    <View style={styles.container}>
+      <View style={styles.content}>
+        <Ionicons name="mail" size={48} color="#E95721" style={styles.icon} />
+        <Text style={styles.title}>Verify Account</Text>
+        <Text style={styles.subtitle}>Enter the OTP sent to your email & phone</Text>
+        <Text style={styles.mobile}>{mobile}</Text>
 
-          <Card>
-            <Input
-              label="Enter 6-Digit OTP"
-              value={otp}
-              onChangeText={handleOtpChange}
-              placeholder="Enter OTP here"
-              icon="keypad-outline"
-              keyboardType="number-pad"
-              maxLength={6}
-              autoComplete="one-time-code"
-              textContentType="oneTimeCode"
-            />
-            
-            <Button
-              title="Verify"
-              onPress={handleVerify}
-              loading={loading}
-              disabled={otp.length !== 6}
-              size="lg"
-              style={{ marginTop: theme.spacing.md }}
-            />
-          </Card>
+        <View style={styles.inputWrapper}>
+          <Text style={styles.label}>ENTER 6-DIGIT OTP</Text>
+          <TextInput
+            style={styles.input}
+            value={otp}
+            onChangeText={handleOtpChange}
+            placeholder="Enter OTP"
+            placeholderTextColor="#999"
+            keyboardType="numeric"
+            maxLength={6}
+            autoFocus={false}
+            returnKeyType="done"
+            onSubmitEditing={handleVerify}
+          />
+        </View>
 
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Didn't receive the OTP?</Text>
-            <Button
-              title="Resend OTP"
-              onPress={() => Alert.alert('OTP Sent', 'A new OTP has been sent')}
-              variant="outline"
-              size="sm"
-              style={{ marginTop: theme.spacing.sm }}
-            />
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        <TouchableOpacity 
+          style={[styles.button, otp.length !== 6 && styles.buttonDisabled]}
+          onPress={handleVerify}
+          disabled={loading || otp.length !== 6}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Verify</Text>
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.resendButton}
+          onPress={() => Alert.alert('OTP Sent', 'A new OTP has been sent')}
+        >
+          <Text style={styles.resendText}>Didn't receive OTP? Resend</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: '#FFFFFF',
   },
-  keyboardView: {
+  content: {
     flex: 1,
-  },
-  scrollContent: {
-    padding: theme.spacing.xl,
-  },
-  header: {
+    padding: 24,
+    paddingTop: 60,
     alignItems: 'center',
-    marginBottom: theme.spacing.xxl,
+  },
+  icon: {
+    marginBottom: 16,
   },
   title: {
-    fontSize: theme.fontSize.xxl,
-    fontWeight: theme.fontWeight.bold,
-    color: theme.colors.textPrimary,
-    marginTop: theme.spacing.md,
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1a1a2e',
+    textAlign: 'center',
   },
   subtitle: {
-    fontSize: theme.fontSize.md,
-    color: theme.colors.textSecondary,
-    marginTop: theme.spacing.sm,
+    fontSize: 16,
+    color: '#666',
+    marginTop: 8,
     textAlign: 'center',
   },
   mobile: {
-    fontSize: theme.fontSize.lg,
-    fontWeight: theme.fontWeight.semibold,
-    color: theme.colors.primary,
-    marginTop: theme.spacing.xs,
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#E95721',
+    marginTop: 4,
   },
-  footer: {
+  inputWrapper: {
+    width: '100%',
+    marginTop: 32,
+    marginBottom: 24,
+  },
+  label: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#666',
+    marginBottom: 8,
+    letterSpacing: 0.5,
+  },
+  input: {
+    width: '100%',
+    height: 56,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#E95721',
+    paddingHorizontal: 16,
+    fontSize: 20,
+    color: '#1a1a2e',
+    textAlign: 'center',
+    letterSpacing: 8,
+  },
+  button: {
+    width: '100%',
+    height: 56,
+    backgroundColor: '#E95721',
+    borderRadius: 12,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: theme.spacing.xl,
   },
-  footerText: {
-    color: theme.colors.textMuted,
-    fontSize: theme.fontSize.sm,
+  buttonDisabled: {
+    backgroundColor: '#ccc',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  resendButton: {
+    marginTop: 24,
+    padding: 12,
+  },
+  resendText: {
+    color: '#E95721',
+    fontSize: 14,
+    fontWeight: '500',
   },
 });
