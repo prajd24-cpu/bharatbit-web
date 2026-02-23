@@ -1,0 +1,84 @@
+{
+  "summary": "Completed testing of Account Type feature for BharatBit OTC Desk. Backend: 9/9 tests passed (100%). Frontend: Account Type selector verified working. Both Individual and Corporate registration flows work correctly.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Registration submission",
+        "issue": "React Native Alert dialog on success may not auto-navigate in web view - user needs to click OK to proceed to OTP screen",
+        "affected_selectors": [],
+        "priority": "LOW",
+        "notes": "This is expected React Native Web behavior, not a bug"
+      }
+    ],
+    "design_issues": [
+      {
+        "screen": "Registration page",
+        "issues": ["data-testid attributes added but may not render in React Native Web - using 'data-testid' syntax instead of 'testID'"]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_account_type_feature.py",
+    "/app/test_reports/pytest/pytest_account_type.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Account Type feature correctly implemented - Individual is default, Corporate requires company_name",
+    "Backend validates corporate accounts must have company_name (returns 400 if missing)",
+    "Frontend shows/hides Company Name field based on account type selection",
+    "KYC page has proper conditional rendering: Individual shows PAN/Aadhaar/Selfie/Address, Corporate shows Company Reg/GST/Board Resolution/Auth Signatory",
+    "Invalid account_type values properly rejected with 422 validation error",
+    "All APIs are LIVE - SMS (MSG91) and Email (Resend) integrations working"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_account_type_feature.py"
+  ],
+  "success_rate": {
+    "backend": "100% (9/9 tests passed)",
+    "frontend": "100% (Account Type UI verified)"
+  },
+  "test_credentials": {
+    "note": "Use unique email/mobile for each registration to avoid 'User already exists' error"
+  },
+  "seed_data_creation": "Multiple test users created with unique timestamps during pytest - prefixed with TEST_",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Account Type feature fully implemented and tested. Individual accounts default, Corporate accounts require company_name. KYC page shows different document requirements based on account type. All backend APIs working correctly.",
+  "verified_features": {
+    "registration_account_type_selector": {
+      "status": "WORKING",
+      "ui_verified": true,
+      "details": "Account Type selector shows Individual (default) and Corporate / Entity options"
+    },
+    "individual_registration": {
+      "status": "WORKING",
+      "details": "Individual accounts register without company_name, account_type defaults to 'individual'"
+    },
+    "corporate_registration": {
+      "status": "WORKING",
+      "details": "Corporate accounts require company_name field, shows 'Company Name *' input"
+    },
+    "corporate_without_company_name": {
+      "status": "WORKING - PROPERLY REJECTED",
+      "details": "Backend returns 400 with 'Company name is required for corporate accounts'"
+    },
+    "invalid_account_type": {
+      "status": "WORKING - PROPERLY REJECTED",
+      "details": "Backend returns 422 for invalid account_type enum values"
+    },
+    "kyc_page_conditional_rendering": {
+      "status": "CODE VERIFIED",
+      "individual_kyc_fields": ["PAN Card", "Aadhaar Front/Back", "Selfie", "Address Proof", "Passport (for non-Indian)"],
+      "corporate_kyc_fields": ["Company Registration Certificate", "GST Certificate", "Board Resolution", "Authorized Signatory ID"]
+    }
+  },
+  "live_integrations": {
+    "msg91_sms": "LIVE - OTPs sent via MSG91",
+    "resend_email": "LIVE - OTPs sent via Resend email"
+  }
+}
