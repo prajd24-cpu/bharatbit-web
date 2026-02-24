@@ -40,22 +40,43 @@ export default function Home() {
         <h2>Why Choose BharatBit?</h2>
         <div className="features-grid">
           <div className="feature-card">
-            <div className="feature-icon">🔒</div>
+            <div className="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#E95721" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                <circle cx="12" cy="16" r="1"/>
+              </svg>
+            </div>
             <h3>Bank-Grade Security</h3>
             <p>Multi-layer security with 2FA, biometrics, and cold storage</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon">💹</div>
+            <div className="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#E95721" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                <polyline points="17 6 23 6 23 12"/>
+              </svg>
+            </div>
             <h3>Best Rates</h3>
             <p>Competitive OTC rates for large volume trades</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon">⚡</div>
+            <div className="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#E95721" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+            </div>
             <h3>Instant Settlement</h3>
             <p>Quick processing with same-day INR settlement</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon">🎯</div>
+            <div className="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#E95721" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+                <path d="M16 11l2 2 4-4"/>
+              </svg>
+            </div>
             <h3>Dedicated Support</h3>
             <p>Personal relationship manager for premium clients</p>
           </div>
@@ -241,8 +262,13 @@ export default function Home() {
           box-shadow: 0 2px 12px rgba(0,0,0,0.06);
         }
         .feature-icon {
-          font-size: 40px;
-          margin-bottom: 16px;
+          width: 48px;
+          height: 48px;
+          margin: 0 auto 16px;
+        }
+        .feature-icon svg {
+          width: 100%;
+          height: 100%;
         }
         .feature-card h3 {
           font-size: 18px;
