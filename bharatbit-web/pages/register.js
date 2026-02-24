@@ -4,9 +4,36 @@ import axios from 'axios'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://bharatbit-preview.preview.emergentagent.com'
 
+const countryCodes = [
+  { code: '+91', country: 'India' },
+  { code: '+1', country: 'USA/Canada' },
+  { code: '+44', country: 'UK' },
+  { code: '+971', country: 'UAE' },
+  { code: '+65', country: 'Singapore' },
+  { code: '+852', country: 'Hong Kong' },
+  { code: '+81', country: 'Japan' },
+  { code: '+86', country: 'China' },
+  { code: '+61', country: 'Australia' },
+  { code: '+49', country: 'Germany' },
+  { code: '+33', country: 'France' },
+  { code: '+41', country: 'Switzerland' },
+  { code: '+31', country: 'Netherlands' },
+  { code: '+966', country: 'Saudi Arabia' },
+  { code: '+974', country: 'Qatar' },
+  { code: '+973', country: 'Bahrain' },
+  { code: '+968', country: 'Oman' },
+  { code: '+60', country: 'Malaysia' },
+  { code: '+66', country: 'Thailand' },
+  { code: '+63', country: 'Philippines' },
+  { code: '+62', country: 'Indonesia' },
+  { code: '+84', country: 'Vietnam' },
+  { code: '+27', country: 'South Africa' },
+  { code: '+234', country: 'Nigeria' },
+  { code: '+254', country: 'Kenya' },
+]
+
 export default function Register() {
   const router = useRouter()
-  const [step, setStep] = useState(1)
   const [accountType, setAccountType] = useState('individual')
   const [formData, setFormData] = useState({
     email: '',
@@ -53,7 +80,6 @@ export default function Register() {
 
       await axios.post(`${API_URL}/api/auth/register`, payload)
       
-      // Redirect to OTP verification
       localStorage.setItem('otpMobile', formData.mobile_number)
       router.push('/verify-otp?type=registration')
     } catch (err) {
@@ -82,7 +108,6 @@ export default function Register() {
             <p>Join India's premier OTC crypto trading platform</p>
           </div>
 
-          {/* Account Type Selector */}
           <div className="account-type-selector">
             <button 
               className={`type-btn ${accountType === 'individual' ? 'active' : ''}`}
@@ -133,16 +158,17 @@ export default function Register() {
 
             <div className="form-row">
               <div className="form-group country-code">
-                <label>Code</label>
+                <label>Country</label>
                 <select 
                   name="country_code" 
                   value={formData.country_code}
                   onChange={handleChange}
                 >
-                  <option value="+91">+91</option>
-                  <option value="+1">+1</option>
-                  <option value="+44">+44</option>
-                  <option value="+971">+971</option>
+                  {countryCodes.map(c => (
+                    <option key={c.code} value={c.code}>
+                      {c.code} {c.country}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="form-group mobile">
@@ -200,6 +226,7 @@ export default function Register() {
         .register-page {
           min-height: 100vh;
           background: #f8f9fa;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         .navbar {
           display: flex;
@@ -281,6 +308,7 @@ export default function Register() {
           align-items: center;
           gap: 8px;
           transition: all 0.2s;
+          font-family: inherit;
         }
         .type-btn.active {
           border-color: #E95721;
@@ -316,6 +344,7 @@ export default function Register() {
           height: 48px;
           padding: 0 16px;
           font-size: 16px;
+          font-family: inherit;
           border: 1px solid #e0e0e0;
           border-radius: 10px;
           background: #f8f9fa;
@@ -329,7 +358,7 @@ export default function Register() {
           gap: 12px;
         }
         .country-code {
-          width: 100px;
+          width: 160px;
         }
         .mobile {
           flex: 1;
@@ -360,6 +389,7 @@ export default function Register() {
           border-radius: 12px;
           font-size: 17px;
           font-weight: 600;
+          font-family: inherit;
           cursor: pointer;
           box-shadow: 0 4px 14px rgba(233, 87, 33, 0.3);
         }
@@ -375,6 +405,12 @@ export default function Register() {
           }
           .register-card {
             padding: 24px;
+          }
+          .form-row {
+            flex-direction: column;
+          }
+          .country-code {
+            width: 100%;
           }
         }
       `}</style>
