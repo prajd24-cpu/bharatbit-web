@@ -504,6 +504,7 @@ export default function Home() {
           .features h2 {
             font-size: 22px;
             margin-bottom: 32px;
+            color: #1a1a2e;
           }
           
           .features-grid {
