@@ -51,7 +51,21 @@ export default function VerifyOTP() {
         otp
       })
 
-      localStorage.setItem('token', response.data.access_token)
+      // Store token and user data
+      localStorage.setItem('token', response.data.token || response.data.access_token)
+      
+      // Store user info for profile
+      if (response.data.user) {
+        localStorage.setItem('userEmail', response.data.user.email)
+        localStorage.setItem('userMobile', response.data.user.mobile)
+        localStorage.setItem('clientUID', response.data.user.client_uid)
+        localStorage.setItem('kycStatus', response.data.user.kyc_status)
+        localStorage.setItem('accountType', response.data.user.account_type)
+        if (response.data.user.company_name) {
+          localStorage.setItem('companyName', response.data.user.company_name)
+        }
+      }
+      
       localStorage.removeItem('otpMobile')
       router.push('/dashboard')
     } catch (err) {
