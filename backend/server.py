@@ -24,7 +24,8 @@ from routers import (
     wallet_alias_router,
     kyc_router,
     rates_router,
-    crypto_router
+    crypto_router,
+    notifications_router
 )
 
 # Configure logging
@@ -53,6 +54,7 @@ api_router.include_router(wallet_alias_router)
 api_router.include_router(kyc_router)
 api_router.include_router(rates_router)
 api_router.include_router(crypto_router)
+api_router.include_router(notifications_router)
 
 # Payment routes (for backwards compatibility)
 @api_router.get("/payment/bank-details")

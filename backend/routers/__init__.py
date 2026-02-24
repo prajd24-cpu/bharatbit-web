@@ -5,6 +5,7 @@ from .wallets import router as wallets_router, wallet_alias_router
 from .kyc import router as kyc_router
 from .rates import router as rates_router
 from .crypto import router as crypto_router
+from .notifications import router as notifications_router
 
 __all__ = [
     "auth_router",
@@ -14,5 +15,6 @@ __all__ = [
     "wallet_alias_router",
     "kyc_router",
     "rates_router",
-    "crypto_router"
+    "crypto_router",
+    "notifications_router"
 ]
