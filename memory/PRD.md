@@ -4,7 +4,9 @@
 Build a premium Over-the-Counter (OTC) crypto trading desk web application named "BharatBit OTC Desk" for high-net-worth Indian and international clients.
 
 ## Core Requirements
-- **Branding**: Premium dark theme, "By invitation only. For High Net-Worth Clients." tagline, Inter font
+- **Branding**: Premium dark theme, Inter font
+- **Tagline**: "Discreet. Secure. Direct." (in italics, white, hero section)
+- **Exclusivity Line**: "By invitation only. For High Net-Worth Clients." (small text above footer)
 - **Target Audience**: High-net-worth Indian and international crypto traders
 - **Account Types**: Individual and Corporate/Entity accounts
 
