@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
+import { Pressable, Text, StyleSheet, ActivityIndicator, ViewStyle, TextStyle, Platform } from 'react-native';
 import { theme } from '../constants/theme';
 
 interface ButtonProps {
@@ -21,6 +21,7 @@ export const Button: React.FC<ButtonProps> = ({
   loading = false,
   disabled = false,
   style,
+  testID,
 }) => {
   const buttonStyles: ViewStyle[] = [styles.button, styles[`${size}Size`], styles[`${variant}Variant`]];
   const textStyles: TextStyle[] = [styles.text, styles[`${size}Text`], styles[`${variant}Text`]];
@@ -33,19 +34,79 @@ export const Button: React.FC<ButtonProps> = ({
     buttonStyles.push(style);
   }
 
+  const handlePress = () => {
+    if (!disabled && !loading) {
+      onPress();
+    }
+  };
+
+  // For web, use a native button element for better compatibility
+  if (Platform.OS === 'web') {
+    return (
+      <button
+        type="button"
+        onClick={handlePress}
+        disabled={disabled || loading}
+        data-testid={testID}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: 12,
+          border: variant === 'outline' ? `1.5px solid ${theme.colors.primary}` : 'none',
+          backgroundColor: disabled || loading 
+            ? '#ccc' 
+            : variant === 'outline' 
+              ? 'transparent' 
+              : variant === 'danger'
+                ? theme.colors.error
+                : variant === 'secondary'
+                  ? theme.colors.card
+                  : theme.colors.primary,
+          paddingLeft: size === 'sm' ? 16 : size === 'lg' ? 32 : 24,
+          paddingRight: size === 'sm' ? 16 : size === 'lg' ? 32 : 24,
+          paddingTop: size === 'sm' ? 10 : size === 'lg' ? 18 : 14,
+          paddingBottom: size === 'sm' ? 10 : size === 'lg' ? 18 : 14,
+          minHeight: size === 'sm' ? 36 : size === 'lg' ? 56 : 48,
+          cursor: disabled || loading ? 'not-allowed' : 'pointer',
+          opacity: disabled || loading ? 0.5 : 1,
+          transition: 'all 0.2s ease',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          fontSize: size === 'sm' ? 14 : size === 'lg' ? 18 : 16,
+          fontWeight: 600,
+          color: variant === 'outline' 
+            ? theme.colors.primary 
+            : variant === 'secondary'
+              ? theme.colors.textPrimary
+              : '#fff',
+          boxShadow: variant === 'primary' && !disabled && !loading 
+            ? '0 4px 14px rgba(233, 87, 33, 0.3)' 
+            : 'none',
+          width: '100%',
+          boxSizing: 'border-box' as const,
+        }}
+      >
+        {loading ? 'Loading...' : title}
+      </button>
+    );
+  }
+
   return (
-    <TouchableOpacity
-      style={buttonStyles}
-      onPress={onPress}
+    <Pressable
+      style={({ pressed }) => [
+        ...buttonStyles,
+        pressed && { opacity: 0.7 }
+      ]}
+      onPress={handlePress}
       disabled={disabled || loading}
-      activeOpacity={0.7}
+      testID={testID}
     >
       {loading ? (
         <ActivityIndicator color={variant === 'outline' ? theme.colors.gold : theme.colors.background} />
       ) : (
         <Text style={textStyles}>{title}</Text>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 
