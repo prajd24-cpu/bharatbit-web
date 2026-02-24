@@ -206,6 +206,9 @@ Build a premium Over-the-Counter (OTC) crypto trading desk web application named
   10. ✅ Trade History and Transaction History tabs
   11. ✅ Profile section with Client ID
   12. ✅ All backend tests passing (100%)
+  13. ✅ Footer with BharatBit trademark (G.F.T. Investments Pvt Ltd © 2026)
+  14. ✅ Profile page now shows email and mobile from login session
+  15. ✅ Live crypto prices from CoinGecko API (updates every 30s)
 
 ---
 
