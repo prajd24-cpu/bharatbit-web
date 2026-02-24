@@ -304,8 +304,8 @@ export default function Home() {
 
         /* Features */
         .features {
-          background: rgba(255,255,255,0.02);
-          border-top: 1px solid rgba(255,255,255,0.06);
+          background: #f8f9fa;
+          border-top: none;
           padding: 80px 48px;
         }
         
@@ -319,7 +319,7 @@ export default function Home() {
           font-size: 28px;
           font-weight: 600;
           margin-bottom: 48px;
-          color: rgba(255,255,255,0.95);
+          color: #1a1a2e;
           letter-spacing: -0.5px;
         }
         
@@ -330,18 +330,18 @@ export default function Home() {
         }
         
         .feature-card {
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.06);
+          background: white;
+          border: 1px solid rgba(0,0,0,0.06);
           padding: 28px 24px;
           border-radius: 12px;
           text-align: center;
           transition: all 0.3s;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
         
         .feature-card:hover {
-          background: rgba(255,255,255,0.05);
-          border-color: rgba(255,255,255,0.1);
           transform: translateY(-4px);
+          box-shadow: 0 8px 24px rgba(0,0,0,0.08);
         }
         
         .feature-icon {
@@ -360,12 +360,12 @@ export default function Home() {
           font-size: 15px;
           font-weight: 600;
           margin-bottom: 10px;
-          color: rgba(255,255,255,0.95);
+          color: #1a1a2e;
         }
         
         .feature-card p {
           font-size: 13px;
-          color: rgba(255,255,255,0.5);
+          color: #666;
           line-height: 1.6;
         }
 
