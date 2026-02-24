@@ -62,6 +62,11 @@ export default function Home() {
         </div>
       </section>
 
+      <div className="invitation-banner">
+        <span className="invitation-line">By Invitation Only</span>
+        <span className="client-line">For High Net-Worth Clients</span>
+      </div>
+
       <footer className="footer">
         <div className="footer-content">
           <div className="footer-logo">
