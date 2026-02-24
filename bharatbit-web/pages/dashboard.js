@@ -723,7 +723,7 @@ export default function Dashboard() {
           <div className="user-info">
             <span className="client-id">ID: {user?.client_id}</span>
             <span className="kyc-badge" data-status={user?.kyc_status || 'pending'}>
-              {user?.kyc_status === 'approved' ? '✓ Verified' : 'KYC Pending'}
+              {user?.kyc_status === 'approved' ? '✓ Verified' : user?.kyc_status === 'under_review' ? '⏳ Verification in Progress' : 'KYC Pending'}
             </span>
           </div>
         </header>
