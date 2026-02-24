@@ -18,6 +18,7 @@ import logging
 from core.database import close_db
 from routers import (
     auth_router,
+    users_router,
     admin_router,
     orders_router,
     wallets_router,
@@ -47,6 +48,7 @@ api_router = APIRouter(prefix="/api")
 
 # Include all modular routers
 api_router.include_router(auth_router)
+api_router.include_router(users_router)
 api_router.include_router(admin_router)
 api_router.include_router(orders_router)
 api_router.include_router(wallets_router)

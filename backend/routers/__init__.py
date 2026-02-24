@@ -1,4 +1,4 @@
-from .auth import router as auth_router
+from .auth import router as auth_router, users_router
 from .admin import router as admin_router
 from .orders import router as orders_router
 from .wallets import router as wallets_router, wallet_alias_router
@@ -9,6 +9,7 @@ from .notifications import router as notifications_router
 
 __all__ = [
     "auth_router",
+    "users_router",
     "admin_router", 
     "orders_router",
     "wallets_router",
