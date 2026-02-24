@@ -32,6 +32,21 @@ const countryCodes = [
   { code: '+254', country: 'Kenya' },
 ]
 
+// Eye icons for password visibility
+const EyeIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+    <circle cx="12" cy="12" r="3"/>
+  </svg>
+)
+
+const EyeOffIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+    <line x1="1" y1="1" x2="23" y2="23"/>
+  </svg>
+)
+
 export default function Register() {
   const router = useRouter()
   const [accountType, setAccountType] = useState('individual')
@@ -45,9 +60,26 @@ export default function Register() {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false)
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
+
+  const handleCountryCodeChange = (e) => {
+    // Allow direct input - validate it starts with +
+    let value = e.target.value
+    if (!value.startsWith('+') && value.length > 0) {
+      value = '+' + value
+    }
+    setFormData({ ...formData, country_code: value })
+  }
+
+  const selectCountryCode = (code) => {
+    setFormData({ ...formData, country_code: code })
+    setShowCountryDropdown(false)
   }
 
   const handleSubmit = async (e) => {
@@ -71,17 +103,21 @@ export default function Register() {
         mobile_number: formData.mobile_number,
         country_code: formData.country_code,
         password: formData.password,
-        account_type: accountType
-      }
-      
-      if (accountType === 'corporate') {
-        payload.company_name = formData.company_name
+        account_type: accountType,
+        company_name: accountType === 'corporate' ? formData.company_name : null
       }
 
-      await axios.post(`${API_URL}/api/auth/register`, payload)
+      const response = await axios.post(`${API_URL}/api/auth/register`, payload)
       
-      localStorage.setItem('otpMobile', formData.mobile_number)
-      router.push('/verify-otp?type=registration')
+      if (response.data.success) {
+        localStorage.setItem('otpMobile', formData.email)
+        localStorage.setItem('userEmail', formData.email)
+        localStorage.setItem('userMobile', formData.country_code + formData.mobile_number)
+        if (response.data.client_uid) {
+          localStorage.setItem('clientUID', response.data.client_uid)
+        }
+        router.push('/verify-otp')
+      }
     } catch (err) {
       setError(err.response?.data?.detail || 'Registration failed. Please try again.')
     } finally {
@@ -158,18 +194,39 @@ export default function Register() {
 
             <div className="form-row">
               <div className="form-group country-code">
-                <label>Country</label>
-                <select 
-                  name="country_code" 
-                  value={formData.country_code}
-                  onChange={handleChange}
-                >
-                  {countryCodes.map(c => (
-                    <option key={c.code} value={c.code}>
-                      {c.code} {c.country}
-                    </option>
-                  ))}
-                </select>
+                <label>Country Code</label>
+                <div className="country-input-wrapper">
+                  <input
+                    type="text"
+                    name="country_code"
+                    value={formData.country_code}
+                    onChange={handleCountryCodeChange}
+                    onFocus={() => setShowCountryDropdown(true)}
+                    placeholder="+91"
+                    className="country-input"
+                  />
+                  <button 
+                    type="button" 
+                    className="dropdown-toggle"
+                    onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+                  >
+                    ▼
+                  </button>
+                  {showCountryDropdown && (
+                    <div className="country-dropdown">
+                      {countryCodes.map(c => (
+                        <div 
+                          key={c.code} 
+                          className="country-option"
+                          onClick={() => selectCountryCode(c.code)}
+                        >
+                          <span className="code">{c.code}</span>
+                          <span className="name">{c.country}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="form-group mobile">
                 <label>Mobile Number</label>
@@ -186,26 +243,44 @@ export default function Register() {
 
             <div className="form-group">
               <label>Password</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Create a password"
-                required
-              />
+              <div className="password-wrapper">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Create a password"
+                  required
+                />
+                <button 
+                  type="button" 
+                  className="toggle-password"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+              </div>
             </div>
 
             <div className="form-group">
               <label>Confirm Password</label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="Confirm your password"
-                required
-              />
+              <div className="password-wrapper">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Confirm your password"
+                  required
+                />
+                <button 
+                  type="button" 
+                  className="toggle-password"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+              </div>
             </div>
 
             <div className="terms">
@@ -260,6 +335,7 @@ export default function Register() {
           color: #1a1a2e;
         }
         .nav-links {
+          font-size: 14px;
           color: #666;
         }
         .nav-links a {
@@ -269,14 +345,16 @@ export default function Register() {
           margin-left: 4px;
         }
         .register-container {
-          max-width: 480px;
-          margin: 40px auto;
-          padding: 0 20px;
+          display: flex;
+          justify-content: center;
+          padding: 40px 20px;
         }
         .register-card {
           background: white;
-          border-radius: 20px;
+          border-radius: 16px;
           padding: 40px;
+          width: 100%;
+          max-width: 480px;
           box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
         .header {
@@ -290,6 +368,7 @@ export default function Register() {
         }
         .header p {
           color: #666;
+          font-size: 14px;
         }
         .account-type-selector {
           display: flex;
@@ -308,7 +387,9 @@ export default function Register() {
           align-items: center;
           gap: 8px;
           transition: all 0.2s;
-          font-family: inherit;
+        }
+        .type-btn:hover {
+          border-color: #E95721;
         }
         .type-btn.active {
           border-color: #E95721;
@@ -318,15 +399,17 @@ export default function Register() {
           font-size: 24px;
         }
         .type-label {
+          font-size: 14px;
           font-weight: 600;
           color: #1a1a2e;
         }
         .error-message {
           background: #fee2e2;
           color: #dc2626;
-          padding: 12px;
+          padding: 12px 16px;
           border-radius: 8px;
           margin-bottom: 20px;
+          font-size: 14px;
         }
         .form-group {
           margin-bottom: 20px;
@@ -335,73 +418,156 @@ export default function Register() {
           display: block;
           font-size: 13px;
           font-weight: 600;
-          color: #666;
+          color: #333;
           margin-bottom: 8px;
-          text-transform: uppercase;
         }
         .form-group input, .form-group select {
           width: 100%;
-          height: 48px;
-          padding: 0 16px;
-          font-size: 16px;
-          font-family: inherit;
+          padding: 12px 16px;
+          font-size: 15px;
           border: 1px solid #e0e0e0;
           border-radius: 10px;
           background: #f8f9fa;
+          transition: all 0.2s;
+          font-family: inherit;
         }
         .form-group input:focus, .form-group select:focus {
           outline: none;
           border-color: #E95721;
+          background: white;
         }
         .form-row {
           display: flex;
           gap: 12px;
         }
-        .country-code {
-          width: 160px;
+        .form-group.country-code {
+          width: 140px;
+          flex-shrink: 0;
+          position: relative;
         }
-        .mobile {
+        .form-group.mobile {
           flex: 1;
         }
+        
+        /* Country Code Input with Dropdown */
+        .country-input-wrapper {
+          position: relative;
+          display: flex;
+        }
+        .country-input {
+          width: 100%;
+          padding-right: 35px !important;
+        }
+        .dropdown-toggle {
+          position: absolute;
+          right: 8px;
+          top: 50%;
+          transform: translateY(-50%);
+          background: none;
+          border: none;
+          color: #666;
+          font-size: 10px;
+          cursor: pointer;
+          padding: 4px;
+        }
+        .country-dropdown {
+          position: absolute;
+          top: 100%;
+          left: 0;
+          right: 0;
+          background: white;
+          border: 1px solid #e0e0e0;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          max-height: 200px;
+          overflow-y: auto;
+          z-index: 100;
+        }
+        .country-option {
+          padding: 10px 12px;
+          cursor: pointer;
+          display: flex;
+          justify-content: space-between;
+          font-size: 13px;
+        }
+        .country-option:hover {
+          background: #f5f5f5;
+        }
+        .country-option .code {
+          font-weight: 600;
+          color: #E95721;
+        }
+        .country-option .name {
+          color: #666;
+        }
+        
+        /* Password Visibility Toggle */
+        .password-wrapper {
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+        .password-wrapper input {
+          width: 100%;
+          padding-right: 50px;
+        }
+        .toggle-password {
+          position: absolute;
+          right: 12px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #666;
+        }
+        .toggle-password:hover {
+          color: #E95721;
+        }
+        .toggle-password svg {
+          width: 20px;
+          height: 20px;
+        }
+        
         .terms {
           display: flex;
           align-items: flex-start;
           gap: 10px;
           margin-bottom: 24px;
-        }
-        .terms input {
-          margin-top: 4px;
-        }
-        .terms label {
           font-size: 13px;
           color: #666;
-          line-height: 1.4;
+        }
+        .terms input {
+          margin-top: 2px;
         }
         .terms a {
           color: #E95721;
         }
         .btn-primary {
           width: 100%;
-          height: 56px;
+          padding: 14px;
           background: #E95721;
           color: white;
           border: none;
-          border-radius: 12px;
-          font-size: 17px;
+          border-radius: 10px;
+          font-size: 16px;
           font-weight: 600;
-          font-family: inherit;
           cursor: pointer;
-          box-shadow: 0 4px 14px rgba(233, 87, 33, 0.3);
+          transition: background 0.2s;
+          font-family: inherit;
+        }
+        .btn-primary:hover {
+          background: #d14d1a;
         }
         .btn-primary:disabled {
           background: #ccc;
-          box-shadow: none;
+          cursor: not-allowed;
         }
-        @media (max-width: 768px) {
+        @media (max-width: 600px) {
           .navbar {
             padding: 16px 20px;
-            flex-direction: column;
-            gap: 12px;
           }
           .register-card {
             padding: 24px;
@@ -409,7 +575,7 @@ export default function Register() {
           .form-row {
             flex-direction: column;
           }
-          .country-code {
+          .form-group.country-code {
             width: 100%;
           }
         }
