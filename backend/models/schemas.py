@@ -48,6 +48,7 @@ def generate_client_uid():
 class User(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     client_uid: str = Field(default_factory=generate_client_uid)  # 7-digit Client ID
+    full_name: Optional[str] = None  # User's full name
     mobile: str
     email: EmailStr
     password_hash: str
