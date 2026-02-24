@@ -162,8 +162,7 @@ export default function Login() {
           align-items: center;
           justify-content: center;
           font-size: 20px;
-          font-family: 'Bungee Outline', cursive;
-          font-weight: 400;
+          font-weight: 700;
           color: white;
         }
         .logo-icon.large {
