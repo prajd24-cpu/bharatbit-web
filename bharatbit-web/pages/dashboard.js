@@ -728,7 +728,7 @@ export default function Dashboard() {
           </div>
         </header>
 
-        {user?.kyc_status !== 'approved' && (
+        {user?.kyc_status !== 'approved' && user?.kyc_status !== 'under_review' && (
           <div className="kyc-alert"><span className="icon">{Icons.orders}</span><p>Complete your KYC verification to start trading</p><button onClick={() => setShowKYCModal(true)}>Complete KYC</button></div>
         )}
 
