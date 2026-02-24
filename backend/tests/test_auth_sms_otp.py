@@ -10,7 +10,7 @@ import time
 import uuid
 
 # BASE_URL for testing - must be from env
-BASE_URL = os.environ.get('EXPO_PUBLIC_BACKEND_URL', 'https://bharatbit-preview.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('EXPO_PUBLIC_BACKEND_URL', 'https://crypto-trading-web.preview.emergentagent.com').rstrip('/')
 
 
 class TestHealthAndSetup:

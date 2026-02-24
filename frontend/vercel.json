@@ -1,6 +1,6 @@
 {
   "installCommand": "yarn install",
-  "buildCommand": "EXPO_PUBLIC_BACKEND_URL=https://bharatbit-preview.preview.emergentagent.com npx expo export -p web",
+  "buildCommand": "EXPO_PUBLIC_BACKEND_URL=https://crypto-trading-web.preview.emergentagent.com npx expo export -p web",
   "outputDirectory": "dist",
   "framework": null,
   "rewrites": [
