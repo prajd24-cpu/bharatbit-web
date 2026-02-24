@@ -60,14 +60,15 @@ async def register(data: RegisterRequest):
     
     # Send SMS OTP
     from services.sms_service import send_sms_otp
-    sms_result = await send_sms_otp(data.mobile, otp)
+    sms_result = await send_sms_otp(full_mobile, otp)
     
     # Notify admin
     try:
         await notify_admin_new_registration({
             "email": data.email,
-            "mobile": data.mobile,
+            "mobile": full_mobile,
             "id": user.id,
+            "client_uid": user.client_uid,
             "account_type": data.account_type,
             "company_name": data.company_name,
             "referral_code": data.referral_code,
