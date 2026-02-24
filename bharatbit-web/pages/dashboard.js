@@ -872,11 +872,12 @@ export default function Dashboard() {
                 <div className="profile-card">
                   <h3>Verification Status</h3>
                   <div className="status-list">
-                    <div className="status-item"><span className="status-label">KYC Status</span><span className={`status-value ${user?.kyc_status === 'approved' ? 'verified' : 'pending'}`}>{user?.kyc_status === 'approved' ? '✓ Verified' : 'Pending'}</span></div>
+                    <div className="status-item"><span className="status-label">KYC Status</span><span className={`status-value ${user?.kyc_status === 'approved' ? 'verified' : user?.kyc_status === 'under_review' ? 'in-progress' : 'pending'}`}>{user?.kyc_status === 'approved' ? '✓ Verified' : user?.kyc_status === 'under_review' ? '⏳ In Progress' : 'Pending'}</span></div>
                     <div className="status-item"><span className="status-label">Bank Account</span><span className={`status-value ${user?.bank_verified ? 'verified' : 'pending'}`}>{user?.bank_verified ? '✓ Verified' : 'Not Added'}</span></div>
                     <div className="status-item"><span className="status-label">Wallet</span><span className={`status-value ${user?.wallet_verified ? 'verified' : 'pending'}`}>{user?.wallet_verified ? '✓ Verified' : 'Not Added'}</span></div>
                   </div>
-                  {user?.kyc_status !== 'approved' && <button className="btn-kyc" onClick={() => setShowKYCModal(true)}>Complete KYC</button>}
+                  {user?.kyc_status !== 'approved' && user?.kyc_status !== 'under_review' && <button className="btn-kyc" onClick={() => setShowKYCModal(true)}>Complete KYC</button>}
+                  {user?.kyc_status === 'under_review' && <p className="kyc-in-review-msg">Your documents are being reviewed. This usually takes 1-2 business days.</p>}
                 </div>
               </div>
             </div>
