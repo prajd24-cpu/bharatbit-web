@@ -180,23 +180,12 @@ export default function Home() {
           margin: 0 auto 24px;
           line-height: 1.6;
         }
-        .invitation-text {
+        .tagline-text {
+          font-size: 22px;
+          font-style: italic;
+          color: #ffffff;
           margin-bottom: 40px;
-        }
-        .invitation-line {
-          display: block;
-          font-size: 16px;
-          font-weight: 600;
-          color: #E95721;
-          text-transform: uppercase;
           letter-spacing: 2px;
-          margin-bottom: 8px;
-        }
-        .client-line {
-          display: block;
-          font-size: 14px;
-          color: rgba(255,255,255,0.6);
-          letter-spacing: 1px;
         }
         .hero-buttons {
           display: flex;
