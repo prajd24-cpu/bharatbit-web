@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="16" time="14.147" timestamp="2026-02-24T14:20:37.302095+00:00" hostname="agent-env-2f9d8711-56f4-4f81-a730-3d00490efd21"><testcase classname="tests.test_bharatbit_nextjs_backend.TestHealthCheck" name="test_health_check_returns_200" time="0.349" /><testcase classname="tests.test_bharatbit_nextjs_backend.TestNotificationEndpoints" name="test_send_kyc_notification" time="0.398" /><testcase classname="tests.test_bharatbit_nextjs_backend.TestNotificationEndpoints" name="test_send_wallet_notification" time="0.371" /><testcase classname="tests.test_bharatbit_nextjs_backend.TestNotificationEndpoints" name="test_send_bank_notification" time="0.303"><failure message="assert False == True">tests/test_bharatbit_nextjs_backend.py:116: in test_send_bank_notification
+    assert data["success"] == True
+E   assert False == True</failure></testcase><testcase classname="tests.test_bharatbit_nextjs_backend.TestNotificationEndpoints" name="test_kyc_notification_missing_required_fields" time="0.143" /><testcase classname="tests.test_bharatbit_nextjs_backend.TestRegistrationWithCountryCode" name="test_register_with_country_code_and_mobile_number" time="1.197" /><testcase classname="tests.test_bharatbit_nextjs_backend.TestRegistrationWithCountryCode" name="test_register_with_mobile_field" time="0.137"><failure message="AssertionError: Expected 200, got 400: {&quot;detail&quot;:&quot;User already exists&quot;}&#10;assert 400 == 200&#10; +  where 400 = &lt;Response [400]&gt;.status_code">tests/test_bharatbit_nextjs_backend.py:174: in test_register_with_mobile_field
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+E   AssertionError: Expected 200, got 400: {"detail":"User already exists"}
+E   assert 400 == 200
+E    +  where 400 = &lt;Response [400]&gt;.status_code</failure></testcase><testcase classname="tests.test_bharatbit_nextjs_backend.TestRegistrationWithCountryCode" name="test_register_corporate_with_country_code" time="1.081" /><testcase classname="tests.test_bharatbit_nextjs_backend.TestRegistrationWithCountryCode" name="test_register_with_international_country_code" time="1.111" /><testcase classname="tests.test_bharatbit_nextjs_backend.TestClientUIDGeneration" name="test_multiple_registrations_unique_client_uids" time="5.086" /><testcase classname="tests.test_bharatbit_nextjs_backend.TestUserProfileEndpoint" name="test_profile_requires_authentication" time="0.133" /><testcase classname="tests.test_bharatbit_nextjs_backend.TestUserProfileEndpoint" name="test_profile_returns_client_uid_with_auth" time="1.967" /><testcase classname="tests.test_bharatbit_nextjs_backend.TestAuthEndpoints" name="test_login_with_identifier_field" time="0.211" /><testcase classname="tests.test_bharatbit_nextjs_backend.TestAuthEndpoints" name="test_login_with_email_field_backward_compat" time="0.132" /><testcase classname="tests.test_bharatbit_nextjs_backend.TestAPIStructure" name="test_root_endpoint" time="0.865"><failure message="requests.exceptions.JSONDecodeError: Expecting value: line 1 column 1 (char 0)">/root/.venv/lib/python3.11/site-packages/requests/models.py:976: in json
+    return complexjson.loads(self.text, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/json/__init__.py:346: in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/json/decoder.py:337: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/json/decoder.py:355: in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+E   json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+tests/test_bharatbit_nextjs_backend.py:349: in test_root_endpoint
+    data = response.json()
+           ^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/requests/models.py:980: in json
+    raise RequestsJSONDecodeError(e.msg, e.doc, e.pos)
+E   requests.exceptions.JSONDecodeError: Expecting value: line 1 column 1 (char 0)</failure></testcase><testcase classname="tests.test_bharatbit_nextjs_backend.TestAPIStructure" name="test_api_docs_available" time="0.529"><failure message="assert 404 == 200&#10; +  where 404 = &lt;Response [404]&gt;.status_code">tests/test_bharatbit_nextjs_backend.py:357: in test_api_docs_available
+    assert response.status_code == 200
+E   assert 404 == 200
+E    +  where 404 = &lt;Response [404]&gt;.status_code</failure></testcase></testsuite></testsuites>
