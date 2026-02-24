@@ -40,8 +40,14 @@ class WalletVerificationStatus(str, Enum):
     REJECTED = "rejected"
 
 # ==================== DATABASE MODELS ====================
+def generate_client_uid():
+    """Generate a unique 7-digit client UID"""
+    import random
+    return str(random.randint(1000000, 9999999))
+
 class User(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    client_uid: str = Field(default_factory=generate_client_uid)  # 7-digit Client ID
     mobile: str
     email: EmailStr
     password_hash: str

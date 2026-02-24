@@ -74,6 +74,7 @@ async def register(data: RegisterRequest):
         "success": True,
         "message": "OTP sent to email and mobile",
         "user_id": user.id,
+        "client_uid": user.client_uid,
         "email": data.email,
         "account_type": data.account_type,
         "email_sent": email_result.get("success", False),
@@ -112,6 +113,7 @@ async def verify_otp(data: VerifyOTPRequest):
             "token": token,
             "user": {
                 "id": user["id"],
+                "client_uid": user.get("client_uid", "N/A"),
                 "mobile": user["mobile"],
                 "email": user["email"],
                 "role": user["role"],
@@ -202,6 +204,7 @@ async def verify_2fa(data: Verify2FARequest):
         "token": token,
         "user": {
             "id": user["id"],
+            "client_uid": user.get("client_uid", "N/A"),
             "mobile": user["mobile"],
             "email": user["email"],
             "role": user["role"],
@@ -216,6 +219,7 @@ async def verify_2fa(data: Verify2FARequest):
 async def get_me(current_user: dict = Depends(get_current_user)):
     user_data = {
         "id": current_user["id"],
+        "client_uid": current_user.get("client_uid", "N/A"),
         "mobile": current_user["mobile"],
         "email": current_user["email"],
         "role": current_user["role"],
