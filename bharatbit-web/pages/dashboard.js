@@ -449,11 +449,14 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="loading-screen">
+        <Head>
+          <link href="https://fonts.googleapis.com/css2?family=Bungee+Outline&display=swap" rel="stylesheet" />
+        </Head>
         <div className="logo-icon">B</div>
         <p>Loading...</p>
         <style jsx>{`
           .loading-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 16px; font-family: 'Inter', sans-serif; background: #f5f7fa; }
-          .logo-icon { width: 60px; height: 60px; background: #E95721; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; color: white; }
+          .logo-icon { width: 60px; height: 60px; background: #E95721; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-family: 'Bungee Outline', cursive; font-weight: 400; color: white; }
         `}</style>
       </div>
     )
@@ -461,6 +464,9 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard" data-testid="dashboard-container">
+      <Head>
+        <link href="https://fonts.googleapis.com/css2?family=Bungee+Outline&display=swap" rel="stylesheet" />
+      </Head>
       {/* KYC Modal */}
       {showKYCModal && (
         <div className="modal-overlay" onClick={() => setShowKYCModal(false)} data-testid="kyc-modal">
