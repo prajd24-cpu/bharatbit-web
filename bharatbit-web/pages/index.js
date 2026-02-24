@@ -37,14 +37,6 @@ export default function Home() {
               <span className="stat-value">₹500Cr+</span>
               <span className="stat-label">Trading Volume</span>
             </div>
-            <div className="stat">
-              <span className="stat-value">10,000+</span>
-              <span className="stat-label">Happy Clients</span>
-            </div>
-            <div className="stat">
-              <span className="stat-value">24/7</span>
-              <span className="stat-label">Support</span>
-            </div>
           </div>
         </div>
       </main>
