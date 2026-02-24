@@ -71,7 +71,7 @@ Build a premium Over-the-Counter (OTC) crypto trading desk mobile and web applic
 - [ ] Full testing on physical device pending
 
 ### Web App Access
-- [x] **Live Web URL**: https://crypto-desk-preview.preview.emergentagent.com
+- [x] **Live Web URL**: https://bharatbit-preview.preview.emergentagent.com
 - [x] Works directly in browser without Expo Go
 - [x] Supports registration, login, KYC, orders, and portfolio management
 
