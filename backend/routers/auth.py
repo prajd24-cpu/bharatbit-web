@@ -233,6 +233,32 @@ async def get_me(current_user: dict = Depends(get_current_user)):
     }
     return user_data
 
+
+# Create users router for profile endpoint
+users_router = APIRouter(prefix="/users", tags=["Users"])
+
+@users_router.get("/profile")
+async def get_profile(current_user: dict = Depends(get_current_user)):
+    """Get current user's full profile with client_id field for frontend compatibility"""
+    return {
+        "id": current_user["id"],
+        "client_id": current_user.get("client_uid", str(current_user["id"])[:7]),  # client_id for frontend
+        "client_uid": current_user.get("client_uid", "N/A"),
+        "email": current_user["email"],
+        "mobile_number": current_user["mobile"],
+        "name": current_user.get("name", ""),
+        "profile_pic": current_user.get("profile_pic"),
+        "kyc_status": current_user["kyc_status"],
+        "account_type": current_user.get("account_type", "individual"),
+        "company_name": current_user.get("company_name"),
+        "is_frozen": current_user.get("is_frozen", False),
+        "bank_verified": current_user.get("bank_verified", False),
+        "wallet_verified": current_user.get("wallet_verified", False),
+        "relationship_manager": current_user.get("relationship_manager"),
+        "rm_phone": current_user.get("rm_phone"),
+        "rm_whatsapp": current_user.get("rm_whatsapp")
+    }
+
 @router.post("/forgot-password")
 async def forgot_password(data: ForgotPasswordRequest):
     user = await db.users.find_one({"email": data.email})
