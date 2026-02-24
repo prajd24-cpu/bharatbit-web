@@ -19,7 +19,7 @@ export default function Home() {
       <main className="hero">
         <div className="hero-content">
           <div className="hero-badge">Premium OTC Trading</div>
-          <h1>India's Most Trusted<br /><span className="highlight">OTC Crypto Desk</span></h1>
+          <h1>India's Regulated<br /><span className="highlight">OTC Crypto Desk</span></h1>
           <p className="hero-subtitle">
             Execute large crypto trades with institutional-grade security, 
             competitive rates, and personalized service for high-net-worth individuals.
