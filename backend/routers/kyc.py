@@ -33,6 +33,21 @@ async def submit_kyc(data: KYCSubmitRequest, current_user: dict = Depends(get_cu
         {"$set": {"kyc_status": KYCStatus.UNDER_REVIEW}}
     )
     
+    # Send email notification to admin
+    try:
+        from services.email_service import notify_admin_kyc_submission
+        user_data = {
+            "email": current_user.get("email"),
+            "mobile": current_user.get("mobile"),
+            "client_uid": current_user.get("client_uid"),
+            "full_name": current_user.get("full_name")
+        }
+        kyc_data = data.dict()
+        await notify_admin_kyc_submission(user_data, kyc_data)
+        logger.info(f"KYC submission notification sent for user {current_user.get('email')}")
+    except Exception as e:
+        logger.error(f"Failed to send KYC notification email: {e}")
+    
     return {"success": True, "message": "KYC submitted for review"}
 
 @router.get("/status")
