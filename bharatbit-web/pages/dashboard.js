@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/router'
 import axios from 'axios'
-import Head from 'next/head'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://crypto-trading-web.preview.emergentagent.com'
 
@@ -449,9 +448,6 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="loading-screen">
-        <Head>
-          <link href="https://fonts.googleapis.com/css2?family=Bungee+Outline&display=swap" rel="stylesheet" />
-        </Head>
         <div className="logo-icon">B</div>
         <p>Loading...</p>
         <style jsx>{`
@@ -464,9 +460,6 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard" data-testid="dashboard-container">
-      <Head>
-        <link href="https://fonts.googleapis.com/css2?family=Bungee+Outline&display=swap" rel="stylesheet" />
-      </Head>
       {/* KYC Modal */}
       {showKYCModal && (
         <div className="modal-overlay" onClick={() => setShowKYCModal(false)} data-testid="kyc-modal">
@@ -844,7 +837,7 @@ export default function Dashboard() {
                   <li>Transfer via <strong>NEFT, RTGS, or Net Banking</strong></li>
                   <li>Use Client ID <strong>{user?.client_id}</strong> as reference</li>
                   <li>Deposits credited within <strong>1-2 hours</strong></li>
-                  <li>Minimum deposit: <strong>₹1,00,000</strong></li>
+                  <li>After transfer, notify us at <strong>otc@bharatbit.world</strong></li>
                 </ol>
               </div>
             </div>

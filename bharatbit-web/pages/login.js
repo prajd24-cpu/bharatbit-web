@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/router'
 import axios from 'axios'
-import Head from 'next/head'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://crypto-trading-web.preview.emergentagent.com'
 
@@ -55,10 +54,6 @@ export default function Login() {
 
   return (
     <div className="login-page">
-      <Head>
-        <link href="https://fonts.googleapis.com/css2?family=Bungee+Outline&display=swap" rel="stylesheet" />
-      </Head>
-      
       <nav className="navbar">
         <div className="logo" onClick={() => router.push('/')}>
           <div className="logo-icon">B</div>
