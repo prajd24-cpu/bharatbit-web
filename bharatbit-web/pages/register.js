@@ -51,6 +51,7 @@ export default function Register() {
   const router = useRouter()
   const [accountType, setAccountType] = useState('individual')
   const [formData, setFormData] = useState({
+    full_name: '',
     email: '',
     mobile_number: '',
     country_code: '+91',
