@@ -537,7 +537,7 @@ export default function Dashboard() {
               <div className="kyc-form">
                 <h3>Selfie Verification</h3>
                 <p className="doc-info">Take a clear selfie holding your PAN card next to your face.</p>
-                <DocumentUpload label="Selfie with PAN Card" file={kycData.selfie} onFileSelect={file => setKycData({...kycData, selfie: file})} required />
+                <DocumentUpload label="Selfie with PAN Card" file={kycData.selfie} onFileSelect={file => setKycData({...kycData, selfie: file})} required cameraOnly={true} />
                 
                 <div className="doc-checklist">
                   <h4>Document Checklist</h4>
