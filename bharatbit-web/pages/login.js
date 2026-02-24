@@ -29,6 +29,9 @@ export default function Login() {
 
       if (response.data.requires_2fa) {
         localStorage.setItem('otpMobile', response.data.mobile)
+        // Pre-store identifier for profile page
+        localStorage.setItem('userEmail', identifier.includes('@') ? identifier : '')
+        localStorage.setItem('userMobile', !identifier.includes('@') ? identifier : response.data.mobile)
         router.push('/verify-otp')
       }
     } catch (err) {
