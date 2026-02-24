@@ -4,46 +4,67 @@ import axios from 'axios'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://bharatbit-preview.preview.emergentagent.com'
 
-function DocumentUpload({ label, onCapture, onUpload, file, accept = "image/*" }) {
-  const fileInputRef = useRef(null)
-  const cameraInputRef = useRef(null)
+// Generate 7-digit UID
+const generateUID = () => {
+  return Math.floor(1000000 + Math.random() * 9000000).toString()
+}
+
+// Document Upload Component with Camera
+function DocumentUpload({ label, onFileSelect, file, required = false }) {
+  const cameraRef = useRef(null)
+  const fileRef = useRef(null)
+
+  const openCamera = () => {
+    if (cameraRef.current) {
+      cameraRef.current.click()
+    }
+  }
+
+  const openFiles = () => {
+    if (fileRef.current) {
+      fileRef.current.click()
+    }
+  }
 
   return (
     <div className="document-upload">
-      <label>{label}</label>
+      <label>{label} {required && <span className="required">*</span>}</label>
       <div className="upload-options">
-        <button type="button" className="upload-btn camera" onClick={() => cameraInputRef.current?.click()}>
-          📷 Take Photo
+        <button type="button" className="upload-btn camera" onClick={openCamera}>
+          📷 Open Camera
           <input
-            ref={cameraInputRef}
+            ref={cameraRef}
             type="file"
             accept="image/*"
             capture="environment"
-            onChange={(e) => onCapture(e.target.files[0])}
+            onChange={(e) => e.target.files[0] && onFileSelect(e.target.files[0])}
             style={{ display: 'none' }}
           />
         </button>
-        <button type="button" className="upload-btn file" onClick={() => fileInputRef.current?.click()}>
-          📁 Upload File
+        <button type="button" className="upload-btn file" onClick={openFiles}>
+          📁 Choose File
           <input
-            ref={fileInputRef}
+            ref={fileRef}
             type="file"
-            accept={accept}
-            onChange={(e) => onUpload(e.target.files[0])}
+            accept="image/*,.pdf"
+            onChange={(e) => e.target.files[0] && onFileSelect(e.target.files[0])}
             style={{ display: 'none' }}
           />
         </button>
       </div>
       {file && <p className="file-name">✓ {file.name}</p>}
+      {required && !file && <p className="required-hint">This document is required</p>}
       <style jsx>{`
         .document-upload { margin-bottom: 20px; }
-        .document-upload label { display: block; font-size: 13px; font-weight: 600; color: #666; margin-bottom: 10px; }
+        .document-upload > label { display: block; font-size: 13px; font-weight: 600; color: #666; margin-bottom: 10px; }
+        .required { color: #E95721; }
         .upload-options { display: flex; gap: 12px; }
         .upload-btn { flex: 1; padding: 14px; border: 2px dashed #e0e0e0; border-radius: 10px; background: #f8f9fa; cursor: pointer; font-size: 14px; font-family: inherit; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .upload-btn:hover { border-color: #E95721; background: rgba(233, 87, 33, 0.05); }
         .upload-btn.camera { border-color: #4CAF50; }
         .upload-btn.camera:hover { background: rgba(76, 175, 80, 0.05); }
         .file-name { margin-top: 8px; font-size: 13px; color: #4CAF50; }
+        .required-hint { margin-top: 4px; font-size: 12px; color: #E95721; }
       `}</style>
     </div>
   )
@@ -56,35 +77,33 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('portfolio')
   const [showKYCModal, setShowKYCModal] = useState(false)
   const [showWalletModal, setShowWalletModal] = useState(false)
+  const [showBankModal, setShowBankModal] = useState(false)
   const [kycStep, setKycStep] = useState(1)
   const [isNRI, setIsNRI] = useState(false)
+  const [kycError, setKycError] = useState('')
+  
   const [kycData, setKycData] = useState({
-    pan_number: '',
-    aadhaar_number: '',
-    passport_number: '',
-    address: '',
-    pan_image: null,
-    aadhaar_front: null,
-    aadhaar_back: null,
-    passport_front: null,
-    passport_back: null,
-    selfie: null
+    pan_number: '', aadhaar_number: '', passport_number: '', address: '',
+    pan_image: null, aadhaar_front: null, aadhaar_back: null,
+    passport_front: null, passport_back: null, selfie: null
   })
+  
   const [walletData, setWalletData] = useState({
-    wallet_type: 'exchange',
-    exchange_name: '',
-    wallet_address: '',
-    asset: 'BTC',
-    ownership_proof: null,
-    notes: ''
+    wallet_type: 'exchange', exchange_name: '', wallet_address: '',
+    asset: 'BTC', ownership_proof: null, notes: ''
   })
+  
+  const [bankData, setBankData] = useState({
+    account_holder: '', account_number: '', confirm_account: '',
+    ifsc_code: '', bank_name: '', branch: '', account_type: 'savings'
+  })
+
+  const [tradeHistory] = useState([])
+  const [transactionHistory] = useState([])
 
   useEffect(() => {
     const token = localStorage.getItem('token')
-    if (!token) {
-      router.replace('/login')
-      return
-    }
+    if (!token) { router.replace('/login'); return }
     fetchProfile(token)
   }, [router])
 
@@ -95,11 +114,19 @@ export default function Dashboard() {
       })
       setUser(response.data)
     } catch (err) {
+      // Generate UID if not exists
+      const storedUID = localStorage.getItem('clientUID') || generateUID()
+      localStorage.setItem('clientUID', storedUID)
       setUser({
-        email: 'user@example.com',
-        mobile_number: '9999999999',
+        client_id: storedUID,
+        email: localStorage.getItem('userEmail') || 'user@example.com',
+        mobile_number: localStorage.getItem('userMobile') || '9999999999',
         kyc_status: 'pending',
-        account_type: 'individual'
+        account_type: 'individual',
+        profile_pic: null,
+        name: '',
+        bank_verified: false,
+        wallet_verified: false
       })
     } finally {
       setLoading(false)
@@ -111,16 +138,149 @@ export default function Dashboard() {
     router.push('/login')
   }
 
+  const goHome = () => {
+    setActiveTab('portfolio')
+  }
+
+  // Validate KYC Step 1
+  const validateStep1 = () => {
+    if (!kycData.pan_number || kycData.pan_number.length !== 10) {
+      setKycError('Please enter valid 10-character PAN number')
+      return false
+    }
+    if (!isNRI && (!kycData.aadhaar_number || kycData.aadhaar_number.length !== 12)) {
+      setKycError('Please enter valid 12-digit Aadhaar number')
+      return false
+    }
+    if (isNRI && !kycData.passport_number) {
+      setKycError('Please enter passport number')
+      return false
+    }
+    if (!kycData.address) {
+      setKycError('Please enter your address')
+      return false
+    }
+    setKycError('')
+    return true
+  }
+
+  // Validate KYC Step 2
+  const validateStep2 = () => {
+    if (!kycData.pan_image) {
+      setKycError('Please upload PAN card image')
+      return false
+    }
+    if (!isNRI) {
+      if (!kycData.aadhaar_front) {
+        setKycError('Please upload Aadhaar front image')
+        return false
+      }
+      if (!kycData.aadhaar_back) {
+        setKycError('Please upload Aadhaar back image')
+        return false
+      }
+    } else {
+      if (!kycData.passport_front) {
+        setKycError('Please upload Passport front page')
+        return false
+      }
+      if (!kycData.passport_back) {
+        setKycError('Please upload Passport back/visa page')
+        return false
+      }
+    }
+    setKycError('')
+    return true
+  }
+
+  // Validate KYC Step 3
+  const validateStep3 = () => {
+    if (!kycData.selfie) {
+      setKycError('Please upload selfie with PAN card')
+      return false
+    }
+    setKycError('')
+    return true
+  }
+
+  const handleKYCNext = (nextStep) => {
+    if (kycStep === 1 && !validateStep1()) return
+    if (kycStep === 2 && !validateStep2()) return
+    setKycStep(nextStep)
+  }
+
   const handleKYCSubmit = async () => {
-    alert('KYC documents submitted successfully! Our team will review and verify within 24-48 hours.')
+    if (!validateStep3()) return
+    
+    try {
+      // Send KYC data to support email
+      await axios.post(`${API_URL}/api/notifications/send-kyc`, {
+        client_id: user?.client_id,
+        email: user?.email,
+        mobile: user?.mobile_number,
+        kyc_data: {
+          pan_number: kycData.pan_number,
+          aadhaar_number: kycData.aadhaar_number,
+          passport_number: kycData.passport_number,
+          address: kycData.address,
+          is_nri: isNRI
+        },
+        to_email: 'support@bharatbit.world'
+      })
+    } catch (err) {
+      console.log('Email notification pending backend setup')
+    }
+    
+    alert('KYC documents submitted successfully! Our team will review and verify within 24-48 hours. You will receive confirmation at your registered email.')
     setShowKYCModal(false)
     setKycStep(1)
   }
 
   const handleWalletSubmit = async () => {
+    if (!walletData.wallet_address || !walletData.ownership_proof) {
+      alert('Please fill all required fields and upload ownership proof')
+      return
+    }
+    
+    try {
+      await axios.post(`${API_URL}/api/notifications/send-wallet`, {
+        client_id: user?.client_id,
+        email: user?.email,
+        wallet_data: walletData,
+        to_email: 'otc@bharatbit.world'
+      })
+    } catch (err) {
+      console.log('Email notification pending backend setup')
+    }
+    
     alert('Wallet submitted for verification! Our team will verify ownership within 24 hours.')
     setShowWalletModal(false)
     setWalletData({ wallet_type: 'exchange', exchange_name: '', wallet_address: '', asset: 'BTC', ownership_proof: null, notes: '' })
+  }
+
+  const handleBankSubmit = async () => {
+    if (bankData.account_number !== bankData.confirm_account) {
+      alert('Account numbers do not match')
+      return
+    }
+    if (!bankData.account_holder || !bankData.account_number || !bankData.ifsc_code) {
+      alert('Please fill all required fields')
+      return
+    }
+    
+    try {
+      await axios.post(`${API_URL}/api/notifications/send-bank`, {
+        client_id: user?.client_id,
+        email: user?.email,
+        bank_data: bankData,
+        to_email: 'otc@bharatbit.world'
+      })
+    } catch (err) {
+      console.log('Email notification pending backend setup')
+    }
+    
+    alert('Bank details submitted for verification! You will receive confirmation once verified.')
+    setShowBankModal(false)
   }
 
   if (loading) {
@@ -153,94 +313,57 @@ export default function Dashboard() {
               <div className={`progress-step ${kycStep >= 3 ? 'active' : ''}`}>3. Selfie</div>
             </div>
 
+            {kycError && <div className="error-msg">{kycError}</div>}
+
             {kycStep === 1 && (
               <div className="kyc-form">
                 <h3>Personal Details</h3>
-                
                 <div className="nri-toggle">
-                  <label>
-                    <input type="checkbox" checked={isNRI} onChange={e => setIsNRI(e.target.checked)} />
-                    I am an NRI / Non-Indian Resident
-                  </label>
+                  <label><input type="checkbox" checked={isNRI} onChange={e => setIsNRI(e.target.checked)} /> I am an NRI / Non-Indian Resident</label>
                 </div>
-
                 <div className="form-group">
-                  <label>PAN Number (Required for all)</label>
+                  <label>PAN Number <span className="req">*</span></label>
                   <input type="text" value={kycData.pan_number} onChange={e => setKycData({...kycData, pan_number: e.target.value.toUpperCase()})} placeholder="ABCDE1234F" maxLength={10} />
                 </div>
-
                 {!isNRI && (
                   <div className="form-group">
-                    <label>Aadhaar Number</label>
-                    <input type="text" value={kycData.aadhaar_number} onChange={e => setKycData({...kycData, aadhaar_number: e.target.value.replace(/\D/g, '')})} placeholder="1234 5678 9012" maxLength={12} />
+                    <label>Aadhaar Number <span className="req">*</span></label>
+                    <input type="text" value={kycData.aadhaar_number} onChange={e => setKycData({...kycData, aadhaar_number: e.target.value.replace(/\D/g, '')})} placeholder="123456789012" maxLength={12} />
                   </div>
                 )}
-
                 {isNRI && (
                   <div className="form-group">
-                    <label>Passport Number</label>
+                    <label>Passport Number <span className="req">*</span></label>
                     <input type="text" value={kycData.passport_number} onChange={e => setKycData({...kycData, passport_number: e.target.value.toUpperCase()})} placeholder="A12345678" maxLength={12} />
                   </div>
                 )}
-
                 <div className="form-group">
-                  <label>Current Address</label>
+                  <label>Current Address <span className="req">*</span></label>
                   <textarea value={kycData.address} onChange={e => setKycData({...kycData, address: e.target.value})} placeholder="Enter your full address" rows={3} />
                 </div>
-                
-                <button className="btn-primary" onClick={() => setKycStep(2)}>Continue</button>
+                <button className="btn-primary" onClick={() => handleKYCNext(2)}>Continue</button>
               </div>
             )}
 
             {kycStep === 2 && (
               <div className="kyc-form">
                 <h3>Upload Documents</h3>
-                <p className="doc-info">You can take a photo or upload an existing image</p>
-
-                <DocumentUpload 
-                  label="PAN Card" 
-                  file={kycData.pan_image}
-                  onCapture={file => setKycData({...kycData, pan_image: file})}
-                  onUpload={file => setKycData({...kycData, pan_image: file})}
-                />
-
-                {!isNRI && (
+                <p className="doc-info">Use camera to capture or upload existing images</p>
+                <DocumentUpload label="PAN Card" file={kycData.pan_image} onFileSelect={file => setKycData({...kycData, pan_image: file})} required />
+                {!isNRI ? (
                   <>
-                    <DocumentUpload 
-                      label="Aadhaar Card - Front" 
-                      file={kycData.aadhaar_front}
-                      onCapture={file => setKycData({...kycData, aadhaar_front: file})}
-                      onUpload={file => setKycData({...kycData, aadhaar_front: file})}
-                    />
-                    <DocumentUpload 
-                      label="Aadhaar Card - Back" 
-                      file={kycData.aadhaar_back}
-                      onCapture={file => setKycData({...kycData, aadhaar_back: file})}
-                      onUpload={file => setKycData({...kycData, aadhaar_back: file})}
-                    />
+                    <DocumentUpload label="Aadhaar Card - Front" file={kycData.aadhaar_front} onFileSelect={file => setKycData({...kycData, aadhaar_front: file})} required />
+                    <DocumentUpload label="Aadhaar Card - Back" file={kycData.aadhaar_back} onFileSelect={file => setKycData({...kycData, aadhaar_back: file})} required />
+                  </>
+                ) : (
+                  <>
+                    <DocumentUpload label="Passport - Front Page" file={kycData.passport_front} onFileSelect={file => setKycData({...kycData, passport_front: file})} required />
+                    <DocumentUpload label="Passport - Back/Visa Page" file={kycData.passport_back} onFileSelect={file => setKycData({...kycData, passport_back: file})} required />
                   </>
                 )}
-
-                {isNRI && (
-                  <>
-                    <DocumentUpload 
-                      label="Passport - Front Page" 
-                      file={kycData.passport_front}
-                      onCapture={file => setKycData({...kycData, passport_front: file})}
-                      onUpload={file => setKycData({...kycData, passport_front: file})}
-                    />
-                    <DocumentUpload 
-                      label="Passport - Back/Visa Page" 
-                      file={kycData.passport_back}
-                      onCapture={file => setKycData({...kycData, passport_back: file})}
-                      onUpload={file => setKycData({...kycData, passport_back: file})}
-                    />
-                  </>
-                )}
-
                 <div className="btn-row">
                   <button className="btn-secondary" onClick={() => setKycStep(1)}>Back</button>
-                  <button className="btn-primary" onClick={() => setKycStep(3)}>Continue</button>
+                  <button className="btn-primary" onClick={() => handleKYCNext(3)}>Continue</button>
                 </div>
               </div>
             )}
@@ -249,14 +372,7 @@ export default function Dashboard() {
               <div className="kyc-form">
                 <h3>Selfie Verification</h3>
                 <p className="doc-info">Take a clear selfie holding your PAN card next to your face</p>
-                
-                <DocumentUpload 
-                  label="Selfie with PAN Card" 
-                  file={kycData.selfie}
-                  onCapture={file => setKycData({...kycData, selfie: file})}
-                  onUpload={file => setKycData({...kycData, selfie: file})}
-                />
-
+                <DocumentUpload label="Selfie with PAN Card" file={kycData.selfie} onFileSelect={file => setKycData({...kycData, selfie: file})} required />
                 <div className="btn-row">
                   <button className="btn-secondary" onClick={() => setKycStep(2)}>Back</button>
                   <button className="btn-primary" onClick={handleKYCSubmit}>Submit KYC</button>
@@ -275,20 +391,18 @@ export default function Dashboard() {
               <h2>Add Withdrawal Wallet</h2>
               <button className="close-btn" onClick={() => setShowWalletModal(false)}>×</button>
             </div>
-            
             <div className="wallet-form">
               <div className="form-group">
-                <label>Wallet Type</label>
+                <label>Wallet Type <span className="req">*</span></label>
                 <select value={walletData.wallet_type} onChange={e => setWalletData({...walletData, wallet_type: e.target.value})}>
                   <option value="exchange">Exchange Wallet</option>
                   <option value="custodial">Custodial Wallet</option>
                   <option value="self_custody">Self-Custody (Hardware/Software)</option>
                 </select>
               </div>
-
               {walletData.wallet_type === 'exchange' && (
                 <div className="form-group">
-                  <label>Exchange Name</label>
+                  <label>Exchange Name <span className="req">*</span></label>
                   <select value={walletData.exchange_name} onChange={e => setWalletData({...walletData, exchange_name: e.target.value})}>
                     <option value="">Select Exchange</option>
                     <option value="wazirx">WazirX</option>
@@ -301,16 +415,14 @@ export default function Dashboard() {
                   </select>
                 </div>
               )}
-
               {walletData.wallet_type === 'custodial' && (
                 <div className="form-group">
-                  <label>Custodian Name</label>
+                  <label>Custodian Name <span className="req">*</span></label>
                   <input type="text" value={walletData.exchange_name} onChange={e => setWalletData({...walletData, exchange_name: e.target.value})} placeholder="e.g., BitGo, Fireblocks" />
                 </div>
               )}
-
               <div className="form-group">
-                <label>Crypto Asset</label>
+                <label>Crypto Asset <span className="req">*</span></label>
                 <select value={walletData.asset} onChange={e => setWalletData({...walletData, asset: e.target.value})}>
                   <option value="BTC">Bitcoin (BTC)</option>
                   <option value="ETH">Ethereum (ETH)</option>
@@ -318,30 +430,69 @@ export default function Dashboard() {
                   <option value="USDC">USD Coin (USDC)</option>
                 </select>
               </div>
-
               <div className="form-group">
-                <label>Wallet Address</label>
+                <label>Wallet Address <span className="req">*</span></label>
                 <input type="text" value={walletData.wallet_address} onChange={e => setWalletData({...walletData, wallet_address: e.target.value})} placeholder="Enter your wallet address" />
               </div>
-
               <DocumentUpload 
-                label={walletData.wallet_type === 'exchange' ? 'Ownership Proof (Exchange deposit page screenshot)' : walletData.wallet_type === 'custodial' ? 'Ownership Proof (Custodian agreement)' : 'Ownership Proof (Signed message from wallet)'}
-                file={walletData.ownership_proof}
-                onCapture={file => setWalletData({...walletData, ownership_proof: file})}
-                onUpload={file => setWalletData({...walletData, ownership_proof: file})}
-                accept="image/*,.pdf"
+                label="Ownership Proof (Screenshot/Document)" 
+                file={walletData.ownership_proof} 
+                onFileSelect={file => setWalletData({...walletData, ownership_proof: file})} 
+                required 
               />
-
               <div className="form-group">
-                <label>Additional Notes (Optional)</label>
+                <label>Additional Notes</label>
                 <textarea value={walletData.notes} onChange={e => setWalletData({...walletData, notes: e.target.value})} placeholder="Any additional information" rows={2} />
               </div>
-
-              <div className="info-box">
-                <strong>Important:</strong> All wallets must be verified before withdrawals. Verification typically takes 24 hours.
-              </div>
-
+              <div className="info-box">⚠️ All wallets require verification before withdrawals. Processing time: 24 hours.</div>
               <button className="btn-primary" onClick={handleWalletSubmit}>Submit for Verification</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bank Account Modal */}
+      {showBankModal && (
+        <div className="modal-overlay" onClick={() => setShowBankModal(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Add Bank Account</h2>
+              <button className="close-btn" onClick={() => setShowBankModal(false)}>×</button>
+            </div>
+            <div className="bank-form">
+              <div className="form-group">
+                <label>Account Holder Name <span className="req">*</span></label>
+                <input type="text" value={bankData.account_holder} onChange={e => setBankData({...bankData, account_holder: e.target.value})} placeholder="As per bank records" />
+              </div>
+              <div className="form-group">
+                <label>Account Number <span className="req">*</span></label>
+                <input type="text" value={bankData.account_number} onChange={e => setBankData({...bankData, account_number: e.target.value})} placeholder="Enter account number" />
+              </div>
+              <div className="form-group">
+                <label>Confirm Account Number <span className="req">*</span></label>
+                <input type="text" value={bankData.confirm_account} onChange={e => setBankData({...bankData, confirm_account: e.target.value})} placeholder="Re-enter account number" />
+              </div>
+              <div className="form-group">
+                <label>IFSC Code <span className="req">*</span></label>
+                <input type="text" value={bankData.ifsc_code} onChange={e => setBankData({...bankData, ifsc_code: e.target.value.toUpperCase()})} placeholder="e.g., ICIC0003458" maxLength={11} />
+              </div>
+              <div className="form-group">
+                <label>Bank Name</label>
+                <input type="text" value={bankData.bank_name} onChange={e => setBankData({...bankData, bank_name: e.target.value})} placeholder="e.g., ICICI Bank" />
+              </div>
+              <div className="form-group">
+                <label>Branch</label>
+                <input type="text" value={bankData.branch} onChange={e => setBankData({...bankData, branch: e.target.value})} placeholder="e.g., Balewadi, Pune" />
+              </div>
+              <div className="form-group">
+                <label>Account Type</label>
+                <select value={bankData.account_type} onChange={e => setBankData({...bankData, account_type: e.target.value})}>
+                  <option value="savings">Savings</option>
+                  <option value="current">Current</option>
+                </select>
+              </div>
+              <div className="info-box">⚠️ Bank account verification required. A small test amount will be credited for verification.</div>
+              <button className="btn-primary" onClick={handleBankSubmit}>Submit Bank Details</button>
             </div>
           </div>
         </div>
@@ -350,13 +501,18 @@ export default function Dashboard() {
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-header">
-          <div className="logo"><div className="logo-icon">B</div><span>BharatBit</span></div>
+          <div className="logo" onClick={goHome} style={{cursor:'pointer'}}><div className="logo-icon">B</div><span>BharatBit</span></div>
         </div>
         <nav className="sidebar-nav">
+          <button className="nav-item home-btn" onClick={goHome}><span className="nav-icon">🏠</span>Home</button>
           <button className={`nav-item ${activeTab === 'portfolio' ? 'active' : ''}`} onClick={() => setActiveTab('portfolio')}><span className="nav-icon">📊</span>Portfolio</button>
-          <button className={`nav-item ${activeTab === 'trade' ? 'active' : ''}`} onClick={() => setActiveTab('trade')}><span className="nav-icon">💱</span>Trade</button>
+          <button className={`nav-item ${activeTab === 'trade' ? 'active' : ''}`} onClick={() => setActiveTab('trade')}><span className="nav-icon">💱</span>Place Trade</button>
           <button className={`nav-item ${activeTab === 'orders' ? 'active' : ''}`} onClick={() => setActiveTab('orders')}><span className="nav-icon">📋</span>Orders</button>
+          <button className={`nav-item ${activeTab === 'trade_history' ? 'active' : ''}`} onClick={() => setActiveTab('trade_history')}><span className="nav-icon">📈</span>Trade History</button>
+          <button className={`nav-item ${activeTab === 'transactions' ? 'active' : ''}`} onClick={() => setActiveTab('transactions')}><span className="nav-icon">💳</span>Transactions</button>
           <button className={`nav-item ${activeTab === 'wallet' ? 'active' : ''}`} onClick={() => setActiveTab('wallet')}><span className="nav-icon">💰</span>Wallets</button>
+          <button className={`nav-item ${activeTab === 'bank' ? 'active' : ''}`} onClick={() => setActiveTab('bank')}><span className="nav-icon">🏦</span>Bank Account</button>
+          <button className={`nav-item ${activeTab === 'deposit' ? 'active' : ''}`} onClick={() => setActiveTab('deposit')}><span className="nav-icon">💵</span>Deposit Funds</button>
           <button className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}><span className="nav-icon">👤</span>Profile</button>
         </nav>
         <div className="sidebar-footer"><button className="logout-btn" onClick={handleLogout}><span>🚪</span> Logout</button></div>
@@ -365,10 +521,15 @@ export default function Dashboard() {
       {/* Main Content */}
       <main className="main-content">
         <header className="topbar">
-          <h1>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h1>
+          <div className="topbar-left">
+            <button className="home-icon-btn" onClick={goHome}>🏠</button>
+            <h1>{activeTab === 'trade_history' ? 'Trade History' : activeTab === 'transactions' ? 'Transaction History' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h1>
+          </div>
           <div className="user-info">
-            <span className="kyc-badge" data-status={user?.kyc_status || 'pending'}>KYC: {user?.kyc_status || 'Pending'}</span>
-            <span className="user-email">{user?.email}</span>
+            <span className="client-id">ID: {user?.client_id}</span>
+            <span className="kyc-badge" data-status={user?.kyc_status || 'pending'}>
+              {user?.kyc_status === 'approved' ? '✓ Verified' : 'KYC Pending'}
+            </span>
           </div>
         </header>
 
@@ -377,15 +538,17 @@ export default function Dashboard() {
         )}
 
         <div className="content-area">
+          {/* Portfolio Tab */}
           {activeTab === 'portfolio' && (
             <div className="portfolio-section">
               <div className="portfolio-summary">
-                <div className="summary-card"><span className="card-label">Total Portfolio Value</span><span className="card-value">₹0.00</span><span className="card-change positive">+0.00%</span></div>
+                <div className="summary-card"><span className="card-label">Total Portfolio Value</span><span className="card-value">₹0.00</span></div>
                 <div className="summary-card"><span className="card-label">Available Balance (INR)</span><span className="card-value">₹0.00</span></div>
                 <div className="summary-card"><span className="card-label">Crypto Holdings</span><span className="card-value">0 BTC</span></div>
               </div>
               <div className="market-prices">
                 <h2>Live Market Prices</h2>
+                <p className="price-disclaimer">All prices are indicative only</p>
                 <div className="price-grid">
                   <div className="price-card"><div className="coin-info"><span className="coin-icon">₿</span><div><span className="coin-name">Bitcoin</span><span className="coin-symbol">BTC</span></div></div><div className="coin-price"><span className="price">₹87,45,000</span><span className="change positive">+2.4%</span></div></div>
                   <div className="price-card"><div className="coin-info"><span className="coin-icon">Ξ</span><div><span className="coin-name">Ethereum</span><span className="coin-symbol">ETH</span></div></div><div className="coin-price"><span className="price">₹2,32,500</span><span className="change positive">+1.8%</span></div></div>
@@ -395,35 +558,163 @@ export default function Dashboard() {
             </div>
           )}
 
+          {/* Trade Tab */}
           {activeTab === 'trade' && (
             <div className="trade-section">
               <div className="trade-card">
                 <h2>Place OTC Order</h2>
-                <p className="trade-info">Execute large trades with personalized rates</p>
+                <div className="trade-disclaimer">
+                  <p><strong>⚠️ Important Notice:</strong></p>
+                  <ul>
+                    <li>All prices displayed are <strong>indicative only</strong></li>
+                    <li>Orders are processed with <strong>manual execution</strong> once we receive your confirmation</li>
+                    <li>Processing time: <strong>1 hour to 24 hours</strong></li>
+                    <li>Final rates will be confirmed by our OTC desk before execution</li>
+                  </ul>
+                </div>
                 <div className="trade-type-selector"><button className="trade-type active">Buy</button><button className="trade-type">Sell</button></div>
                 <div className="trade-form">
                   <div className="form-group"><label>Select Asset</label><select><option>Bitcoin (BTC)</option><option>Ethereum (ETH)</option><option>USDT</option></select></div>
                   <div className="form-group"><label>Amount (INR)</label><input type="text" placeholder="Enter amount in INR" /></div>
                   <div className="indicative-rate"><span>Indicative Rate:</span><span>₹87,45,000 / BTC</span></div>
-                  <p className="disclaimer">* Final rate will be confirmed by our OTC desk</p>
                   <button className="btn-trade" disabled={user?.kyc_status !== 'approved'}>{user?.kyc_status !== 'approved' ? 'Complete KYC to Trade' : 'Request Quote'}</button>
                 </div>
               </div>
             </div>
           )}
 
+          {/* Orders Tab */}
           {activeTab === 'orders' && (
-            <div className="orders-section"><h2>Your Orders</h2><div className="empty-state"><span className="empty-icon">📋</span><p>No orders yet</p><span>Your OTC orders will appear here</span></div></div>
+            <div className="orders-section"><h2>Active Orders</h2><div className="empty-state"><span className="empty-icon">📋</span><p>No active orders</p><span>Your pending OTC orders will appear here</span></div></div>
           )}
 
+          {/* Trade History Tab */}
+          {activeTab === 'trade_history' && (
+            <div className="history-section">
+              <h2>Trade History</h2>
+              {tradeHistory.length === 0 ? (
+                <div className="empty-state"><span className="empty-icon">📈</span><p>No trade history</p><span>Your completed trades will appear here</span></div>
+              ) : (
+                <div className="history-list">{/* Trade history items */}</div>
+              )}
+            </div>
+          )}
+
+          {/* Transaction History Tab */}
+          {activeTab === 'transactions' && (
+            <div className="history-section">
+              <h2>Transaction History</h2>
+              {transactionHistory.length === 0 ? (
+                <div className="empty-state"><span className="empty-icon">💳</span><p>No transactions</p><span>Your deposits and withdrawals will appear here</span></div>
+              ) : (
+                <div className="history-list">{/* Transaction history items */}</div>
+              )}
+            </div>
+          )}
+
+          {/* Wallet Tab */}
           {activeTab === 'wallet' && (
-            <div className="wallet-section"><h2>Your Withdrawal Wallets</h2><p className="section-desc">Add and verify your wallets for secure withdrawals</p><div className="empty-state"><span className="empty-icon">💰</span><p>No wallets added</p><span>Add your crypto wallet addresses for withdrawals</span><button className="btn-add" onClick={() => setShowWalletModal(true)}>+ Add Wallet</button></div></div>
+            <div className="wallet-section"><h2>Withdrawal Wallets</h2><p className="section-desc">Add and verify your crypto wallets for withdrawals</p><div className="empty-state"><span className="empty-icon">💰</span><p>No wallets added</p><span>Add your crypto wallet addresses</span><button className="btn-add" onClick={() => setShowWalletModal(true)}>+ Add Wallet</button></div></div>
           )}
 
+          {/* Bank Account Tab */}
+          {activeTab === 'bank' && (
+            <div className="bank-section">
+              <h2>Bank Account</h2>
+              <p className="section-desc">Add your bank account for INR withdrawals</p>
+              <div className="empty-state">
+                <span className="empty-icon">🏦</span>
+                <p>No bank account added</p>
+                <span>Add your bank details for withdrawals</span>
+                <button className="btn-add" onClick={() => setShowBankModal(true)}>+ Add Bank Account</button>
+              </div>
+            </div>
+          )}
+
+          {/* Deposit Funds Tab */}
+          {activeTab === 'deposit' && (
+            <div className="deposit-section">
+              <h2>Deposit Funds</h2>
+              <p className="section-desc">Transfer funds to our account via NEFT/RTGS/Net Banking</p>
+              
+              <div className="bank-details-card">
+                <h3>🏦 Our Bank Details</h3>
+                <div className="detail-row"><span className="label">Account Name</span><span className="value">G.F.T. INVESTMENTS PRIVATE LIMITED</span></div>
+                <div className="detail-row"><span className="label">Account Number</span><span className="value highlight">345805000533</span></div>
+                <div className="detail-row"><span className="label">IFSC Code</span><span className="value highlight">ICIC0003458</span></div>
+                <div className="detail-row"><span className="label">Branch</span><span className="value">BALEWADI HIGH STREET, PUNE 411045</span></div>
+                <div className="detail-row"><span className="label">Bank</span><span className="value">ICICI Bank</span></div>
+              </div>
+
+              <div className="deposit-instructions">
+                <h4>Instructions:</h4>
+                <ol>
+                  <li>Transfer funds via <strong>NEFT, RTGS, or Net Banking</strong> only</li>
+                  <li>Use your <strong>Client ID ({user?.client_id})</strong> as payment reference</li>
+                  <li>Deposits are credited within <strong>1-2 business hours</strong></li>
+                  <li>Minimum deposit: <strong>₹1,00,000</strong></li>
+                  <li>After transfer, notify us at <strong>otc@bharatbit.world</strong></li>
+                </ol>
+              </div>
+
+              <div className="info-box warning">⚠️ Only transfer from your registered bank account. Third-party transfers will be rejected.</div>
+            </div>
+          )}
+
+          {/* Profile Tab */}
           {activeTab === 'profile' && (
             <div className="profile-section">
-              <div className="profile-card"><h2>Account Details</h2><div className="profile-info"><div className="info-row"><span className="info-label">Email</span><span className="info-value">{user?.email}</span></div><div className="info-row"><span className="info-label">Mobile</span><span className="info-value">{user?.mobile_number}</span></div><div className="info-row"><span className="info-label">Account Type</span><span className="info-value">{user?.account_type || 'Individual'}</span></div><div className="info-row"><span className="info-label">KYC Status</span><span className={`status-badge ${user?.kyc_status || 'pending'}`}>{user?.kyc_status || 'Pending'}</span></div></div></div>
-              <div className="kyc-card"><h2>KYC Verification</h2><p>Complete your KYC to start trading on BharatBit</p><div className="kyc-steps"><div className="step"><span className="step-num">1</span><span>Personal Details</span></div><div className="step"><span className="step-num">2</span><span>Document Upload</span></div><div className="step"><span className="step-num">3</span><span>Selfie Verification</span></div></div><button className="btn-kyc" onClick={() => setShowKYCModal(true)}>Start KYC Process</button></div>
+              <div className="profile-header-card">
+                <div className="profile-avatar">
+                  {user?.profile_pic ? <img src={user.profile_pic} alt="Profile" /> : <span>👤</span>}
+                </div>
+                <div className="profile-main-info">
+                  <h2>{user?.name || 'BharatBit User'}</h2>
+                  <p className="client-uid">Client ID: <strong>{user?.client_id}</strong></p>
+                  <span className={`verification-badge ${user?.kyc_status}`}>
+                    {user?.kyc_status === 'approved' ? '✓ Verified Account' : '⏳ Verification Pending'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="profile-details-grid">
+                <div className="profile-card">
+                  <h3>Account Information</h3>
+                  <div className="info-list">
+                    <div className="info-item"><span className="label">Client ID</span><span className="value">{user?.client_id}</span></div>
+                    <div className="info-item"><span className="label">Email</span><span className="value">{user?.email}</span></div>
+                    <div className="info-item"><span className="label">Mobile</span><span className="value">{user?.mobile_number}</span></div>
+                    <div className="info-item"><span className="label">Account Type</span><span className="value">{user?.account_type || 'Individual'}</span></div>
+                  </div>
+                </div>
+
+                <div className="profile-card">
+                  <h3>Verification Status</h3>
+                  <div className="status-list">
+                    <div className="status-item">
+                      <span className="status-label">KYC Status</span>
+                      <span className={`status-value ${user?.kyc_status === 'approved' ? 'verified' : 'pending'}`}>
+                        {user?.kyc_status === 'approved' ? '✓ Verified' : '⏳ Pending'}
+                      </span>
+                    </div>
+                    <div className="status-item">
+                      <span className="status-label">Bank Account</span>
+                      <span className={`status-value ${user?.bank_verified ? 'verified' : 'pending'}`}>
+                        {user?.bank_verified ? '✓ Verified' : '⏳ Not Added'}
+                      </span>
+                    </div>
+                    <div className="status-item">
+                      <span className="status-label">Wallet</span>
+                      <span className={`status-value ${user?.wallet_verified ? 'verified' : 'pending'}`}>
+                        {user?.wallet_verified ? '✓ Verified' : '⏳ Not Added'}
+                      </span>
+                    </div>
+                  </div>
+                  {user?.kyc_status !== 'approved' && (
+                    <button className="btn-kyc" onClick={() => setShowKYCModal(true)}>Complete KYC</button>
+                  )}
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -431,119 +722,152 @@ export default function Dashboard() {
 
       <style jsx>{`
         .dashboard { display: flex; min-height: 100vh; background: #f5f7fa; font-family: 'Inter', -apple-system, sans-serif; }
-        .sidebar { width: 260px; background: #1a1a2e; color: white; display: flex; flex-direction: column; }
-        .sidebar-header { padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .logo { display: flex; align-items: center; gap: 12px; }
-        .logo-icon { width: 40px; height: 40px; background: #E95721; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; }
-        .logo span { font-size: 20px; font-weight: 700; }
-        .sidebar-nav { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
-        .nav-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: transparent; border: none; border-radius: 10px; color: rgba(255,255,255,0.7); font-size: 15px; cursor: pointer; text-align: left; font-family: inherit; }
+        .sidebar { width: 240px; background: #1a1a2e; color: white; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { width: 36px; height: 36px; background: #E95721; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; }
+        .logo span { font-size: 18px; font-weight: 700; }
+        .sidebar-nav { flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: transparent; border: none; border-radius: 8px; color: rgba(255,255,255,0.7); font-size: 14px; cursor: pointer; text-align: left; font-family: inherit; transition: all 0.2s; }
         .nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
         .nav-item.active { background: #E95721; color: white; }
-        .sidebar-footer { padding: 16px; border-top: 1px solid rgba(255,255,255,0.1); }
-        .logout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: none; border-radius: 10px; color: rgba(255,255,255,0.7); cursor: pointer; font-family: inherit; }
-        .main-content { flex: 1; display: flex; flex-direction: column; }
-        .topbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 32px; background: white; border-bottom: 1px solid #e0e0e0; }
-        .topbar h1 { font-size: 24px; color: #1a1a2e; }
-        .user-info { display: flex; align-items: center; gap: 16px; }
-        .kyc-badge { padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; }
+        .nav-item.home-btn { background: rgba(233,87,33,0.2); color: #E95721; margin-bottom: 8px; }
+        .nav-icon { font-size: 16px; width: 20px; }
+        .sidebar-footer { padding: 12px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .logout-btn { display: flex; align-items: center; gap: 8px; width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.05); border: none; border-radius: 8px; color: rgba(255,255,255,0.7); cursor: pointer; font-family: inherit; font-size: 14px; }
+        
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; background: white; border-bottom: 1px solid #e0e0e0; }
+        .topbar-left { display: flex; align-items: center; gap: 12px; }
+        .home-icon-btn { background: #f0f0f0; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 16px; }
+        .topbar h1 { font-size: 20px; color: #1a1a2e; }
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .client-id { font-size: 13px; color: #666; font-weight: 500; }
+        .kyc-badge { padding: 5px 10px; border-radius: 16px; font-size: 12px; font-weight: 600; }
         .kyc-badge[data-status="pending"] { background: #fff3cd; color: #856404; }
         .kyc-badge[data-status="approved"] { background: #d4edda; color: #155724; }
-        .user-email { color: #666; font-size: 14px; }
-        .kyc-alert { display: flex; align-items: center; gap: 12px; margin: 20px 32px; padding: 16px 20px; background: #fff3cd; border-radius: 12px; color: #856404; }
-        .kyc-alert p { flex: 1; font-size: 14px; }
-        .kyc-alert button { padding: 8px 16px; background: #E95721; color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; font-family: inherit; }
-        .content-area { flex: 1; padding: 24px 32px; overflow-y: auto; }
         
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-        .modal { background: white; border-radius: 20px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 24px; border-bottom: 1px solid #e0e0e0; }
-        .modal-header h2 { font-size: 20px; color: #1a1a2e; }
-        .close-btn { width: 36px; height: 36px; border: none; background: #f0f0f0; border-radius: 50%; font-size: 24px; cursor: pointer; }
-        .kyc-progress { display: flex; padding: 16px 24px; gap: 8px; border-bottom: 1px solid #f0f0f0; }
-        .progress-step { flex: 1; padding: 10px; text-align: center; font-size: 13px; color: #999; background: #f8f9fa; border-radius: 8px; }
+        .kyc-alert { display: flex; align-items: center; gap: 12px; margin: 16px 24px; padding: 14px 18px; background: #fff3cd; border-radius: 10px; color: #856404; }
+        .kyc-alert p { flex: 1; font-size: 14px; margin: 0; }
+        .kyc-alert button { padding: 8px 14px; background: #E95721; color: white; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; font-family: inherit; font-size: 13px; }
+        
+        .content-area { flex: 1; padding: 24px; overflow-y: auto; }
+        
+        /* Modal Styles */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .modal { background: white; border-radius: 16px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #e0e0e0; }
+        .modal-header h2 { font-size: 18px; color: #1a1a2e; margin: 0; }
+        .close-btn { width: 32px; height: 32px; border: none; background: #f0f0f0; border-radius: 50%; font-size: 20px; cursor: pointer; line-height: 1; }
+        .error-msg { margin: 12px 20px; padding: 10px 14px; background: #fee2e2; color: #dc2626; border-radius: 8px; font-size: 13px; }
+        .kyc-progress { display: flex; padding: 14px 20px; gap: 8px; border-bottom: 1px solid #f0f0f0; }
+        .progress-step { flex: 1; padding: 8px; text-align: center; font-size: 12px; color: #999; background: #f8f9fa; border-radius: 6px; }
         .progress-step.active { background: #E95721; color: white; }
-        .kyc-form, .wallet-form { padding: 24px; }
-        .kyc-form h3 { font-size: 18px; margin-bottom: 16px; color: #1a1a2e; }
-        .doc-info { color: #666; font-size: 14px; margin-bottom: 20px; }
-        .nri-toggle { margin-bottom: 20px; padding: 12px 16px; background: #f8f9fa; border-radius: 10px; }
-        .nri-toggle label { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #666; cursor: pointer; }
-        .nri-toggle input { width: 18px; height: 18px; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; font-size: 13px; font-weight: 600; color: #666; margin-bottom: 8px; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 16px; font-size: 15px; border: 1px solid #e0e0e0; border-radius: 10px; background: #f8f9fa; font-family: inherit; }
+        .kyc-form, .wallet-form, .bank-form { padding: 20px; }
+        .kyc-form h3 { font-size: 16px; margin-bottom: 14px; color: #1a1a2e; }
+        .doc-info { color: #666; font-size: 13px; margin-bottom: 16px; }
+        .nri-toggle { margin-bottom: 16px; padding: 10px 14px; background: #f8f9fa; border-radius: 8px; }
+        .nri-toggle label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #666; cursor: pointer; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 600; color: #666; margin-bottom: 6px; }
+        .req { color: #E95721; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 14px; font-size: 14px; border: 1px solid #e0e0e0; border-radius: 8px; background: #f8f9fa; font-family: inherit; }
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #E95721; background: white; }
-        .btn-primary { width: 100%; padding: 14px; background: #E95721; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; font-family: inherit; }
-        .btn-secondary { padding: 14px 24px; background: #f0f0f0; color: #1a1a2e; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; font-family: inherit; }
-        .btn-row { display: flex; gap: 12px; }
+        .btn-primary { width: 100%; padding: 12px; background: #E95721; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; }
+        .btn-secondary { padding: 12px 20px; background: #f0f0f0; color: #1a1a2e; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; }
+        .btn-row { display: flex; gap: 10px; }
         .btn-row .btn-primary { flex: 1; }
-        .info-box { background: #e3f2fd; color: #1565c0; padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 20px; }
+        .info-box { background: #e3f2fd; color: #1565c0; padding: 10px 14px; border-radius: 6px; font-size: 12px; margin-bottom: 16px; }
+        .info-box.warning { background: #fff3cd; color: #856404; }
 
-        .portfolio-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
-        .summary-card { background: white; padding: 24px; border-radius: 16px; display: flex; flex-direction: column; gap: 8px; }
-        .card-label { font-size: 13px; color: #666; text-transform: uppercase; }
-        .card-value { font-size: 28px; font-weight: 700; color: #1a1a2e; }
-        .card-change { font-size: 14px; font-weight: 500; }
-        .card-change.positive { color: #22c55e; }
-        .card-change.negative { color: #ef4444; }
-        .market-prices h2 { font-size: 18px; color: #1a1a2e; margin-bottom: 16px; }
-        .price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-        .price-card { background: white; padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .coin-info { display: flex; align-items: center; gap: 12px; }
-        .coin-icon { width: 44px; height: 44px; background: #f0f0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        .coin-name { display: block; font-weight: 600; color: #1a1a2e; }
-        .coin-symbol { font-size: 13px; color: #666; }
+        /* Content Sections */
+        .portfolio-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+        .summary-card { background: white; padding: 20px; border-radius: 12px; }
+        .card-label { font-size: 12px; color: #666; text-transform: uppercase; display: block; margin-bottom: 8px; }
+        .card-value { font-size: 24px; font-weight: 700; color: #1a1a2e; }
+        .market-prices h2 { font-size: 16px; color: #1a1a2e; margin-bottom: 8px; }
+        .price-disclaimer { font-size: 12px; color: #E95721; margin-bottom: 16px; }
+        .price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .price-card { background: white; padding: 16px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .coin-info { display: flex; align-items: center; gap: 10px; }
+        .coin-icon { width: 40px; height: 40px; background: #f0f0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .coin-name { display: block; font-weight: 600; color: #1a1a2e; font-size: 14px; }
+        .coin-symbol { font-size: 12px; color: #666; }
         .coin-price { text-align: right; }
-        .price { display: block; font-weight: 600; color: #1a1a2e; }
-        .change { font-size: 13px; font-weight: 500; }
+        .price { display: block; font-weight: 600; color: #1a1a2e; font-size: 14px; }
+        .change { font-size: 12px; font-weight: 500; }
         .change.positive { color: #22c55e; }
         .change.negative { color: #ef4444; }
 
         .trade-section { max-width: 500px; }
-        .trade-card { background: white; padding: 32px; border-radius: 16px; }
-        .trade-card h2 { margin-bottom: 8px; }
-        .trade-info { color: #666; margin-bottom: 24px; }
-        .trade-type-selector { display: flex; gap: 12px; margin-bottom: 24px; }
-        .trade-type { flex: 1; padding: 14px; border: 2px solid #e0e0e0; border-radius: 10px; background: white; font-weight: 600; cursor: pointer; font-family: inherit; }
+        .trade-card { background: white; padding: 24px; border-radius: 12px; }
+        .trade-card h2 { margin-bottom: 16px; font-size: 18px; }
+        .trade-disclaimer { background: #fff8e1; border: 1px solid #ffcc02; border-radius: 8px; padding: 14px; margin-bottom: 20px; }
+        .trade-disclaimer p { font-size: 13px; margin: 0 0 8px; }
+        .trade-disclaimer ul { margin: 0; padding-left: 18px; font-size: 12px; color: #666; }
+        .trade-disclaimer li { margin-bottom: 4px; }
+        .trade-type-selector { display: flex; gap: 10px; margin-bottom: 20px; }
+        .trade-type { flex: 1; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; font-weight: 600; cursor: pointer; font-family: inherit; font-size: 14px; }
         .trade-type.active { border-color: #E95721; background: rgba(233, 87, 33, 0.05); color: #E95721; }
-        .trade-form .form-group { margin-bottom: 20px; }
-        .trade-form label { display: block; font-size: 13px; font-weight: 600; color: #666; margin-bottom: 8px; }
-        .trade-form input, .trade-form select { width: 100%; height: 48px; padding: 0 16px; border: 1px solid #e0e0e0; border-radius: 10px; font-size: 16px; font-family: inherit; }
-        .indicative-rate { display: flex; justify-content: space-between; padding: 12px 16px; background: #f8f9fa; border-radius: 8px; margin-bottom: 12px; }
-        .disclaimer { font-size: 12px; color: #999; margin-bottom: 20px; }
-        .btn-trade { width: 100%; padding: 16px; background: #ccc; color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; font-family: inherit; }
+        .trade-form .form-group { margin-bottom: 16px; }
+        .trade-form label { display: block; font-size: 12px; font-weight: 600; color: #666; margin-bottom: 6px; }
+        .trade-form input, .trade-form select { width: 100%; height: 44px; padding: 0 14px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px; font-family: inherit; }
+        .indicative-rate { display: flex; justify-content: space-between; padding: 10px 14px; background: #f8f9fa; border-radius: 6px; margin-bottom: 16px; font-size: 13px; }
+        .btn-trade { width: 100%; padding: 14px; background: #E95721; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer; }
+        .btn-trade:disabled { background: #ccc; cursor: not-allowed; }
 
-        .empty-state { text-align: center; padding: 60px 20px; background: white; border-radius: 16px; }
-        .empty-icon { font-size: 48px; display: block; margin-bottom: 16px; }
-        .empty-state p { font-size: 18px; font-weight: 600; color: #1a1a2e; margin-bottom: 8px; }
-        .empty-state span { color: #666; }
-        .btn-add { margin-top: 20px; padding: 12px 24px; background: #E95721; color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-family: inherit; }
-        .section-desc { color: #666; margin-bottom: 20px; }
+        .empty-state { text-align: center; padding: 48px 20px; background: white; border-radius: 12px; }
+        .empty-icon { font-size: 40px; display: block; margin-bottom: 12px; }
+        .empty-state p { font-size: 16px; font-weight: 600; color: #1a1a2e; margin-bottom: 6px; }
+        .empty-state span { color: #666; font-size: 13px; display: block; margin-bottom: 16px; }
+        .btn-add { padding: 10px 20px; background: #E95721; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-family: inherit; font-size: 14px; }
+        .section-desc { color: #666; margin-bottom: 16px; font-size: 14px; }
 
-        .profile-section { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-        .profile-card, .kyc-card { background: white; padding: 28px; border-radius: 16px; }
-        .profile-card h2, .kyc-card h2 { margin-bottom: 20px; }
-        .profile-info { display: flex; flex-direction: column; gap: 16px; }
-        .info-row { display: flex; justify-content: space-between; padding-bottom: 16px; border-bottom: 1px solid #f0f0f0; }
-        .info-label { color: #666; }
-        .info-value { font-weight: 500; }
-        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; }
-        .status-badge.pending { background: #fff3cd; color: #856404; }
-        .status-badge.approved { background: #d4edda; color: #155724; }
-        .kyc-card p { color: #666; margin-bottom: 24px; }
-        .kyc-steps { display: flex; gap: 20px; margin-bottom: 24px; }
-        .step { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 13px; color: #666; }
-        .step-num { width: 32px; height: 32px; background: #f0f0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; }
-        .btn-kyc { width: 100%; padding: 14px; background: #E95721; color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-family: inherit; }
+        /* Deposit Section */
+        .deposit-section h2 { margin-bottom: 8px; font-size: 18px; }
+        .bank-details-card { background: white; border-radius: 12px; padding: 24px; margin-bottom: 20px; border: 2px solid #E95721; }
+        .bank-details-card h3 { font-size: 16px; margin-bottom: 16px; color: #1a1a2e; }
+        .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-row .label { color: #666; font-size: 13px; }
+        .detail-row .value { font-weight: 600; color: #1a1a2e; font-size: 13px; }
+        .detail-row .value.highlight { color: #E95721; font-size: 14px; }
+        .deposit-instructions { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .deposit-instructions h4 { font-size: 14px; margin-bottom: 12px; }
+        .deposit-instructions ol { padding-left: 18px; font-size: 13px; color: #666; }
+        .deposit-instructions li { margin-bottom: 8px; }
+
+        /* Profile Section */
+        .profile-header-card { background: white; border-radius: 12px; padding: 24px; display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
+        .profile-avatar { width: 80px; height: 80px; background: #f0f0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; }
+        .profile-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .profile-main-info h2 { font-size: 20px; margin-bottom: 4px; }
+        .client-uid { font-size: 14px; color: #666; margin-bottom: 8px; display: block; }
+        .verification-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; }
+        .verification-badge.approved { background: #d4edda; color: #155724; }
+        .verification-badge.pending { background: #fff3cd; color: #856404; }
+        .profile-details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .profile-card { background: white; border-radius: 12px; padding: 20px; }
+        .profile-card h3 { font-size: 15px; margin-bottom: 16px; color: #1a1a2e; }
+        .info-list, .status-list { display: flex; flex-direction: column; gap: 12px; }
+        .info-item, .status-item { display: flex; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0; }
+        .info-item:last-child, .status-item:last-child { border-bottom: none; }
+        .info-item .label, .status-item .status-label { color: #666; font-size: 13px; }
+        .info-item .value { font-weight: 500; font-size: 13px; }
+        .status-value { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 12px; }
+        .status-value.verified { background: #d4edda; color: #155724; }
+        .status-value.pending { background: #f0f0f0; color: #666; }
+        .btn-kyc { width: 100%; padding: 12px; background: #E95721; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-family: inherit; margin-top: 16px; font-size: 14px; }
 
         @media (max-width: 1024px) {
-          .sidebar { width: 80px; }
-          .sidebar-header .logo span, .nav-item span:last-child, .logout-btn span:last-child { display: none; }
-          .portfolio-summary, .price-grid, .profile-section { grid-template-columns: 1fr; }
+          .sidebar { width: 70px; }
+          .sidebar-header .logo span, .nav-item span:not(.nav-icon), .logout-btn span:last-child { display: none; }
+          .portfolio-summary, .price-grid, .profile-details-grid { grid-template-columns: 1fr; }
         }
         @media (max-width: 768px) {
           .sidebar { display: none; }
           .content-area { padding: 16px; }
+          .topbar { padding: 12px 16px; }
         }
       `}</style>
     </div>
