@@ -17,21 +17,15 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const showAlert = (title: string, message: string) => {
-    if (Platform.OS === 'web') {
-      setError(message);
-      // Also use browser alert as fallback
-      window.alert(`${title}: ${message}`);
-    } else {
-      Alert.alert(title, message);
-    }
-  };
-
   const handleLogin = async () => {
     setError('');
     
     if (!identifier || !password) {
-      showAlert('Error', 'Please fill all fields');
+      if (Platform.OS === 'web') {
+        setError('Please fill all fields');
+      } else {
+        Alert.alert('Error', 'Please fill all fields');
+      }
       return;
     }
 
@@ -41,17 +35,22 @@ export default function LoginScreen() {
       if (result.requires_2fa) {
         router.push({
           pathname: '/auth/verify-2fa',
-          params: { mobile: result.mobile, mock_otp: result.mock_otp }
+          params: { mobile: result.mobile }
         });
       }
-    } catch (error: any) {
-      showAlert('Login Failed', error.message || 'An error occurred');
+    } catch (err: any) {
+      const message = err.message || 'Login failed';
+      if (Platform.OS === 'web') {
+        setError(message);
+      } else {
+        Alert.alert('Login Failed', message);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // Web-specific login form for better compatibility
+  // Web version - pure HTML for reliable keyboard and button functionality
   if (Platform.OS === 'web') {
     return (
       <div style={{
@@ -63,11 +62,7 @@ export default function LoginScreen() {
         padding: '20px',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       }}>
-        <div style={{
-          width: '100%',
-          maxWidth: '400px',
-        }}>
-          {/* Header */}
+        <div style={{ width: '100%', maxWidth: '400px' }}>
           <div style={{ textAlign: 'center' as const, marginBottom: '32px' }}>
             <div style={{
               width: '64px',
@@ -81,27 +76,23 @@ export default function LoginScreen() {
             }}>
               <Ionicons name="shield-checkmark" size={36} color="#E95721" />
             </div>
-            <h1 style={{
-              fontSize: '28px',
-              fontWeight: 700,
-              color: '#1a1a2e',
-              margin: '0 0 8px',
-            }}>Welcome Back</h1>
-            <p style={{
-              fontSize: '16px',
-              color: '#666',
-              margin: 0,
-            }}>Sign in to your private vault</p>
+            <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#1a1a2e', margin: '0 0 8px' }}>
+              Welcome Back
+            </h1>
+            <p style={{ fontSize: '16px', color: '#666', margin: 0 }}>
+              Sign in to your private vault
+            </p>
           </div>
 
-          {/* Card */}
-          <div style={{
-            backgroundColor: '#fff',
-            borderRadius: '16px',
-            padding: '24px',
-            boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-          }}>
-            {/* Error message */}
+          <form 
+            onSubmit={(e) => { e.preventDefault(); handleLogin(); }}
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: '16px',
+              padding: '24px',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+            }}
+          >
             {error && (
               <div style={{
                 backgroundColor: '#fee2e2',
@@ -115,7 +106,6 @@ export default function LoginScreen() {
               </div>
             )}
 
-            {/* Email/Mobile Input */}
             <div style={{ marginBottom: '16px' }}>
               <label style={{
                 display: 'block',
@@ -124,13 +114,13 @@ export default function LoginScreen() {
                 color: '#666',
                 marginBottom: '8px',
                 textTransform: 'uppercase' as const,
-                letterSpacing: '0.5px',
               }}>Mobile / Email</label>
               <input
                 type="text"
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
                 placeholder="Enter mobile number or email"
+                autoComplete="username"
                 style={{
                   width: '100%',
                   height: '48px',
@@ -145,7 +135,6 @@ export default function LoginScreen() {
               />
             </div>
 
-            {/* Password Input */}
             <div style={{ marginBottom: '8px' }}>
               <label style={{
                 display: 'block',
@@ -154,13 +143,13 @@ export default function LoginScreen() {
                 color: '#666',
                 marginBottom: '8px',
                 textTransform: 'uppercase' as const,
-                letterSpacing: '0.5px',
               }}>Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
+                autoComplete="current-password"
                 style={{
                   width: '100%',
                   height: '48px',
@@ -172,37 +161,21 @@ export default function LoginScreen() {
                   boxSizing: 'border-box' as const,
                   outline: 'none',
                 }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleLogin();
-                  }
-                }}
               />
             </div>
 
-            {/* Forgot Password */}
             <div style={{ textAlign: 'right' as const, marginBottom: '20px' }}>
               <a 
-                href="/auth/forgot-password"
-                onClick={(e) => {
-                  e.preventDefault();
-                  router.push('/auth/forgot-password');
-                }}
-                style={{
-                  color: '#E95721',
-                  fontSize: '14px',
-                  textDecoration: 'none',
-                  cursor: 'pointer',
-                }}
+                href="#"
+                onClick={(e) => { e.preventDefault(); router.push('/auth/forgot-password'); }}
+                style={{ color: '#E95721', fontSize: '14px', textDecoration: 'none' }}
               >
                 Forgot Password?
               </a>
             </div>
 
-            {/* Sign In Button */}
             <button
-              type="button"
-              onClick={handleLogin}
+              type="submit"
               disabled={loading}
               style={{
                 width: '100%',
@@ -214,15 +187,12 @@ export default function LoginScreen() {
                 fontSize: '17px',
                 fontWeight: 600,
                 cursor: loading ? 'not-allowed' : 'pointer',
-                boxShadow: loading ? 'none' : '0 4px 14px rgba(233, 87, 33, 0.3)',
-                transition: 'all 0.2s ease',
               }}
             >
               {loading ? 'Signing In...' : 'Sign In'}
             </button>
-          </div>
+          </form>
 
-          {/* Footer */}
           <div style={{ textAlign: 'center' as const, marginTop: '24px' }}>
             <p style={{ color: '#666', fontSize: '14px', margin: '0 0 12px' }}>
               Don't have an account?
@@ -282,7 +252,6 @@ export default function LoginScreen() {
               isPassword
             />
             
-            {/* Forgot Password Link */}
             <TouchableOpacity 
               style={styles.forgotPassword}
               onPress={() => router.push('/auth/forgot-password')}
