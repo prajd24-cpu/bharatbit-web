@@ -5,13 +5,16 @@ export default function Home() {
 
   return (
     <div className="landing-page">
+      {/* Subtle background pattern */}
+      <div className="bg-pattern" />
+      
       <nav className="navbar">
         <div className="logo">
           <div className="logo-icon">B</div>
           <span className="logo-text">BharatBit<sup>®</sup></span>
         </div>
         <div className="nav-buttons">
-          <button className="btn-outline-nav" onClick={() => router.push('/login')}>Sign In</button>
+          <button className="btn-ghost" onClick={() => router.push('/login')}>Sign In</button>
           <button className="btn-primary-nav" onClick={() => router.push('/register')}>Get Started</button>
         </div>
       </nav>
@@ -19,17 +22,20 @@ export default function Home() {
       <main className="hero">
         <div className="hero-content">
           <div className="hero-badge">Premium OTC Trading</div>
-          <h1><span className="white-text">India's Regulated</span><br /><span className="highlight">OTC Crypto Desk</span></h1>
+          <h1>
+            <span className="white-text">India's Regulated</span>
+            <br />
+            <span className="highlight">OTC Crypto Desk</span>
+          </h1>
           <p className="hero-subtitle">
-            Execute large crypto trades with institutional-grade security, 
-            competitive rates, and personalized service.
+            Execute large crypto trades with institutional-grade security, competitive rates, and personalized service.
           </p>
-          <p className="tagline-text">Discreet. Secure. Direct.</p>
+          <p className="tagline">Discreet. Secure. Direct.</p>
           <div className="hero-buttons">
-            <button className="btn-primary-large" onClick={() => router.push('/register')}>
+            <button className="btn-primary" onClick={() => router.push('/register')}>
               Create Account
             </button>
-            <button className="btn-outline-large" onClick={() => router.push('/login')}>
+            <button className="btn-outline" onClick={() => router.push('/login')}>
               Sign In
             </button>
           </div>
@@ -37,48 +43,50 @@ export default function Home() {
       </main>
 
       <section className="features">
-        <h2>Why Choose BharatBit?</h2>
-        <div className="features-grid">
-          <div className="feature-card">
-            <div className="feature-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#E95721" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                <circle cx="12" cy="16" r="1"/>
-              </svg>
+        <div className="features-inner">
+          <h2>Why Choose BharatBit?</h2>
+          <div className="features-grid">
+            <div className="feature-card">
+              <div className="feature-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  <circle cx="12" cy="16" r="1"/>
+                </svg>
+              </div>
+              <h3>Bank-Grade Security</h3>
+              <p>Multi-layer security with 2FA, biometrics, and cold storage</p>
             </div>
-            <h3>Bank-Grade Security</h3>
-            <p>Multi-layer security with 2FA, biometrics, and cold storage</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#E95721" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-                <polyline points="17 6 23 6 23 12"/>
-              </svg>
+            <div className="feature-card">
+              <div className="feature-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                  <polyline points="17 6 23 6 23 12"/>
+                </svg>
+              </div>
+              <h3>Best Rates</h3>
+              <p>Competitive OTC rates for large volume trades</p>
             </div>
-            <h3>Best Rates</h3>
-            <p>Competitive OTC rates for large volume trades</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#E95721" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-              </svg>
+            <div className="feature-card">
+              <div className="feature-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                </svg>
+              </div>
+              <h3>Instant Settlement</h3>
+              <p>Quick processing with same-day INR settlement</p>
             </div>
-            <h3>Instant Settlement</h3>
-            <p>Quick processing with same-day INR settlement</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#E95721" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-                <path d="M16 11l2 2 4-4"/>
-              </svg>
+            <div className="feature-card">
+              <div className="feature-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                  <path d="M16 11l2 2 4-4"/>
+                </svg>
+              </div>
+              <h3>Dedicated Support</h3>
+              <p>Personal relationship manager for premium clients</p>
             </div>
-            <h3>Dedicated Support</h3>
-            <p>Personal relationship manager for premium clients</p>
           </div>
         </div>
       </section>
@@ -91,7 +99,7 @@ export default function Home() {
       <footer className="footer">
         <div className="footer-content">
           <div className="footer-logo">
-            <div className="logo-icon">B</div>
+            <div className="logo-icon small">B</div>
             <span>BharatBit<sup>®</sup> OTC Desk</span>
           </div>
           <p>BharatBit<sup>®</sup> is a trademark owned by G.F.T. Investments Private Limited. All rights reserved © 2026</p>
@@ -101,261 +109,459 @@ export default function Home() {
       <style jsx>{`
         .landing-page {
           min-height: 100vh;
-          background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+          background: #0f0f1a;
           color: white;
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+          position: relative;
+          overflow-x: hidden;
         }
+        
+        .bg-pattern {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 100vh;
+          background: radial-gradient(ellipse at 50% 0%, rgba(233, 87, 33, 0.08) 0%, transparent 60%);
+          pointer-events: none;
+        }
+
+        /* Navbar */
         .navbar {
+          position: relative;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 20px 40px;
-          max-width: 1200px;
+          padding: 24px 48px;
+          max-width: 1280px;
           margin: 0 auto;
         }
+        
         .logo {
           display: flex;
           align-items: center;
           gap: 12px;
         }
+        
         .logo-icon {
-          width: 45px;
-          height: 45px;
+          width: 42px;
+          height: 42px;
           background: #E95721;
-          border-radius: 12px;
+          border-radius: 10px;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 24px;
+          font-size: 20px;
           font-weight: 700;
           color: white;
         }
-        .logo-text {
-          font-size: 24px;
-          font-weight: 700;
+        
+        .logo-icon.small {
+          width: 36px;
+          height: 36px;
+          font-size: 18px;
         }
+        
+        .logo-text {
+          font-size: 20px;
+          font-weight: 600;
+          letter-spacing: -0.3px;
+        }
+        
         .nav-buttons {
           display: flex;
-          gap: 12px;
+          align-items: center;
+          gap: 16px;
         }
-        .btn-outline-nav {
-          padding: 10px 24px;
+        
+        .btn-ghost {
+          padding: 10px 20px;
           background: transparent;
-          border: 1.5px solid rgba(255,255,255,0.3);
+          border: none;
+          color: rgba(255,255,255,0.8);
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: color 0.2s;
+          font-family: inherit;
+        }
+        
+        .btn-ghost:hover {
+          color: white;
+        }
+        
+        .btn-primary-nav {
+          padding: 10px 22px;
+          background: #E95721;
+          border: none;
           border-radius: 8px;
           color: white;
+          font-size: 14px;
           font-weight: 500;
           cursor: pointer;
           transition: all 0.2s;
           font-family: inherit;
         }
-        .btn-outline-nav:hover {
-          border-color: white;
+        
+        .btn-primary-nav:hover {
+          background: #d04d1d;
+          transform: translateY(-1px);
         }
-        .btn-primary-nav {
-          padding: 10px 24px;
+
+        /* Hero */
+        .hero {
+          position: relative;
+          max-width: 1280px;
+          margin: 0 auto;
+          padding: 80px 48px 100px;
+          text-align: center;
+        }
+        
+        .hero-badge {
+          display: inline-block;
+          padding: 8px 18px;
+          background: rgba(233, 87, 33, 0.12);
+          border: 1px solid rgba(233, 87, 33, 0.3);
+          border-radius: 100px;
+          font-size: 13px;
+          font-weight: 500;
+          color: #E95721;
+          margin-bottom: 32px;
+          letter-spacing: 0.5px;
+        }
+        
+        .hero h1 {
+          font-size: 52px;
+          font-weight: 600;
+          line-height: 1.15;
+          margin-bottom: 24px;
+          letter-spacing: -1px;
+        }
+        
+        .white-text {
+          color: rgba(255,255,255,0.95);
+        }
+        
+        .highlight {
+          color: #E95721;
+        }
+        
+        .hero-subtitle {
+          font-size: 17px;
+          color: rgba(255,255,255,0.6);
+          max-width: 520px;
+          margin: 0 auto 28px;
+          line-height: 1.7;
+          font-weight: 400;
+        }
+        
+        .tagline {
+          font-size: 18px;
+          font-style: italic;
+          color: rgba(255,255,255,0.85);
+          margin-bottom: 48px;
+          letter-spacing: 1px;
+          font-weight: 400;
+        }
+        
+        .hero-buttons {
+          display: flex;
+          gap: 14px;
+          justify-content: center;
+        }
+        
+        .btn-primary {
+          padding: 14px 36px;
           background: #E95721;
           border: none;
           border-radius: 8px;
           color: white;
-          font-weight: 600;
+          font-size: 15px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+          font-family: inherit;
+          box-shadow: 0 8px 24px rgba(233, 87, 33, 0.3);
+        }
+        
+        .btn-primary:hover {
+          background: #d04d1d;
+          transform: translateY(-2px);
+          box-shadow: 0 12px 32px rgba(233, 87, 33, 0.35);
+        }
+        
+        .btn-outline {
+          padding: 14px 36px;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.15);
+          border-radius: 8px;
+          color: rgba(255,255,255,0.9);
+          font-size: 15px;
+          font-weight: 500;
           cursor: pointer;
           transition: all 0.2s;
           font-family: inherit;
         }
-        .btn-primary-nav:hover {
-          background: #d04d1d;
+        
+        .btn-outline:hover {
+          background: rgba(255,255,255,0.08);
+          border-color: rgba(255,255,255,0.25);
         }
-        .hero {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 60px 40px 80px;
-          text-align: center;
-        }
-        .hero-badge {
-          display: inline-block;
-          padding: 8px 16px;
-          background: rgba(233, 87, 33, 0.2);
-          border: 1px solid rgba(233, 87, 33, 0.5);
-          border-radius: 20px;
-          font-size: 14px;
-          color: #E95721;
-          margin-bottom: 24px;
-        }
-        .hero h1 {
-          font-size: 56px;
-          font-weight: 700;
-          line-height: 1.2;
-          margin-bottom: 24px;
-        }
-        .white-text {
-          color: #ffffff;
-        }
-        .highlight {
-          color: #E95721;
-        }
-        .hero-subtitle {
-          font-size: 18px;
-          color: rgba(255,255,255,0.7);
-          max-width: 600px;
-          margin: 0 auto 24px;
-          line-height: 1.6;
-        }
-        .tagline-text {
-          font-size: 22px;
-          font-style: italic;
-          color: #ffffff;
-          margin-bottom: 40px;
-          letter-spacing: 2px;
-        }
-        .hero-buttons {
-          display: flex;
-          gap: 16px;
-          justify-content: center;
-        }
-        .btn-primary-large {
-          padding: 16px 40px;
-          background: #E95721;
-          border: none;
-          border-radius: 12px;
-          color: white;
-          font-size: 17px;
-          font-weight: 600;
-          cursor: pointer;
-          box-shadow: 0 4px 20px rgba(233, 87, 33, 0.4);
-          font-family: inherit;
-        }
-        .btn-outline-large {
-          padding: 16px 40px;
-          background: transparent;
-          border: 2px solid rgba(255,255,255,0.3);
-          border-radius: 12px;
-          color: white;
-          font-size: 17px;
-          font-weight: 600;
-          cursor: pointer;
-          font-family: inherit;
-        }
+
+        /* Features */
         .features {
-          background: #f8f9fa;
-          padding: 80px 40px;
-          color: #1a1a2e;
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          background: rgba(255,255,255,0.02);
+          border-top: 1px solid rgba(255,255,255,0.06);
+          padding: 80px 48px;
         }
+        
+        .features-inner {
+          max-width: 1100px;
+          margin: 0 auto;
+        }
+        
         .features h2 {
           text-align: center;
-          font-size: 36px;
-          margin-bottom: 50px;
+          font-size: 28px;
+          font-weight: 600;
+          margin-bottom: 48px;
+          color: rgba(255,255,255,0.95);
+          letter-spacing: -0.5px;
         }
+        
         .features-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          gap: 24px;
-          max-width: 1200px;
-          margin: 0 auto;
+          gap: 20px;
         }
+        
         .feature-card {
-          background: white;
-          padding: 32px 24px;
-          border-radius: 16px;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.06);
+          padding: 28px 24px;
+          border-radius: 12px;
           text-align: center;
-          box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+          transition: all 0.3s;
         }
+        
+        .feature-card:hover {
+          background: rgba(255,255,255,0.05);
+          border-color: rgba(255,255,255,0.1);
+          transform: translateY(-4px);
+        }
+        
         .feature-icon {
-          width: 48px;
-          height: 48px;
-          margin: 0 auto 16px;
+          width: 44px;
+          height: 44px;
+          margin: 0 auto 18px;
+          color: #E95721;
         }
+        
         .feature-icon svg {
           width: 100%;
           height: 100%;
         }
+        
         .feature-card h3 {
-          font-size: 18px;
-          margin-bottom: 8px;
-          color: #1a1a2e;
+          font-size: 15px;
+          font-weight: 600;
+          margin-bottom: 10px;
+          color: rgba(255,255,255,0.95);
         }
+        
         .feature-card p {
-          font-size: 14px;
-          color: #666;
-          line-height: 1.5;
+          font-size: 13px;
+          color: rgba(255,255,255,0.5);
+          line-height: 1.6;
         }
+
+        /* Invitation Banner */
         .invitation-banner {
-          background: #1a1a2e;
-          padding: 24px 40px;
+          background: rgba(0,0,0,0.3);
+          padding: 28px 48px;
           text-align: center;
-          border-top: 1px solid rgba(255,255,255,0.1);
+          border-top: 1px solid rgba(255,255,255,0.04);
         }
-        .invitation-banner .invitation-line {
+        
+        .invitation-line {
           display: block;
-          font-size: 12px;
+          font-size: 11px;
           font-weight: 600;
           color: #E95721;
           text-transform: uppercase;
           letter-spacing: 2px;
-          margin-bottom: 4px;
+          margin-bottom: 6px;
         }
-        .invitation-banner .client-line {
+        
+        .client-line {
           display: block;
-          font-size: 11px;
-          color: rgba(255,255,255,0.5);
-          letter-spacing: 1px;
+          font-size: 12px;
+          color: rgba(255,255,255,0.4);
+          letter-spacing: 0.5px;
         }
+
+        /* Footer */
         .footer {
-          background: #1a1a2e;
-          padding: 40px;
+          background: transparent;
+          padding: 40px 48px;
           text-align: center;
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          border-top: 1px solid rgba(255,255,255,0.04);
         }
+        
         .footer-content {
           display: flex;
           flex-direction: column;
           align-items: center;
           gap: 16px;
         }
+        
         .footer-logo {
           display: flex;
           align-items: center;
-          gap: 12px;
-          color: white;
-          font-size: 18px;
-          font-weight: 600;
+          gap: 10px;
+          color: rgba(255,255,255,0.9);
+          font-size: 16px;
+          font-weight: 500;
         }
+        
         .footer p {
-          color: rgba(255,255,255,0.5);
-          font-size: 14px;
+          color: rgba(255,255,255,0.35);
+          font-size: 12px;
         }
+
+        /* Mobile Responsive */
+        @media (max-width: 1024px) {
+          .features-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
         @media (max-width: 768px) {
           .navbar {
             padding: 16px 20px;
           }
+          
+          .logo-icon {
+            width: 36px;
+            height: 36px;
+            font-size: 18px;
+            border-radius: 8px;
+          }
+          
+          .logo-text {
+            font-size: 18px;
+          }
+          
           .nav-buttons {
             gap: 8px;
           }
-          .btn-outline-nav, .btn-primary-nav {
-            padding: 8px 16px;
-            font-size: 14px;
+          
+          .btn-ghost {
+            padding: 8px 12px;
+            font-size: 13px;
           }
+          
+          .btn-primary-nav {
+            padding: 8px 14px;
+            font-size: 13px;
+            border-radius: 6px;
+          }
+          
           .hero {
-            padding: 40px 20px 60px;
+            padding: 48px 24px 64px;
           }
+          
+          .hero-badge {
+            font-size: 12px;
+            padding: 6px 14px;
+            margin-bottom: 24px;
+          }
+          
           .hero h1 {
             font-size: 32px;
+            margin-bottom: 20px;
           }
+          
           .hero-subtitle {
-            font-size: 16px;
+            font-size: 15px;
+            margin-bottom: 20px;
           }
+          
+          .tagline {
+            font-size: 16px;
+            margin-bottom: 36px;
+          }
+          
           .hero-buttons {
             flex-direction: column;
+            gap: 12px;
           }
-          .btn-primary-large, .btn-outline-large {
+          
+          .btn-primary, .btn-outline {
             width: 100%;
+            padding: 14px 24px;
+            font-size: 14px;
           }
+          
           .features {
-            padding: 60px 20px;
+            padding: 48px 20px;
           }
+          
+          .features h2 {
+            font-size: 22px;
+            margin-bottom: 32px;
+          }
+          
           .features-grid {
             grid-template-columns: 1fr;
+            gap: 12px;
+          }
+          
+          .feature-card {
+            padding: 24px 20px;
+          }
+          
+          .invitation-banner {
+            padding: 24px 20px;
+          }
+          
+          .footer {
+            padding: 32px 20px;
+          }
+          
+          .footer p {
+            font-size: 11px;
+            line-height: 1.5;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .navbar {
+            padding: 14px 16px;
+          }
+          
+          .logo-icon {
+            width: 32px;
+            height: 32px;
+            font-size: 16px;
+          }
+          
+          .logo-text {
+            font-size: 16px;
+          }
+          
+          .btn-ghost {
+            padding: 6px 10px;
+            font-size: 12px;
+          }
+          
+          .btn-primary-nav {
+            padding: 7px 12px;
+            font-size: 12px;
+          }
+          
+          .hero h1 {
+            font-size: 28px;
           }
         }
       `}</style>
