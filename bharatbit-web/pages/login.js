@@ -1,8 +1,24 @@
 import { useState } from 'react'
 import { useRouter } from 'next/router'
 import axios from 'axios'
+import Head from 'next/head'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://crypto-trading-web.preview.emergentagent.com'
+
+// Eye icons for password visibility
+const EyeIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+    <circle cx="12" cy="12" r="3"/>
+  </svg>
+)
+
+const EyeOffIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+    <line x1="1" y1="1" x2="23" y2="23"/>
+  </svg>
+)
 
 export default function Login() {
   const router = useRouter()
@@ -10,15 +26,11 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-
-    if (!identifier || !password) {
-      setError('Please fill all fields')
-      return
-    }
 
     setLoading(true)
     try {
@@ -43,6 +55,10 @@ export default function Login() {
 
   return (
     <div className="login-page">
+      <Head>
+        <link href="https://fonts.googleapis.com/css2?family=Bungee+Outline&display=swap" rel="stylesheet" />
+      </Head>
+      
       <nav className="navbar">
         <div className="logo" onClick={() => router.push('/')}>
           <div className="logo-icon">B</div>
@@ -67,27 +83,36 @@ export default function Login() {
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label htmlFor="identifier">Mobile / Email</label>
+              <label htmlFor="identifier">Email or Mobile</label>
               <input
                 id="identifier"
                 type="text"
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
-                placeholder="Enter mobile number or email"
+                placeholder="Enter email or mobile number"
                 autoComplete="username"
               />
             </div>
 
             <div className="form-group">
               <label htmlFor="password">Password</label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                autoComplete="current-password"
-              />
+              <div className="password-wrapper">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  autoComplete="current-password"
+                />
+                <button 
+                  type="button" 
+                  className="toggle-password"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+              </div>
             </div>
 
             <div className="forgot-link">
@@ -137,7 +162,8 @@ export default function Login() {
           align-items: center;
           justify-content: center;
           font-size: 20px;
-          font-weight: 700;
+          font-family: 'Bungee Outline', cursive;
+          font-weight: 400;
           color: white;
         }
         .logo-icon.large {
@@ -152,6 +178,7 @@ export default function Login() {
           color: #1a1a2e;
         }
         .nav-links {
+          font-size: 14px;
           color: #666;
         }
         .nav-links a {
@@ -168,12 +195,12 @@ export default function Login() {
           padding: 40px 20px;
         }
         .login-card {
-          width: 100%;
-          max-width: 420px;
           background: white;
           border-radius: 20px;
-          padding: 40px;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+          padding: 48px;
+          width: 100%;
+          max-width: 420px;
+          box-shadow: 0 10px 40px rgba(0,0,0,0.1);
         }
         .header {
           text-align: center;
@@ -191,14 +218,16 @@ export default function Login() {
         }
         .header p {
           color: #666;
+          font-size: 14px;
         }
         .error-message {
           background: #fee2e2;
           color: #dc2626;
-          padding: 12px;
+          padding: 12px 16px;
           border-radius: 10px;
           margin-bottom: 20px;
           font-size: 14px;
+          text-align: center;
         }
         .form-group {
           margin-bottom: 20px;
@@ -207,18 +236,15 @@ export default function Login() {
           display: block;
           font-size: 13px;
           font-weight: 600;
-          color: #666;
+          color: #333;
           margin-bottom: 8px;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
         }
         .form-group input {
           width: 100%;
-          height: 52px;
-          padding: 0 16px;
-          font-size: 16px;
-          border: 1.5px solid #e0e0e0;
-          border-radius: 12px;
+          padding: 14px 16px;
+          font-size: 15px;
+          border: 1px solid #e0e0e0;
+          border-radius: 10px;
           background: #f8f9fa;
           transition: all 0.2s;
         }
@@ -227,34 +253,64 @@ export default function Login() {
           border-color: #E95721;
           background: white;
         }
+        
+        /* Password Visibility Toggle */
+        .password-wrapper {
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+        .password-wrapper input {
+          width: 100%;
+          padding-right: 50px;
+        }
+        .toggle-password {
+          position: absolute;
+          right: 12px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #666;
+        }
+        .toggle-password:hover {
+          color: #E95721;
+        }
+        .toggle-password svg {
+          width: 20px;
+          height: 20px;
+        }
+        
         .forgot-link {
           text-align: right;
           margin-bottom: 24px;
         }
         .forgot-link a {
           color: #E95721;
-          font-size: 14px;
+          font-size: 13px;
           cursor: pointer;
         }
         .btn-primary {
           width: 100%;
-          height: 56px;
+          padding: 14px;
           background: #E95721;
           color: white;
           border: none;
-          border-radius: 12px;
-          font-size: 17px;
+          border-radius: 10px;
+          font-size: 16px;
           font-weight: 600;
           cursor: pointer;
-          box-shadow: 0 4px 14px rgba(233, 87, 33, 0.3);
-          transition: all 0.2s;
+          transition: background 0.2s;
+          font-family: inherit;
         }
         .btn-primary:hover {
-          background: #d04d1d;
+          background: #d14d1a;
         }
         .btn-primary:disabled {
           background: #ccc;
-          box-shadow: none;
           cursor: not-allowed;
         }
         .divider {
@@ -271,31 +327,31 @@ export default function Login() {
         .divider span {
           padding: 0 16px;
           color: #999;
-          font-size: 14px;
+          font-size: 13px;
         }
         .btn-secondary {
           width: 100%;
-          height: 52px;
-          background: transparent;
-          color: #E95721;
-          border: 2px solid #E95721;
-          border-radius: 12px;
+          padding: 14px;
+          background: white;
+          color: #1a1a2e;
+          border: 2px solid #e0e0e0;
+          border-radius: 10px;
           font-size: 16px;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.2s;
+          font-family: inherit;
         }
         .btn-secondary:hover {
-          background: rgba(233, 87, 33, 0.05);
+          border-color: #E95721;
+          color: #E95721;
         }
-        @media (max-width: 768px) {
+        @media (max-width: 600px) {
           .navbar {
             padding: 16px 20px;
-            flex-direction: column;
-            gap: 12px;
           }
           .login-card {
-            padding: 28px 24px;
+            padding: 32px 24px;
           }
         }
       `}</style>
