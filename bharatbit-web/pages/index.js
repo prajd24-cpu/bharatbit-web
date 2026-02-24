@@ -19,24 +19,22 @@ export default function Home() {
       <main className="hero">
         <div className="hero-content">
           <div className="hero-badge">Premium OTC Trading</div>
-          <h1>India's Regulated<br /><span className="highlight">OTC Crypto Desk</span></h1>
+          <h1><span className="white-text">India's Regulated</span><br /><span className="highlight">OTC Crypto Desk</span></h1>
           <p className="hero-subtitle">
             Execute large crypto trades with institutional-grade security, 
-            competitive rates, and personalized service for high-net-worth individuals.
+            competitive rates, and personalized service.
           </p>
+          <div className="invitation-text">
+            <span className="invitation-line">By Invitation Only</span>
+            <span className="client-line">For High Net-Worth Clients</span>
+          </div>
           <div className="hero-buttons">
             <button className="btn-primary-large" onClick={() => router.push('/register')}>
-              Start Trading
+              Create Account
             </button>
             <button className="btn-outline-large" onClick={() => router.push('/login')}>
               Sign In
             </button>
-          </div>
-          <div className="hero-stats">
-            <div className="stat">
-              <span className="stat-value">₹500Cr+</span>
-              <span className="stat-label">Trading Volume</span>
-            </div>
           </div>
         </div>
       </main>
@@ -82,6 +80,7 @@ export default function Home() {
           min-height: 100vh;
           background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
           color: white;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         .navbar {
           display: flex;
@@ -125,6 +124,7 @@ export default function Home() {
           font-weight: 500;
           cursor: pointer;
           transition: all 0.2s;
+          font-family: inherit;
         }
         .btn-outline-nav:hover {
           border-color: white;
@@ -138,6 +138,7 @@ export default function Home() {
           font-weight: 600;
           cursor: pointer;
           transition: all 0.2s;
+          font-family: inherit;
         }
         .btn-primary-nav:hover {
           background: #d04d1d;
@@ -164,6 +165,9 @@ export default function Home() {
           line-height: 1.2;
           margin-bottom: 24px;
         }
+        .white-text {
+          color: #ffffff;
+        }
         .highlight {
           color: #E95721;
         }
@@ -171,14 +175,31 @@ export default function Home() {
           font-size: 18px;
           color: rgba(255,255,255,0.7);
           max-width: 600px;
-          margin: 0 auto 40px;
+          margin: 0 auto 24px;
           line-height: 1.6;
+        }
+        .invitation-text {
+          margin-bottom: 40px;
+        }
+        .invitation-line {
+          display: block;
+          font-size: 16px;
+          font-weight: 600;
+          color: #E95721;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          margin-bottom: 8px;
+        }
+        .client-line {
+          display: block;
+          font-size: 14px;
+          color: rgba(255,255,255,0.6);
+          letter-spacing: 1px;
         }
         .hero-buttons {
           display: flex;
           gap: 16px;
           justify-content: center;
-          margin-bottom: 60px;
         }
         .btn-primary-large {
           padding: 16px 40px;
@@ -190,6 +211,7 @@ export default function Home() {
           font-weight: 600;
           cursor: pointer;
           box-shadow: 0 4px 20px rgba(233, 87, 33, 0.4);
+          font-family: inherit;
         }
         .btn-outline-large {
           padding: 16px 40px;
@@ -200,30 +222,13 @@ export default function Home() {
           font-size: 17px;
           font-weight: 600;
           cursor: pointer;
-        }
-        .hero-stats {
-          display: flex;
-          justify-content: center;
-          gap: 60px;
-        }
-        .stat {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-        .stat-value {
-          font-size: 32px;
-          font-weight: 700;
-          color: #E95721;
-        }
-        .stat-label {
-          font-size: 14px;
-          color: rgba(255,255,255,0.6);
+          font-family: inherit;
         }
         .features {
           background: #f8f9fa;
           padding: 80px 40px;
           color: #1a1a2e;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         .features h2 {
           text-align: center;
@@ -262,6 +267,7 @@ export default function Home() {
           background: #1a1a2e;
           padding: 40px;
           text-align: center;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         .footer-content {
           display: flex;
@@ -306,10 +312,6 @@ export default function Home() {
           }
           .btn-primary-large, .btn-outline-large {
             width: 100%;
-          }
-          .hero-stats {
-            flex-direction: column;
-            gap: 24px;
           }
           .features {
             padding: 60px 20px;
