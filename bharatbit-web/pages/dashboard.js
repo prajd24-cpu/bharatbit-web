@@ -1090,7 +1090,9 @@ export default function Dashboard() {
         .status-value { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 12px; }
         .status-value.verified { background: #d4edda; color: #155724; }
         .status-value.pending { background: #f0f0f0; color: #666; }
+        .status-value.in-progress { background: #fff3cd; color: #856404; }
         .btn-kyc { width: 100%; padding: 12px; background: #E95721; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-family: inherit; margin-top: 16px; font-size: 14px; }
+        .kyc-in-review-msg { margin-top: 16px; padding: 12px; background: #fff3cd; border-radius: 8px; color: #856404; font-size: 13px; text-align: center; }
 
         /* Responsive - Tablet */
         @media (max-width: 1024px) {
