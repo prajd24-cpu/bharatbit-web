@@ -8,7 +8,7 @@ export default function Home() {
       <nav className="navbar">
         <div className="logo">
           <div className="logo-icon">B</div>
-          <span className="logo-text">BharatBit</span>
+          <span className="logo-text">BharatBit<sup>®</sup></span>
         </div>
         <div className="nav-buttons">
           <button className="btn-outline-nav" onClick={() => router.push('/login')}>Sign In</button>
@@ -69,9 +69,9 @@ export default function Home() {
         <div className="footer-content">
           <div className="footer-logo">
             <div className="logo-icon">B</div>
-            <span>BharatBit OTC Desk</span>
+            <span>BharatBit<sup>®</sup> OTC Desk</span>
           </div>
-          <p>© 2025 BharatBit. All rights reserved.</p>
+          <p>BharatBit<sup>®</sup> is a trademark owned by G.F.T. Investments Private Limited. All rights reserved © 2026</p>
         </div>
       </footer>
 

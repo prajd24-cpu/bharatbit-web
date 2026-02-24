@@ -46,7 +46,7 @@ export default function Login() {
       <nav className="navbar">
         <div className="logo" onClick={() => router.push('/')}>
           <div className="logo-icon">B</div>
-          <span className="logo-text">BharatBit</span>
+          <span className="logo-text">BharatBit<sup>®</sup></span>
         </div>
         <div className="nav-links">
           New here? <a onClick={() => router.push('/register')}>Create Account</a>
@@ -60,7 +60,7 @@ export default function Login() {
               <div className="logo-icon large">B</div>
             </div>
             <h1>Welcome Back</h1>
-            <p>Sign in to your BharatBit account</p>
+            <p>Sign in to your BharatBit<sup>®</sup> Private Vault</p>
           </div>
 
           {error && <div className="error-message">{error}</div>}
