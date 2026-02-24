@@ -100,6 +100,7 @@ export default function Register() {
     setLoading(true)
     try {
       const payload = {
+        full_name: formData.full_name,
         email: formData.email,
         mobile_number: formData.mobile_number,
         country_code: formData.country_code,
@@ -113,6 +114,7 @@ export default function Register() {
       if (response.data.success) {
         localStorage.setItem('otpMobile', formData.email)
         localStorage.setItem('userEmail', formData.email)
+        localStorage.setItem('userName', formData.full_name)
         localStorage.setItem('userMobile', formData.country_code + formData.mobile_number)
         if (response.data.client_uid) {
           localStorage.setItem('clientUID', response.data.client_uid)
