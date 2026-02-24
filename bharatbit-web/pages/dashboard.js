@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/router'
 import axios from 'axios'
+import Head from 'next/head'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://crypto-trading-web.preview.emergentagent.com'
 
