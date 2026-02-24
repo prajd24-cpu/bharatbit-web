@@ -1,99 +1,161 @@
 # BharatBit OTC Desk - Product Requirements Document
 
 ## Original Problem Statement
-Build a premium Over-the-Counter (OTC) crypto trading desk mobile and web application named "BharatBit OTC Desk" for high-net-worth Indian and international clients.
+Build a premium Over-the-Counter (OTC) crypto trading desk web application named "BharatBit OTC Desk" for high-net-worth Indian and international clients.
 
 ## Core Requirements
-- **Branding**: Premium light theme, white background, orange buttons (#E95721), dark navy blue text, "B" logo
+- **Branding**: Premium dark theme, "By invitation only. For High Net-Worth Clients." tagline, Inter font
 - **Target Audience**: High-net-worth Indian and international crypto traders
 - **Account Types**: Individual and Corporate/Entity accounts
+
+---
+
+## Technology Stack
+
+### New Next.js Web App (Primary)
+- **Location**: `/app/bharatbit-web/`
+- **Framework**: Next.js 14.2.3
+- **Styling**: CSS-in-JS (styled-jsx)
+- **API Client**: Axios
+- **Deployment**: Vercel
+
+### Backend (Unchanged)
+- **Framework**: FastAPI
+- **Database**: MongoDB (Motor async driver)
+- **Email**: Resend (LIVE)
+- **SMS**: MSG91 (LIVE - DLT pending)
 
 ---
 
 ## Implemented Features
 
 ### Authentication (COMPLETE)
-- [x] User registration with Mobile + Country Code Picker (29 countries)
-- [x] **Account Type Selection**: Individual or Corporate/Entity (NEW - Feb 23, 2026)
-- [x] Company Name field for Corporate accounts (NEW - Feb 23, 2026)
+- [x] User registration with Mobile + Country Code selector (25+ countries)
+- [x] **Country Code Dropdown** on registration form
+- [x] **Account Type Selection**: Individual or Corporate/Entity
+- [x] Company Name field for Corporate accounts
 - [x] Email OTP verification via Resend (LIVE)
-- [x] SMS OTP via MSG91 (LIVE - pending DLT registration for actual delivery)
+- [x] SMS OTP via MSG91 (LIVE - pending DLT registration)
 - [x] Secure Login with 2FA (Email + SMS OTP)
 - [x] Forgot Password flow with email reset link
+- [x] **7-Digit Client UID** auto-generated on registration
 
-### KYC Module (ENHANCED - Feb 23, 2026)
-- [x] Multi-step KYC form with conditional fields based on account type
-- [x] **Individual KYC Documents**:
-  - PAN Card (number + image)
-  - Aadhaar Card (front + back)
-  - Live Selfie
-  - Address Proof
-  - Passport (mandatory for non-Indian clients)
-- [x] **Corporate KYC Documents**: (NEW - Feb 23, 2026)
-  - Company Registration Certificate
-  - GST Certificate
-  - Board Resolution
-  - Authorized Signatory ID Proof
-- [x] Camera capture and gallery upload options
-- [x] KYC status banner on dashboard
-- [x] Admin approval workflow
+### KYC Module (ENHANCED - Feb 24, 2026)
+- [x] Multi-step KYC form with conditional fields
+- [x] **Camera Capture** using `capture="environment"` for documents, `capture="user"` for selfies
+- [x] **Form Validation** - Blocks submission until ALL required documents uploaded
+- [x] **Document Checklist** showing upload status before submission
+- [x] **Individual KYC Documents**: PAN Card, Aadhaar (front/back), Selfie
+- [x] **NRI KYC Documents**: PAN Card, Passport (front/back), Selfie
+- [x] **Email Notification** to `support@bharatbit.world` on KYC submission
 
-### Wallet Management (COMPLETE)
-- [x] External wallet address submission with proof of ownership
-- [x] Admin verification workflow
-- [x] Primary wallet selection
+### Wallet Management (IMPLEMENTED - Feb 24, 2026)
+- [x] **Add Wallet Modal** with wallet type selection (Exchange/Custodial/Self-Custody)
+- [x] Exchange dropdown (WazirX, CoinDCX, Binance, etc.)
+- [x] Wallet address input with ownership proof upload
+- [x] **Email Notification** to `otc@bharatbit.world` on wallet submission
 
-### OTC Trading (COMPLETE)
-- [x] Buy/Sell Crypto orders
-- [x] Order status tracking
-- [x] INR settlement
+### Bank Account Management (IMPLEMENTED - Feb 24, 2026)
+- [x] **Add Bank Account Modal** with full form fields
+- [x] Account holder, number (with confirmation), IFSC, bank name, branch
+- [x] **Email Notification** to `otc@bharatbit.world` on bank submission
 
-### Admin Panel (COMPLETE)
-- [x] User management
-- [x] KYC approval/rejection
-- [x] Order management
-- [x] Wallet address verification
-- [x] Enhanced analytics with charts (NEW - Feb 23, 2026)
+### Deposit/Payment Details (IMPLEMENTED)
+- [x] **Our Bank Details** section with BharatBit account info
+- [x] Account: G.F.T. INVESTMENTS PRIVATE LIMITED
+- [x] ICICI Bank, IFSC: ICIC0003458
+- [x] Instructions for NEFT/RTGS transfers
 
-### Live Crypto Prices (ENHANCED - Feb 23, 2026)
-- [x] Real-time prices from CoinGecko API
-- [x] 10 supported cryptocurrencies (BTC, ETH, USDT, USDC, BNB, XRP, SOL, ADA, DOGE, MATIC)
-- [x] 7-day price history for charts
-- [x] INR and USD prices with 24h change percentage
-- [x] **Dashboard crypto price cards with sparkline charts** (Re-integrated)
+### Dashboard (COMPLETE)
+- [x] **Home Button** in sidebar and topbar
+- [x] Portfolio overview with value display
+- [x] **Trade History Tab** - placeholder for completed trades
+- [x] **Transaction History Tab** - placeholder for deposits/withdrawals
+- [x] **Profile Section** with Client ID, verification status
+- [x] KYC status banner with action button
 
-### Push Notifications (IMPLEMENTED - Feb 23, 2026)
-- [x] Backend push notification service (Expo Push)
-- [x] Push notifications for KYC approval/rejection
-- [x] Push notifications for order status updates
-- [x] Frontend push token registration on login
-- [x] Notification listeners with screen navigation support
-- [ ] Full testing on physical device pending
+### Place Trade Page (IMPLEMENTED)
+- [x] **Disclaimers** about indicative pricing
+- [x] Processing time notice: 1-24 hours
+- [x] Manual execution notice
+- [x] Buy/Sell toggle (UI ready)
 
-### Web App Access
-- [x] **Live Web URL**: https://crypto-trading-web.preview.emergentagent.com
-- [x] Works directly in browser without Expo Go
-- [x] Supports registration, login, KYC, orders, and portfolio management
+### Admin Notifications (COMPLETE)
+- [x] Registration notification to `support@bharatbit.world`
+- [x] KYC submission notification to `support@bharatbit.world`
+- [x] Wallet submission notification to `otc@bharatbit.world`
+- [x] Bank account notification to `otc@bharatbit.world`
 
-### Backend Refactoring (NEW - Feb 23, 2026)
-- [x] Modular architecture with separate routers
-- [x] `/routers/auth.py` - Authentication routes
-- [x] `/routers/admin.py` - Admin routes with analytics
-- [x] `/routers/orders.py` - Order management
-- [x] `/routers/wallets.py` - Wallet management  
-- [x] `/routers/kyc.py` - KYC submission
-- [x] `/routers/rates.py` - Asset rates
-- [x] `/routers/crypto.py` - Live crypto prices
+---
 
-### Push Notifications (STUBBED - Feb 23, 2026)
-- [x] Service structure in place
-- [x] Notification functions for KYC approval/rejection
-- [x] Notification functions for order status updates
-- [ ] Expo push token integration (pending)
+## Backend API Endpoints
+
+### Authentication
+- `POST /api/auth/register` - Registration with country_code, mobile_number
+- `POST /api/auth/login` - Login with 2FA
+- `POST /api/auth/verify-otp` - OTP verification
+- `POST /api/auth/verify-2fa` - 2FA verification
+- `GET /api/users/profile` - User profile with client_uid
+
+### Notifications
+- `POST /api/notifications/send-kyc` - Send KYC submission email
+- `POST /api/notifications/send-wallet` - Send wallet submission email
+- `POST /api/notifications/send-bank` - Send bank submission email
+
+### Other
+- `GET /api/health` - Health check
+- `GET /api/payment/bank-details` - BharatBit bank details
+- `GET /api/crypto/prices` - Live crypto prices
+
+---
+
+## Code Architecture
+
+```
+/app
+├── backend/                  # FastAPI Backend
+│   ├── routers/
+│   │   ├── auth.py          # Authentication + users_router
+│   │   ├── notifications.py # NEW: KYC/Wallet/Bank notifications
+│   │   ├── admin.py
+│   │   ├── orders.py
+│   │   └── ...
+│   ├── models/schemas.py    # Updated with client_uid, country_code
+│   └── services/
+│       └── email_service.py # Resend integration
+│
+└── bharatbit-web/           # NEW Next.js Frontend
+    ├── pages/
+    │   ├── index.js         # Landing page
+    │   ├── login.js         # Login with 2FA
+    │   ├── register.js      # Registration + country code
+    │   ├── dashboard.js     # Main dashboard + modals
+    │   └── verify-otp.js    # OTP verification
+    └── .env.local           # NEXT_PUBLIC_API_URL
+```
+
+---
+
+## Database Schema
+
+### users collection
+```json
+{
+  "id": "uuid",
+  "client_uid": "7-digit-number",
+  "mobile": "+919876543210",
+  "email": "user@example.com",
+  "password_hash": "...",
+  "account_type": "individual" | "corporate",
+  "company_name": "Company Pvt Ltd",
+  "kyc_status": "pending" | "approved" | "rejected"
+}
+```
 
 ---
 
 ## Live Integrations
+
 | Service | Provider | Status |
 |---------|----------|--------|
 | Email OTP & Notifications | Resend | LIVE |
@@ -101,156 +163,52 @@ Build a premium Over-the-Counter (OTC) crypto trading desk mobile and web applic
 | Live Crypto Prices | CoinGecko | LIVE |
 | Database | MongoDB | LIVE |
 
-## Stubbed/Planned Integrations
-| Service | Provider | Status |
-|---------|----------|--------|
-| KYC Verification | Signzy | Stubbed |
-| Push Notifications | Expo | Stubbed (service ready) |
-
 ---
 
-## Tech Stack
-- **Frontend**: Expo (React Native + Web), TypeScript, expo-router
-- **Backend**: FastAPI, Python, Motor (async MongoDB)
-- **Database**: MongoDB
-- **Integrations**: Resend (email), MSG91 (SMS), CoinGecko (prices)
+## Deployment Instructions
 
-## API Credentials
-- **MSG91 Auth Key**: 495975AzbFFpTNWc699c0cd4P1
-- **Resend API Key**: re_d6KmGr7R_JE8zW7Yp2Gt7mSSiPjc4Vz7D
-- **Admin Account**: admin@bharatbit.com / admin123
-
----
-
-## Code Architecture (Refactored)
-```
-/app/backend/
-├── server.py              # Main entry point
-├── core/
-│   ├── config.py          # Environment configuration
-│   ├── database.py        # MongoDB connection
-│   └── dependencies.py    # Auth & security helpers
-├── models/
-│   └── schemas.py         # Pydantic models
-├── routers/
-│   ├── auth.py            # Authentication
-│   ├── admin.py           # Admin with analytics
-│   ├── orders.py          # Order management
-│   ├── wallets.py         # Wallet management
-│   ├── kyc.py             # KYC submission
-│   ├── rates.py           # Asset rates
-│   └── crypto.py          # Live crypto prices
-└── services/
-    ├── email_service.py   # Resend integration
-    ├── sms_service.py     # MSG91 integration
-    ├── crypto_price_service.py  # CoinGecko (NEW)
-    └── push_service.py    # Push notifications (stubbed)
-```
-
----
-
-## Key API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - Register with OTP
-- `POST /api/auth/verify-otp` - Verify registration OTP
-- `POST /api/auth/login` - Login with 2FA
-- `POST /api/auth/verify-2fa` - Verify 2FA OTP
-- `POST /api/auth/forgot-password` - Request reset
-- `POST /api/auth/reset-password` - Reset password
-
-### Crypto Prices
-- `GET /api/crypto/prices` - Live prices (auth required)
-- `GET /api/crypto/prices/{symbol}/history?days=7` - Price history
-- `GET /api/crypto/supported` - List supported cryptos
-
-### Admin Analytics
-- `GET /api/admin/analytics` - Enhanced analytics with:
-  - `overview`: User counts, order stats, KYC stats
-  - `volume`: Buy/sell volume totals
-  - `charts`: daily_orders (7 days), kyc_status breakdown, asset_breakdown
+### Vercel Deployment (Next.js Frontend)
+1. Push code to GitHub via "Save to Github"
+2. In Vercel dashboard, create new project
+3. Select `/bharatbit-web` as root directory
+4. Add environment variable: `NEXT_PUBLIC_API_URL=https://crypto-trading-web.preview.emergentagent.com`
+5. Deploy - **Important**: Disable build cache on redeploy for changes to take effect
 
 ---
 
 ## Pending User Actions
 1. **MSG91 DLT Registration** - Required for SMS delivery in India
-   - Register on DLT platform (Jio/Airtel/Vodafone)
-   - Get Sender ID and Template ID approved
-   - Provide DLT Template ID for code integration
+2. **Vercel Deployment** - Deploy the new Next.js app from `/bharatbit-web`
 
 ---
 
 ## Future Tasks (Backlog)
-- [ ] Full App Store Deployment (EAS)
-- [ ] WhatsApp Notifications (Twilio)
-- [ ] Expo Push Token integration
-- [ ] Advanced charting library for frontend
+- [ ] Live crypto prices on dashboard (connect CoinGecko API)
+- [ ] Order placement flow with backend integration
+- [ ] Admin panel for KYC/Wallet approval
+- [ ] Push notifications (web service worker)
+- [ ] PWA enhancements
 
 ---
 
 ## Last Updated
-- **Date**: February 23, 2026
+- **Date**: February 24, 2026
 - **Session Tasks Completed**:
-  1. MSG91 SMS Integration (API working, DLT pending)
-  2. Backend Refactoring (modular routers)
-  3. Live Crypto Prices (CoinGecko)
-  4. Enhanced Admin Analytics (charts data)
-  5. Push Notification Service (stubbed)
-  6. **Account Type Feature (Individual vs Corporate)** (NEW - Feb 23, 2026)
-     - Registration screen with account type selector
-     - Corporate requires company_name field
-     - Conditional KYC form rendering
-     - Backend validation and storage
-  7. **Enhanced KYC for Corporate Accounts** (NEW - Feb 23, 2026)
-     - Company Registration Certificate
-     - GST Certificate
-     - Board Resolution
-     - Authorized Signatory ID proof
+  1. ✅ Created notification endpoints (KYC/Wallet/Bank)
+  2. ✅ Added 7-digit Client UID generation
+  3. ✅ Fixed KYC form validation (blocks incomplete submissions)
+  4. ✅ Fixed camera capture with proper `capture` attribute
+  5. ✅ Country code dropdown on registration
+  6. ✅ Add Wallet modal fully implemented
+  7. ✅ Add Bank Account modal fully implemented
+  8. ✅ Our Payment Details section
+  9. ✅ Home button in dashboard
+  10. ✅ Trade History and Transaction History tabs
+  11. ✅ Profile section with Client ID
+  12. ✅ All backend tests passing (100%)
 
 ---
 
-## Database Schema Updates (Feb 23, 2026)
-
-### users collection
-```json
-{
-  "id": "uuid",
-  "mobile": "+919876543210",
-  "email": "user@example.com",
-  "password_hash": "...",
-  "account_type": "individual" | "corporate",  // NEW
-  "company_name": "Company Pvt Ltd",  // NEW - for corporate accounts
-  "kyc_status": "pending" | "under_review" | "approved" | "rejected",
-  "role": "user" | "admin",
-  ...
-}
-```
-
-### kyc_documents collection
-```json
-{
-  "id": "uuid",
-  "user_id": "user-uuid",
-  // Individual fields
-  "pan_number": "ABCDE1234F",
-  "pan_image": "base64...",
-  "aadhaar_number": "1234 5678 9012",
-  "aadhaar_front": "base64...",
-  "aadhaar_back": "base64...",
-  "selfie_image": "base64...",
-  "address_proof": "base64...",
-  "passport_number": "...",  // For non-Indian clients
-  "passport_image": "base64...",
-  // Corporate fields (NEW)
-  "company_registration_cert": "base64...",
-  "gst_certificate": "base64...",
-  "board_resolution": "base64...",
-  "authorized_signatory_id": "base64...",
-  "authorized_signatory_name": "John Doe",
-  // Common fields
-  "bank_account_number": "...",
-  "bank_ifsc": "HDFC0001234",
-  "bank_name": "HDFC Bank",
-  ...
-}
-```
+## Test Results
+- Backend Tests: 16/16 passed (100%)
+- Test file: `/app/backend/tests/test_bharatbit_nextjs_backend.py`
