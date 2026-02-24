@@ -836,7 +836,7 @@ export default function Dashboard() {
                 <ol>
                   <li>Transfer via <strong>NEFT, RTGS, or Net Banking</strong></li>
                   <li>Use Client ID <strong>{user?.client_id}</strong> as reference</li>
-                  <li>Deposits credited within <strong>1-2 hours</strong></li>
+                  <li>Deposits are credited and reflected in account within <strong>24 hrs</strong> subject to working days &amp; banking hours</li>
                   <li>After transfer, notify us at <strong>otc@bharatbit.world</strong></li>
                 </ol>
               </div>
