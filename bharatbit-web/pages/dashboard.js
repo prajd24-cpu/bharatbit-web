@@ -27,7 +27,6 @@ function DocumentUpload({ label, onFileSelect, file, required = false }) {
       <div className="upload-options">
         <button type="button" className="upload-btn camera" onClick={openCamera} data-testid={`camera-btn-${label.toLowerCase().replace(/\s+/g, '-')}`}>
           📷 Take Photo
-          {/* Using capture="user" for front camera (selfie), "environment" for back camera (documents) */}
           <input
             ref={cameraRef}
             type="file"
@@ -66,6 +65,18 @@ function DocumentUpload({ label, onFileSelect, file, required = false }) {
   )
 }
 
+// Format price with Indian numbering system
+function formatINR(num) {
+  if (!num) return '₹0'
+  const x = Math.round(num).toString()
+  let lastThree = x.substring(x.length - 3)
+  const otherNumbers = x.substring(0, x.length - 3)
+  if (otherNumbers !== '') {
+    lastThree = ',' + lastThree
+  }
+  return '₹' + otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + lastThree
+}
+
 export default function Dashboard() {
   const router = useRouter()
   const [user, setUser] = useState(null)
@@ -78,6 +89,15 @@ export default function Dashboard() {
   const [isNRI, setIsNRI] = useState(false)
   const [kycError, setKycError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  
+  // Live crypto prices state
+  const [cryptoPrices, setCryptoPrices] = useState({
+    bitcoin: { inr: 0, change: 0 },
+    ethereum: { inr: 0, change: 0 },
+    solana: { inr: 0, change: 0 },
+    tether: { inr: 0, change: 0 }
+  })
+  const [pricesLoading, setPricesLoading] = useState(true)
   
   const [kycData, setKycData] = useState({
     pan_number: '', aadhaar_number: '', passport_number: '', address: '',
@@ -102,7 +122,30 @@ export default function Dashboard() {
     const token = localStorage.getItem('token')
     if (!token) { router.replace('/login'); return }
     fetchProfile(token)
+    fetchCryptoPrices()
+    
+    // Refresh prices every 30 seconds
+    const priceInterval = setInterval(fetchCryptoPrices, 30000)
+    return () => clearInterval(priceInterval)
   }, [router])
+
+  const fetchCryptoPrices = async () => {
+    try {
+      const response = await axios.get(
+        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,tether&vs_currencies=inr&include_24hr_change=true'
+      )
+      setCryptoPrices({
+        bitcoin: { inr: response.data.bitcoin?.inr || 0, change: response.data.bitcoin?.inr_24h_change || 0 },
+        ethereum: { inr: response.data.ethereum?.inr || 0, change: response.data.ethereum?.inr_24h_change || 0 },
+        solana: { inr: response.data.solana?.inr || 0, change: response.data.solana?.inr_24h_change || 0 },
+        tether: { inr: response.data.tether?.inr || 0, change: response.data.tether?.inr_24h_change || 0 }
+      })
+    } catch (err) {
+      console.log('Price fetch error:', err.message)
+    } finally {
+      setPricesLoading(false)
+    }
+  }
 
   const fetchProfile = async (token) => {
     try {
@@ -110,15 +153,27 @@ export default function Dashboard() {
         headers: { Authorization: `Bearer ${token}` }
       })
       setUser(response.data)
+      // Also store in localStorage for persistence
+      localStorage.setItem('userEmail', response.data.email)
+      localStorage.setItem('userMobile', response.data.mobile_number || response.data.mobile)
+      localStorage.setItem('clientUID', response.data.client_uid || response.data.client_id)
     } catch (err) {
-      // Fallback - generate temp user data
-      const storedEmail = localStorage.getItem('userEmail') || 'user@example.com'
+      // Use stored user data from localStorage (set during login)
+      const storedEmail = localStorage.getItem('userEmail')
+      const storedMobile = localStorage.getItem('userMobile')
+      const storedUID = localStorage.getItem('clientUID')
+      const storedKYC = localStorage.getItem('kycStatus')
+      const storedAccountType = localStorage.getItem('accountType')
+      const storedCompanyName = localStorage.getItem('companyName')
+      
       setUser({
-        client_id: localStorage.getItem('clientUID') || Math.floor(1000000 + Math.random() * 9000000).toString(),
-        email: storedEmail,
-        mobile_number: localStorage.getItem('userMobile') || '9999999999',
-        kyc_status: 'pending',
-        account_type: 'individual',
+        client_id: storedUID || Math.floor(1000000 + Math.random() * 9000000).toString(),
+        client_uid: storedUID || 'N/A',
+        email: storedEmail || 'Not available',
+        mobile_number: storedMobile || 'Not available',
+        kyc_status: storedKYC || 'pending',
+        account_type: storedAccountType || 'individual',
+        company_name: storedCompanyName || null,
         profile_pic: null,
         name: '',
         bank_verified: false,
@@ -132,6 +187,11 @@ export default function Dashboard() {
   const handleLogout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('clientUID')
+    localStorage.removeItem('userEmail')
+    localStorage.removeItem('userMobile')
+    localStorage.removeItem('kycStatus')
+    localStorage.removeItem('accountType')
+    localStorage.removeItem('companyName')
     router.push('/login')
   }
 
@@ -219,7 +279,6 @@ export default function Dashboard() {
   const handleKYCSubmit = async () => {
     if (!validateStep3()) return
     
-    // Final validation - ensure all documents are uploaded
     if (!areAllDocumentsUploaded()) {
       setKycError('Please upload all required documents before submitting')
       return
@@ -411,7 +470,6 @@ export default function Dashboard() {
                 <p className="doc-info">Take a clear selfie holding your PAN card next to your face. Front camera will open on mobile.</p>
                 <DocumentUpload label="Selfie with PAN Card" file={kycData.selfie} onFileSelect={file => setKycData({...kycData, selfie: file})} required />
                 
-                {/* Document checklist */}
                 <div className="doc-checklist">
                   <h4>Document Checklist</h4>
                   <div className={`check-item ${kycData.pan_image ? 'done' : ''}`}>
@@ -627,11 +685,35 @@ export default function Dashboard() {
               </div>
               <div className="market-prices">
                 <h2>Live Market Prices</h2>
-                <p className="price-disclaimer">All prices are indicative only</p>
+                <p className="price-disclaimer">All prices are indicative only • Updated every 30 seconds</p>
                 <div className="price-grid">
-                  <div className="price-card"><div className="coin-info"><span className="coin-icon">₿</span><div><span className="coin-name">Bitcoin</span><span className="coin-symbol">BTC</span></div></div><div className="coin-price"><span className="price">₹87,45,000</span><span className="change positive">+2.4%</span></div></div>
-                  <div className="price-card"><div className="coin-info"><span className="coin-icon">Ξ</span><div><span className="coin-name">Ethereum</span><span className="coin-symbol">ETH</span></div></div><div className="coin-price"><span className="price">₹2,32,500</span><span className="change positive">+1.8%</span></div></div>
-                  <div className="price-card"><div className="coin-info"><span className="coin-icon">◎</span><div><span className="coin-name">Solana</span><span className="coin-symbol">SOL</span></div></div><div className="coin-price"><span className="price">₹12,450</span><span className="change negative">-0.5%</span></div></div>
+                  <div className="price-card">
+                    <div className="coin-info"><span className="coin-icon btc">₿</span><div><span className="coin-name">Bitcoin</span><span className="coin-symbol">BTC</span></div></div>
+                    <div className="coin-price">
+                      <span className="price">{pricesLoading ? '...' : formatINR(cryptoPrices.bitcoin.inr)}</span>
+                      <span className={`change ${cryptoPrices.bitcoin.change >= 0 ? 'positive' : 'negative'}`}>
+                        {cryptoPrices.bitcoin.change >= 0 ? '+' : ''}{cryptoPrices.bitcoin.change.toFixed(2)}%
+                      </span>
+                    </div>
+                  </div>
+                  <div className="price-card">
+                    <div className="coin-info"><span className="coin-icon eth">Ξ</span><div><span className="coin-name">Ethereum</span><span className="coin-symbol">ETH</span></div></div>
+                    <div className="coin-price">
+                      <span className="price">{pricesLoading ? '...' : formatINR(cryptoPrices.ethereum.inr)}</span>
+                      <span className={`change ${cryptoPrices.ethereum.change >= 0 ? 'positive' : 'negative'}`}>
+                        {cryptoPrices.ethereum.change >= 0 ? '+' : ''}{cryptoPrices.ethereum.change.toFixed(2)}%
+                      </span>
+                    </div>
+                  </div>
+                  <div className="price-card">
+                    <div className="coin-info"><span className="coin-icon sol">◎</span><div><span className="coin-name">Solana</span><span className="coin-symbol">SOL</span></div></div>
+                    <div className="coin-price">
+                      <span className="price">{pricesLoading ? '...' : formatINR(cryptoPrices.solana.inr)}</span>
+                      <span className={`change ${cryptoPrices.solana.change >= 0 ? 'positive' : 'negative'}`}>
+                        {cryptoPrices.solana.change >= 0 ? '+' : ''}{cryptoPrices.solana.change.toFixed(2)}%
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -655,7 +737,7 @@ export default function Dashboard() {
                 <div className="trade-form">
                   <div className="form-group"><label>Select Asset</label><select><option>Bitcoin (BTC)</option><option>Ethereum (ETH)</option><option>USDT</option></select></div>
                   <div className="form-group"><label>Amount (INR)</label><input type="text" placeholder="Enter amount in INR" /></div>
-                  <div className="indicative-rate"><span>Indicative Rate:</span><span>₹87,45,000 / BTC</span></div>
+                  <div className="indicative-rate"><span>Indicative Rate:</span><span>{formatINR(cryptoPrices.bitcoin.inr)} / BTC</span></div>
                   <button className="btn-trade" disabled={user?.kyc_status !== 'approved'} data-testid="place-trade-btn">{user?.kyc_status !== 'approved' ? 'Complete KYC to Trade' : 'Request Quote'}</button>
                 </div>
               </div>
@@ -674,7 +756,7 @@ export default function Dashboard() {
               {tradeHistory.length === 0 ? (
                 <div className="empty-state"><span className="empty-icon">📈</span><p>No trade history</p><span>Your completed trades will appear here</span></div>
               ) : (
-                <div className="history-list">{/* Trade history items */}</div>
+                <div className="history-list"></div>
               )}
             </div>
           )}
@@ -686,7 +768,7 @@ export default function Dashboard() {
               {transactionHistory.length === 0 ? (
                 <div className="empty-state"><span className="empty-icon">💳</span><p>No transactions</p><span>Your deposits and withdrawals will appear here</span></div>
               ) : (
-                <div className="history-list">{/* Transaction history items */}</div>
+                <div className="history-list"></div>
               )}
             </div>
           )}
@@ -748,8 +830,8 @@ export default function Dashboard() {
                   {user?.profile_pic ? <img src={user.profile_pic} alt="Profile" /> : <span>👤</span>}
                 </div>
                 <div className="profile-main-info">
-                  <h2>{user?.name || 'BharatBit User'}</h2>
-                  <p className="client-uid">Client ID: <strong>{user?.client_id}</strong></p>
+                  <h2>{user?.name || user?.email?.split('@')[0] || 'BharatBit User'}</h2>
+                  <p className="client-uid">Client ID: <strong>{user?.client_id || user?.client_uid}</strong></p>
                   <span className={`verification-badge ${user?.kyc_status}`}>
                     {user?.kyc_status === 'approved' ? '✓ Verified Account' : '⏳ Verification Pending'}
                   </span>
@@ -760,10 +842,13 @@ export default function Dashboard() {
                 <div className="profile-card">
                   <h3>Account Information</h3>
                   <div className="info-list">
-                    <div className="info-item"><span className="label">Client ID</span><span className="value">{user?.client_id}</span></div>
+                    <div className="info-item"><span className="label">Client ID</span><span className="value">{user?.client_id || user?.client_uid}</span></div>
                     <div className="info-item"><span className="label">Email</span><span className="value">{user?.email}</span></div>
-                    <div className="info-item"><span className="label">Mobile</span><span className="value">{user?.mobile_number}</span></div>
-                    <div className="info-item"><span className="label">Account Type</span><span className="value">{user?.account_type || 'Individual'}</span></div>
+                    <div className="info-item"><span className="label">Mobile</span><span className="value">{user?.mobile_number || user?.mobile}</span></div>
+                    <div className="info-item"><span className="label">Account Type</span><span className="value" style={{textTransform:'capitalize'}}>{user?.account_type || 'Individual'}</span></div>
+                    {user?.company_name && (
+                      <div className="info-item"><span className="label">Company</span><span className="value">{user?.company_name}</span></div>
+                    )}
                   </div>
                 </div>
 
@@ -797,6 +882,11 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+
+        {/* Footer */}
+        <footer className="app-footer">
+          <p>BharatBit™ is a trademark owned by G.F.T. Investments Private Limited. All rights reserved © 2026</p>
+        </footer>
       </main>
 
       <style jsx>{`
@@ -831,6 +921,10 @@ export default function Dashboard() {
         .kyc-alert button { padding: 8px 14px; background: #E95721; color: white; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; font-family: inherit; font-size: 13px; }
         
         .content-area { flex: 1; padding: 24px; overflow-y: auto; }
+        
+        /* Footer */
+        .app-footer { padding: 16px 24px; background: #f8f9fa; border-top: 1px solid #e0e0e0; text-align: center; }
+        .app-footer p { margin: 0; font-size: 12px; color: #666; }
         
         /* Modal Styles */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
@@ -877,6 +971,9 @@ export default function Dashboard() {
         .price-card { background: white; padding: 16px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
         .coin-info { display: flex; align-items: center; gap: 10px; }
         .coin-icon { width: 40px; height: 40px; background: #f0f0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .coin-icon.btc { background: #f7931a; color: white; }
+        .coin-icon.eth { background: #627eea; color: white; }
+        .coin-icon.sol { background: #9945ff; color: white; }
         .coin-name { display: block; font-weight: 600; color: #1a1a2e; font-size: 14px; }
         .coin-symbol { font-size: 12px; color: #666; }
         .coin-price { text-align: right; }
