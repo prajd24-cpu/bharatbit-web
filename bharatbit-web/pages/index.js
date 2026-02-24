@@ -254,6 +254,27 @@ export default function Home() {
           color: #666;
           line-height: 1.5;
         }
+        .invitation-banner {
+          background: #1a1a2e;
+          padding: 24px 40px;
+          text-align: center;
+          border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .invitation-banner .invitation-line {
+          display: block;
+          font-size: 12px;
+          font-weight: 600;
+          color: #E95721;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          margin-bottom: 4px;
+        }
+        .invitation-banner .client-line {
+          display: block;
+          font-size: 11px;
+          color: rgba(255,255,255,0.5);
+          letter-spacing: 1px;
+        }
         .footer {
           background: #1a1a2e;
           padding: 40px;
