@@ -94,7 +94,7 @@ export default function Register() {
       <nav className="navbar">
         <div className="logo" onClick={() => router.push('/')}>
           <div className="logo-icon">B</div>
-          <span className="logo-text">BharatBit</span>
+          <span className="logo-text">BharatBit<sup>®</sup></span>
         </div>
         <div className="nav-links">
           Already have an account? <a onClick={() => router.push('/login')}>Sign In</a>
