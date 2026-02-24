@@ -848,7 +848,7 @@ export default function Dashboard() {
               <div className="profile-header-card">
                 <div className="profile-avatar"><span>{Icons.profile}</span></div>
                 <div className="profile-main-info">
-                  <h2>{user?.name || user?.email?.split('@')[0] || 'BharatBit User'}</h2>
+                  <h2>{user?.full_name || user?.name || user?.email?.split('@')[0] || 'BharatBit User'}</h2>
                   <p className="client-uid">Client ID: <strong>{user?.client_id || user?.client_uid}</strong></p>
                   <span className={`verification-badge ${user?.kyc_status}`}>
                     {user?.kyc_status === 'approved' ? '✓ Verified Account' : 'Verification Pending'}
@@ -859,6 +859,7 @@ export default function Dashboard() {
                 <div className="profile-card">
                   <h3>Account Information</h3>
                   <div className="info-list">
+                    <div className="info-item"><span className="label">Full Name</span><span className="value">{user?.full_name || user?.name || '-'}</span></div>
                     <div className="info-item"><span className="label">Client ID</span><span className="value">{user?.client_id || user?.client_uid}</span></div>
                     <div className="info-item"><span className="label">Email</span><span className="value">{user?.email}</span></div>
                     <div className="info-item"><span className="label">Mobile</span><span className="value">{user?.mobile_number || user?.mobile}</span></div>
