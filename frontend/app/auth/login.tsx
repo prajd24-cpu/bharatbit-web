@@ -79,6 +79,7 @@ export default function LoginScreen() {
             <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#1a1a2e', margin: '0 0 8px' }}>
               Welcome Back
             </h1>
+            <p style={{ fontSize: '10px', color: '#999', margin: '4px 0 0' }}>v2.1</p>
             <p style={{ fontSize: '16px', color: '#666', margin: 0 }}>
               Sign in to your private vault
             </p>
