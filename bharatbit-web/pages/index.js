@@ -24,10 +24,7 @@ export default function Home() {
             Execute large crypto trades with institutional-grade security, 
             competitive rates, and personalized service.
           </p>
-          <div className="invitation-text">
-            <span className="invitation-line">By Invitation Only</span>
-            <span className="client-line">For High Net-Worth Clients</span>
-          </div>
+          <p className="tagline-text">Discreet. Secure. Direct.</p>
           <div className="hero-buttons">
             <button className="btn-primary-large" onClick={() => router.push('/register')}>
               Create Account
