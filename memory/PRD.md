@@ -171,7 +171,7 @@ Build a premium Over-the-Counter (OTC) crypto trading desk web application named
 1. Push code to GitHub via "Save to Github"
 2. In Vercel dashboard, create new project
 3. Select `/bharatbit-web` as root directory
-4. Add environment variable: `NEXT_PUBLIC_API_URL=https://crypto-trading-web.preview.emergentagent.com`
+4. Add environment variable: `NEXT_PUBLIC_API_URL=https://crypto-trading-desk.preview.emergentagent.com`
 5. Deploy - **Important**: Disable build cache on redeploy for changes to take effect
 
 ---

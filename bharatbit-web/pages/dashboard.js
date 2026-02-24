@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/router'
 import axios from 'axios'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://crypto-trading-web.preview.emergentagent.com'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://crypto-trading-desk.preview.emergentagent.com'
 
 // Sleek Fintech Icons (SVG)
 const Icons = {

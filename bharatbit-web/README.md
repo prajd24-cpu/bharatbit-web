@@ -34,7 +34,7 @@ yarn dev
 3. Click "Add New Project"
 4. Import your GitHub repository
 5. Add environment variable:
-   - `NEXT_PUBLIC_API_URL` = `https://crypto-trading-web.preview.emergentagent.com`
+   - `NEXT_PUBLIC_API_URL` = `https://crypto-trading-desk.preview.emergentagent.com`
 6. Click "Deploy"
 
 ## Tech Stack

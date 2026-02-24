@@ -31,7 +31,7 @@ cat > next.config.js << 'EOF'
 const nextConfig = {
   reactStrictMode: true,
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://crypto-trading-web.preview.emergentagent.com'
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://crypto-trading-desk.preview.emergentagent.com'
   }
 }
 module.exports = nextConfig
@@ -153,7 +153,7 @@ cat > pages/login.js << 'EOF'
 import { useState } from 'react'
 import { useRouter } from 'next/router'
 import axios from 'axios'
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://crypto-trading-web.preview.emergentagent.com'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://crypto-trading-desk.preview.emergentagent.com'
 export default function Login() {
   const router = useRouter()
   const [identifier, setIdentifier] = useState('')
@@ -215,7 +215,7 @@ cat > pages/verify-otp.js << 'EOF'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
 import axios from 'axios'
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://crypto-trading-web.preview.emergentagent.com'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://crypto-trading-desk.preview.emergentagent.com'
 export default function VerifyOTP() {
   const router = useRouter()
   const inputRef = useRef(null)

@@ -12,7 +12,7 @@ Premium OTC crypto trading desk for high-net-worth clients.
 4. Import your GitHub repository
 5. Select the `frontend` folder as root directory
 6. Add environment variable:
-   - `EXPO_PUBLIC_BACKEND_URL` = `https://crypto-trading-web.preview.emergentagent.com`
+   - `EXPO_PUBLIC_BACKEND_URL` = `https://crypto-trading-desk.preview.emergentagent.com`
 7. Click Deploy
 
 ### Environment Variables

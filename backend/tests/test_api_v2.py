@@ -21,7 +21,7 @@ import uuid
 import time
 
 # BASE_URL from environment - DO NOT add default
-BASE_URL = os.environ.get('EXPO_PUBLIC_BACKEND_URL', 'https://crypto-trading-web.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('EXPO_PUBLIC_BACKEND_URL', 'https://crypto-trading-desk.preview.emergentagent.com').rstrip('/')
 
 # Test data storage for auth tokens
 AUTH_DATA = {}

@@ -2,7 +2,7 @@
 
 ## 🎯 What Clients See & How to Test
 
-### **Preview URL:** https://crypto-trading-web.preview.emergentagent.com
+### **Preview URL:** https://crypto-trading-desk.preview.emergentagent.com
 
 ---
 
