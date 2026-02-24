@@ -20,7 +20,14 @@ logger = logging.getLogger(__name__)
 
 @router.post("/register")
 async def register(data: RegisterRequest):
-    existing = await db.users.find_one({"$or": [{"mobile": data.mobile}, {"email": data.email}]})
+    # Get mobile number (support both mobile and mobile_number fields)
+    mobile_number = data.mobile or data.mobile_number or ""
+    if data.country_code and mobile_number and not mobile_number.startswith('+'):
+        full_mobile = f"{data.country_code}{mobile_number}"
+    else:
+        full_mobile = mobile_number
+    
+    existing = await db.users.find_one({"$or": [{"mobile": full_mobile}, {"email": data.email}]})
     if existing:
         raise HTTPException(status_code=400, detail="User already exists")
     
@@ -37,7 +44,7 @@ async def register(data: RegisterRequest):
     await db.otp_store.insert_one(otp_data.dict())
     
     user = User(
-        mobile=data.mobile,
+        mobile=full_mobile,
         email=data.email,
         password_hash=hash_password(data.password),
         account_type=data.account_type,
