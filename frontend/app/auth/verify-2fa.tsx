@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert, TextInput, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableWithoutFeedback, Keyboard, Platform } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Button } from '../../components/Button';
+import { Input } from '../../components/Input';
+import { Card } from '../../components/Card';
 import { useAuth } from '../../contexts/AuthContext';
+import { theme } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function Verify2FAScreen() {
@@ -10,8 +15,10 @@ export default function Verify2FAScreen() {
   const { verify2FA } = useAuth();
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const mobile = params.mobile as string;
+  const mockOTP = params.mock_otp as string;
 
   const handleOtpChange = (text: string) => {
     const numericValue = text.replace(/[^0-9]/g, '');
@@ -20,9 +27,23 @@ export default function Verify2FAScreen() {
     }
   };
 
+  const showAlert = (title: string, message: string) => {
+    if (Platform.OS === 'web') {
+      setError(message);
+      window.alert(`${title}: ${message}`);
+    } else {
+      Alert.alert(title, message);
+    }
+  };
+
   const handleVerify = async () => {
+    setError('');
+    if (Platform.OS !== 'web') {
+      Keyboard.dismiss();
+    }
+    
     if (!otp || otp.length !== 6) {
-      Alert.alert('Error', 'Please enter a valid 6-digit OTP');
+      showAlert('Error', 'Please enter a valid 6-digit OTP');
       return;
     }
 
@@ -31,16 +52,16 @@ export default function Verify2FAScreen() {
       await verify2FA(mobile, otp);
       router.replace('/(tabs)/dashboard');
     } catch (error: any) {
-      Alert.alert('Verification Failed', error.message);
+      showAlert('Verification Failed', error.message || 'An error occurred');
     } finally {
       setLoading(false);
     }
   };
 
-  // For WEB - use pure HTML
+  // Web version with pure HTML for better keyboard support
   if (Platform.OS === 'web') {
     return (
-      <div className="otp-container" style={{
+      <div style={{
         minHeight: '100vh',
         backgroundColor: '#f8f9fa',
         display: 'flex',
@@ -52,263 +73,289 @@ export default function Verify2FAScreen() {
         <div style={{
           width: '100%',
           maxWidth: '400px',
-          textAlign: 'center' as const,
         }}>
-          <div style={{
-            width: '80px',
-            height: '80px',
-            borderRadius: '40px',
-            backgroundColor: 'rgba(233, 87, 33, 0.1)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 20px',
-          }}>
-            <Ionicons name="shield-checkmark" size={48} color="#E95721" />
-          </div>
-          
-          <h1 style={{
-            fontSize: '24px',
-            fontWeight: 700,
-            color: '#1a1a2e',
-            margin: '0 0 8px',
-          }}>Two-Factor Authentication</h1>
-          
-          <p style={{
-            fontSize: '15px',
-            color: '#666',
-            margin: '0 0 4px',
-          }}>Enter the OTP sent to your email & phone</p>
-          
-          <p style={{
-            fontSize: '16px',
-            fontWeight: 600,
-            color: '#E95721',
-            margin: '0 0 32px',
-          }}>{mobile}</p>
-
-          <label style={{
-            display: 'block',
-            fontSize: '12px',
-            fontWeight: 600,
-            color: '#666',
-            marginBottom: '10px',
-            textAlign: 'left' as const,
-            letterSpacing: '0.5px',
-          }}>ENTER 6-DIGIT OTP</label>
-          
-          <input
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            maxLength={6}
-            value={otp}
-            onChange={(e) => handleOtpChange(e.target.value)}
-            placeholder="000000"
-            autoComplete="one-time-code"
-            style={{
-              width: '100%',
-              height: '60px',
+          {/* Header */}
+          <div style={{ textAlign: 'center' as const, marginBottom: '24px' }}>
+            <div style={{
+              width: '80px',
+              height: '80px',
+              borderRadius: '40px',
+              backgroundColor: 'rgba(233, 87, 33, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 20px',
+            }}>
+              <Ionicons name="shield-checkmark" size={48} color="#E95721" />
+            </div>
+            <h1 style={{
               fontSize: '24px',
-              textAlign: 'center' as const,
-              letterSpacing: '10px',
-              border: '2px solid #E95721',
-              borderRadius: '12px',
-              backgroundColor: '#ffffff',
+              fontWeight: 700,
               color: '#1a1a2e',
-              padding: '0 16px',
-              boxSizing: 'border-box' as const,
-              marginBottom: '20px',
-              caretColor: '#E95721',
-            }}
-          />
-          
-          <button
-            onClick={handleVerify}
-            disabled={loading || otp.length !== 6}
-            style={{
-              width: '100%',
-              height: '56px',
-              fontSize: '17px',
-              fontWeight: 600,
-              color: '#fff',
-              border: 'none',
-              borderRadius: '14px',
-              cursor: otp.length !== 6 ? 'not-allowed' : 'pointer',
-              background: otp.length !== 6 
-                ? 'linear-gradient(135deg, #ccc 0%, #aaa 100%)' 
-                : 'linear-gradient(135deg, #E95721 0%, #ff7043 50%, #E95721 100%)',
-              boxShadow: otp.length !== 6 
-                ? 'none' 
-                : '0 4px 20px rgba(233, 87, 33, 0.4), inset 0 1px 0 rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease',
-            }}
-          >
-            {loading ? 'Verifying...' : 'Verify & Login'}
-          </button>
-
-          <button
-            onClick={() => alert('A new OTP has been sent')}
-            style={{
-              marginTop: '24px',
-              padding: '12px 20px',
-              background: 'none',
-              border: 'none',
-              color: '#E95721',
+              margin: '0 0 8px',
+            }}>Two-Factor Authentication</h1>
+            <p style={{
               fontSize: '15px',
-              fontWeight: 500,
-              cursor: 'pointer',
-            }}
-          >
-            Didn't receive OTP? Resend
-          </button>
+              color: '#666',
+              margin: '0 0 4px',
+            }}>Enter the OTP sent to your email & phone</p>
+            <p style={{
+              fontSize: '16px',
+              fontWeight: 600,
+              color: '#E95721',
+              margin: '0',
+            }}>{mobile}</p>
+          </div>
+
+          {/* Mock OTP Display - For Development */}
+          {mockOTP && (
+            <div style={{
+              backgroundColor: '#fef3cd',
+              border: '1px solid #ffc107',
+              borderRadius: '12px',
+              padding: '16px',
+              marginBottom: '24px',
+              textAlign: 'center' as const,
+            }}>
+              <p style={{
+                fontSize: '12px',
+                color: '#856404',
+                fontWeight: 600,
+                margin: '0 0 8px',
+                textTransform: 'uppercase' as const,
+              }}>Mock OTP (Dev Only)</p>
+              <p style={{
+                fontSize: '28px',
+                fontWeight: 700,
+                color: '#d4a106',
+                margin: 0,
+                letterSpacing: '4px',
+              }}>{mockOTP}</p>
+            </div>
+          )}
+
+          {/* Card */}
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius: '16px',
+            padding: '24px',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+          }}>
+            {/* Error message */}
+            {error && (
+              <div style={{
+                backgroundColor: '#fee2e2',
+                color: '#dc2626',
+                padding: '12px',
+                borderRadius: '8px',
+                marginBottom: '16px',
+                fontSize: '14px',
+              }}>
+                {error}
+              </div>
+            )}
+
+            {/* OTP Input */}
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '12px',
+                fontWeight: 600,
+                color: '#666',
+                marginBottom: '10px',
+                textTransform: 'uppercase' as const,
+                letterSpacing: '0.5px',
+              }}>Enter 6-Digit OTP</label>
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={6}
+                value={otp}
+                onChange={(e) => handleOtpChange(e.target.value)}
+                placeholder="000000"
+                autoComplete="one-time-code"
+                autoFocus
+                style={{
+                  width: '100%',
+                  height: '60px',
+                  fontSize: '28px',
+                  textAlign: 'center' as const,
+                  letterSpacing: '12px',
+                  border: '2px solid #E95721',
+                  borderRadius: '12px',
+                  backgroundColor: '#ffffff',
+                  color: '#1a1a2e',
+                  padding: '0 16px',
+                  boxSizing: 'border-box' as const,
+                  outline: 'none',
+                  caretColor: '#E95721',
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && otp.length === 6) {
+                    handleVerify();
+                  }
+                }}
+              />
+            </div>
+
+            {/* Verify Button */}
+            <button
+              type="button"
+              onClick={handleVerify}
+              disabled={loading || otp.length !== 6}
+              style={{
+                width: '100%',
+                height: '56px',
+                backgroundColor: loading || otp.length !== 6 ? '#ccc' : '#E95721',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '12px',
+                fontSize: '17px',
+                fontWeight: 600,
+                cursor: loading || otp.length !== 6 ? 'not-allowed' : 'pointer',
+                boxShadow: loading || otp.length !== 6 ? 'none' : '0 4px 14px rgba(233, 87, 33, 0.3)',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              {loading ? 'Verifying...' : 'Verify & Login'}
+            </button>
+          </div>
+
+          {/* Footer */}
+          <div style={{ textAlign: 'center' as const, marginTop: '24px' }}>
+            <button
+              type="button"
+              onClick={() => window.alert('A new OTP has been sent to your phone and email.')}
+              style={{
+                padding: '12px 24px',
+                backgroundColor: 'transparent',
+                color: '#E95721',
+                border: 'none',
+                fontSize: '15px',
+                fontWeight: 500,
+                cursor: 'pointer',
+              }}
+            >
+              Didn't receive OTP? Resend
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
-  // For NATIVE (iOS/Android)
+  // Native (iOS/Android) version
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.iconContainer}>
-          <Ionicons name="shield-checkmark" size={48} color="#E95721" />
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <Ionicons name="shield-checkmark" size={48} color={theme.colors.primary} />
+            <Text style={styles.title}>Two-Factor Authentication</Text>
+            <Text style={styles.subtitle}>Enter the OTP sent to</Text>
+            <Text style={styles.mobile}>{mobile}</Text>
+            {mockOTP && (
+              <View style={styles.mockContainer}>
+                <Text style={styles.mockLabel}>Mock OTP (Dev Only):</Text>
+                <Text style={styles.mockOTP}>{mockOTP}</Text>
+              </View>
+            )}
+          </View>
+
+          <Card>
+            <Input
+              label="Enter 2FA OTP"
+              value={otp}
+              onChangeText={handleOtpChange}
+              placeholder="6-digit OTP"
+              keyboardType="number-pad"
+              maxLength={6}
+              returnKeyType="done"
+              onSubmitEditing={handleVerify}
+            />
+            <Button
+              title="Verify & Login"
+              onPress={handleVerify}
+              loading={loading}
+              size="lg"
+              style={{ marginTop: theme.spacing.md }}
+            />
+          </Card>
+
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Didn't receive the OTP?</Text>
+            <Button
+              title="Resend OTP"
+              onPress={() => Alert.alert('OTP Sent', 'A new OTP has been sent')}
+              variant="outline"
+              size="sm"
+              style={{ marginTop: theme.spacing.sm }}
+            />
+          </View>
         </View>
-        <Text style={styles.title}>Two-Factor Authentication</Text>
-        <Text style={styles.subtitle}>Enter the OTP sent to your email & phone</Text>
-        <Text style={styles.mobile}>{mobile}</Text>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>ENTER 6-DIGIT OTP</Text>
-          <TextInput
-            style={styles.input}
-            value={otp}
-            onChangeText={handleOtpChange}
-            placeholder="000000"
-            placeholderTextColor="#999"
-            keyboardType="numeric"
-            maxLength={6}
-            textContentType="oneTimeCode"
-          />
-        </View>
-
-        <TouchableOpacity 
-          style={[styles.button, otp.length !== 6 && styles.buttonDisabled]}
-          onPress={handleVerify}
-          disabled={loading || otp.length !== 6}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Verify & Login</Text>
-          )}
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={styles.resendButton}
-          onPress={() => Alert.alert('OTP Sent', 'A new OTP has been sent')}
-        >
-          <Text style={styles.resendText}>Didn't receive OTP? Resend</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: theme.colors.background,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 60,
-    alignItems: 'center',
-  },
-  iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'rgba(233, 87, 33, 0.1)',
+    padding: theme.spacing.xl,
     justifyContent: 'center',
+  },
+  header: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: theme.spacing.xxl,
   },
   title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#1a1a2e',
+    fontSize: theme.fontSize.xl,
+    fontWeight: theme.fontWeight.bold,
+    color: theme.colors.textPrimary,
+    marginTop: theme.spacing.md,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 15,
-    color: '#666',
-    marginTop: 8,
-    textAlign: 'center',
+    fontSize: theme.fontSize.md,
+    color: theme.colors.textSecondary,
+    marginTop: theme.spacing.sm,
   },
   mobile: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#E95721',
-    marginTop: 4,
+    fontSize: theme.fontSize.lg,
+    fontWeight: theme.fontWeight.semibold,
+    color: theme.colors.gold,
+    marginTop: theme.spacing.xs,
   },
-  inputContainer: {
-    width: '100%',
-    marginTop: 32,
-    marginBottom: 20,
+  mockContainer: {
+    marginTop: theme.spacing.lg,
+    padding: theme.spacing.md,
+    backgroundColor: theme.colors.card,
+    borderRadius: theme.borderRadius.sm,
+    borderWidth: 1,
+    borderColor: theme.colors.warning,
   },
-  label: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#666',
-    marginBottom: 10,
-    letterSpacing: 0.5,
+  mockLabel: {
+    fontSize: theme.fontSize.xs,
+    color: theme.colors.warning,
+    fontWeight: theme.fontWeight.semibold,
   },
-  input: {
-    width: '100%',
-    height: 60,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#E95721',
-    paddingHorizontal: 16,
-    fontSize: 24,
-    color: '#1a1a2e',
-    textAlign: 'center',
-    letterSpacing: 10,
+  mockOTP: {
+    fontSize: theme.fontSize.xl,
+    color: theme.colors.gold,
+    fontWeight: theme.fontWeight.bold,
+    marginTop: theme.spacing.xs,
   },
-  button: {
-    width: '100%',
-    height: 56,
-    borderRadius: 14,
-    backgroundColor: '#E95721',
-    justifyContent: 'center',
+  footer: {
     alignItems: 'center',
-    shadowColor: '#E95721',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
+    marginTop: theme.spacing.xl,
   },
-  buttonDisabled: {
-    backgroundColor: '#ccc',
-    shadowOpacity: 0,
-    elevation: 0,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 17,
-    fontWeight: '600',
-  },
-  resendButton: {
-    marginTop: 24,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-  },
-  resendText: {
-    color: '#E95721',
-    fontSize: 15,
-    fontWeight: '500',
+  footerText: {
+    color: theme.colors.textMuted,
+    fontSize: theme.fontSize.sm,
   },
 });
