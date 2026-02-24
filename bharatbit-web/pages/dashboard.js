@@ -923,7 +923,7 @@ export default function Dashboard() {
         .sidebar { width: 240px; background: #1a1a2e; color: white; display: flex; flex-direction: column; }
         .sidebar-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .logo { display: flex; align-items: center; gap: 10px; }
-        .logo-icon { width: 36px; height: 36px; background: #E95721; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: white; }
+        .logo-icon { width: 36px; height: 36px; background: #E95721; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-family: 'Bungee Outline', cursive; font-weight: 400; color: white; }
         .logo span { font-size: 18px; font-weight: 700; }
         .sidebar-nav { flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
         .nav-item { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: transparent; border: none; border-radius: 8px; color: rgba(255,255,255,0.7); font-size: 14px; cursor: pointer; text-align: left; font-family: inherit; transition: all 0.2s; }
