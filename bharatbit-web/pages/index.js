@@ -109,7 +109,7 @@ export default function Home() {
       <style jsx>{`
         .landing-page {
           min-height: 100vh;
-          background: #0f0f1a;
+          background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
           color: white;
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
           position: relative;
@@ -117,13 +117,7 @@ export default function Home() {
         }
         
         .bg-pattern {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: 100vh;
-          background: radial-gradient(ellipse at 50% 0%, rgba(233, 87, 33, 0.08) 0%, transparent 60%);
-          pointer-events: none;
+          display: none;
         }
 
         /* Navbar */
