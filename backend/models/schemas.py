@@ -171,13 +171,23 @@ class SavedWallet(BaseModel):
 
 # ==================== REQUEST MODELS ====================
 class RegisterRequest(BaseModel):
-    mobile: str
+    mobile: Optional[str] = None
+    mobile_number: Optional[str] = None  # Alias for mobile
+    country_code: Optional[str] = "+91"  # Country code
     email: EmailStr
     password: str
     account_type: AccountType = AccountType.INDIVIDUAL
     company_name: Optional[str] = None  # Required for corporate accounts
     referral_code: Optional[str] = None
     invite_code: Optional[str] = None
+    
+    @property
+    def full_mobile(self) -> str:
+        """Get full mobile number with country code"""
+        mobile_num = self.mobile or self.mobile_number or ""
+        if mobile_num and self.country_code and not mobile_num.startswith('+'):
+            return f"{self.country_code}{mobile_num}"
+        return mobile_num
 
 class LoginRequest(BaseModel):
     identifier: Optional[str] = None  # Can be email or mobile
