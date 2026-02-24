@@ -172,6 +172,7 @@ class SavedWallet(BaseModel):
 
 # ==================== REQUEST MODELS ====================
 class RegisterRequest(BaseModel):
+    full_name: Optional[str] = None  # User's full name
     mobile: Optional[str] = None
     mobile_number: Optional[str] = None  # Alias for mobile
     country_code: Optional[str] = "+91"  # Country code
