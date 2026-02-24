@@ -343,20 +343,22 @@ class TestAuthEndpoints:
 class TestAPIStructure:
     """Verify API structure and routes exist"""
     
-    def test_root_endpoint(self):
-        """Root endpoint should return API info"""
-        response = requests.get(f"{BASE_URL}/")
+    def test_api_health_endpoint(self):
+        """Health endpoint should return API info"""
+        response = requests.get(f"{BASE_URL}/api/health")
         assert response.status_code == 200
         data = response.json()
-        assert "name" in data
+        assert "status" in data
         assert "version" in data
-        print(f"✓ Root endpoint: {data}")
+        print(f"✓ API health endpoint: {data}")
     
-    def test_api_docs_available(self):
-        """OpenAPI docs should be available"""
-        response = requests.get(f"{BASE_URL}/docs")
-        assert response.status_code == 200
-        print(f"✓ API docs available at /docs")
+    def test_notification_endpoints_exist(self):
+        """Notification endpoints should be accessible"""
+        # Test KYC notification endpoint exists (use OPTIONS or wrong payload to check route)
+        response = requests.post(f"{BASE_URL}/api/notifications/send-kyc", json={})
+        # Should return 422 (validation error) not 404
+        assert response.status_code == 422, f"Expected 422 validation error, got {response.status_code}"
+        print(f"✓ Notification endpoints are accessible")
 
 
 # Run tests if executed directly
