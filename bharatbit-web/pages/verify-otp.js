@@ -13,7 +13,6 @@ export default function VerifyOTP() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    // Get mobile from localStorage
     const storedMobile = localStorage.getItem('otpMobile')
     if (!storedMobile) {
       router.replace('/login')
@@ -21,10 +20,12 @@ export default function VerifyOTP() {
     }
     setMobile(storedMobile)
     
-    // Auto-focus the input
-    if (inputRef.current) {
-      inputRef.current.focus()
-    }
+    // Focus input after mount
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus()
+      }
+    }, 100)
   }, [router])
 
   const handleOtpChange = (e) => {
@@ -50,7 +51,6 @@ export default function VerifyOTP() {
         otp
       })
 
-      // Store token and redirect to dashboard
       localStorage.setItem('token', response.data.access_token)
       localStorage.removeItem('otpMobile')
       router.push('/dashboard')
@@ -61,60 +61,237 @@ export default function VerifyOTP() {
     }
   }
 
-  const handleResend = () => {
-    alert('A new OTP has been sent to your phone and email.')
+  const handleResend = async () => {
+    try {
+      await axios.post(`${API_URL}/api/auth/resend-otp`, { mobile })
+      alert('A new OTP has been sent to your phone and email.')
+    } catch (err) {
+      alert('Failed to resend OTP. Please try again.')
+    }
   }
 
   return (
-    <div className="container">
-      <div className="card">
-        <div className="header">
-          <div className="icon-wrapper">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              <path d="M9 12l2 2 4-4"/>
-            </svg>
-          </div>
-          <h1>Two-Factor Authentication</h1>
-          <p className="subtitle">Enter the OTP sent to your email & phone</p>
-          <p className="mobile-number">{mobile}</p>
+    <div className="verify-page">
+      <nav className="navbar">
+        <div className="logo" onClick={() => router.push('/')}>
+          <div className="logo-icon">B</div>
+          <span className="logo-text">BharatBit</span>
         </div>
+      </nav>
 
-        <form className="form-card" onSubmit={handleSubmit}>
+      <main className="container">
+        <div className="card">
+          <div className="header">
+            <div className="icon-wrapper">
+              <div className="shield-icon">🛡️</div>
+            </div>
+            <h1>Verify Your Identity</h1>
+            <p>Enter the 6-digit OTP sent to</p>
+            <p className="mobile-number">{mobile}</p>
+          </div>
+
           {error && <div className="error-message">{error}</div>}
 
-          <div className="form-group">
-            <label htmlFor="otp">Enter 6-Digit OTP</label>
-            <input
-              ref={inputRef}
-              id="otp"
-              type="tel"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              maxLength={6}
-              value={otp}
-              onChange={handleOtpChange}
-              placeholder="000000"
-              autoComplete="one-time-code"
-              className="otp-input"
-            />
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label>Enter OTP</label>
+              <input
+                ref={inputRef}
+                type="tel"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={6}
+                value={otp}
+                onChange={handleOtpChange}
+                placeholder="000000"
+                autoComplete="one-time-code"
+                className="otp-input"
+              />
+            </div>
+
+            <button type="submit" className="btn-primary" disabled={loading || otp.length !== 6}>
+              {loading ? 'Verifying...' : 'Verify & Continue'}
+            </button>
+          </form>
+
+          <div className="footer">
+            <p>Didn't receive the code?</p>
+            <button type="button" className="resend-btn" onClick={handleResend}>
+              Resend OTP
+            </button>
           </div>
-
-          <button 
-            type="submit" 
-            className="btn btn-primary" 
-            disabled={loading || otp.length !== 6}
-          >
-            {loading ? 'Verifying...' : 'Verify & Login'}
-          </button>
-        </form>
-
-        <div className="footer">
-          <button type="button" className="resend-btn" onClick={handleResend}>
-            Didn't receive OTP? Resend
-          </button>
         </div>
-      </div>
+      </main>
+
+      <style jsx>{`
+        .verify-page {
+          min-height: 100vh;
+          background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+        .navbar {
+          display: flex;
+          justify-content: center;
+          padding: 20px 40px;
+          background: white;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .logo {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          cursor: pointer;
+        }
+        .logo-icon {
+          width: 40px;
+          height: 40px;
+          background: #E95721;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 20px;
+          font-weight: 700;
+          color: white;
+        }
+        .logo-text {
+          font-size: 22px;
+          font-weight: 700;
+          color: #1a1a2e;
+        }
+        .container {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: calc(100vh - 80px);
+          padding: 40px 20px;
+        }
+        .card {
+          width: 100%;
+          max-width: 420px;
+          background: white;
+          border-radius: 20px;
+          padding: 40px;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .header {
+          text-align: center;
+          margin-bottom: 32px;
+        }
+        .icon-wrapper {
+          margin-bottom: 20px;
+        }
+        .shield-icon {
+          font-size: 56px;
+        }
+        .header h1 {
+          font-size: 26px;
+          color: #1a1a2e;
+          margin-bottom: 8px;
+        }
+        .header p {
+          color: #666;
+        }
+        .mobile-number {
+          font-size: 18px;
+          font-weight: 600;
+          color: #E95721;
+          margin-top: 4px;
+        }
+        .error-message {
+          background: #fee2e2;
+          color: #dc2626;
+          padding: 12px;
+          border-radius: 10px;
+          margin-bottom: 20px;
+          font-size: 14px;
+        }
+        .form-group {
+          margin-bottom: 24px;
+        }
+        .form-group label {
+          display: block;
+          font-size: 13px;
+          font-weight: 600;
+          color: #666;
+          margin-bottom: 12px;
+          text-transform: uppercase;
+          text-align: center;
+        }
+        .otp-input {
+          width: 100%;
+          height: 64px;
+          padding: 0 16px;
+          font-size: 32px;
+          font-weight: 600;
+          text-align: center;
+          letter-spacing: 16px;
+          border: 2px solid #E95721;
+          border-radius: 14px;
+          background: white;
+          color: #1a1a2e;
+        }
+        .otp-input:focus {
+          outline: none;
+          box-shadow: 0 0 0 4px rgba(233, 87, 33, 0.15);
+        }
+        .otp-input::placeholder {
+          color: #ddd;
+          letter-spacing: 16px;
+        }
+        .btn-primary {
+          width: 100%;
+          height: 56px;
+          background: #E95721;
+          color: white;
+          border: none;
+          border-radius: 12px;
+          font-size: 17px;
+          font-weight: 600;
+          cursor: pointer;
+          box-shadow: 0 4px 14px rgba(233, 87, 33, 0.3);
+          transition: all 0.2s;
+        }
+        .btn-primary:disabled {
+          background: #ccc;
+          box-shadow: none;
+          cursor: not-allowed;
+        }
+        .footer {
+          text-align: center;
+          margin-top: 28px;
+          padding-top: 24px;
+          border-top: 1px solid #f0f0f0;
+        }
+        .footer p {
+          color: #999;
+          font-size: 14px;
+          margin-bottom: 8px;
+        }
+        .resend-btn {
+          background: none;
+          border: none;
+          color: #E95721;
+          font-size: 15px;
+          font-weight: 600;
+          cursor: pointer;
+          padding: 8px 16px;
+        }
+        .resend-btn:hover {
+          text-decoration: underline;
+        }
+        @media (max-width: 768px) {
+          .navbar {
+            padding: 16px 20px;
+          }
+          .card {
+            padding: 28px 24px;
+          }
+          .otp-input {
+            font-size: 26px;
+            letter-spacing: 12px;
+          }
+        }
+      `}</style>
     </div>
   )
 }
