@@ -112,7 +112,7 @@ const Icons = {
 }
 
 // Document Upload Component with Camera
-function DocumentUpload({ label, onFileSelect, file, required = false }) {
+function DocumentUpload({ label, onFileSelect, file, required = false, cameraOnly = false }) {
   const cameraRef = useRef(null)
   const fileRef = useRef(null)
 
@@ -120,8 +120,8 @@ function DocumentUpload({ label, onFileSelect, file, required = false }) {
     <div className="document-upload" data-testid={`doc-upload-${label.toLowerCase().replace(/\s+/g, '-')}`}>
       <label>{label} {required && <span className="required">*</span>}</label>
       <div className="upload-options">
-        <button type="button" className="upload-btn camera" onClick={() => cameraRef.current?.click()}>
-          <span className="icon">{Icons.camera}</span> Take Photo
+        <button type="button" className={`upload-btn camera ${cameraOnly ? 'full-width' : ''}`} onClick={() => cameraRef.current?.click()}>
+          <span className="icon">{Icons.camera}</span> {cameraOnly ? 'Take Selfie' : 'Take Photo'}
           <input
             ref={cameraRef}
             type="file"
@@ -131,16 +131,18 @@ function DocumentUpload({ label, onFileSelect, file, required = false }) {
             style={{ display: 'none' }}
           />
         </button>
-        <button type="button" className="upload-btn file" onClick={() => fileRef.current?.click()}>
-          <span className="icon">{Icons.folder}</span> Choose File
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*,.pdf"
-            onChange={(e) => e.target.files[0] && onFileSelect(e.target.files[0])}
-            style={{ display: 'none' }}
-          />
-        </button>
+        {!cameraOnly && (
+          <button type="button" className="upload-btn file" onClick={() => fileRef.current?.click()}>
+            <span className="icon">{Icons.folder}</span> Choose File
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*,.pdf"
+              onChange={(e) => e.target.files[0] && onFileSelect(e.target.files[0])}
+              style={{ display: 'none' }}
+            />
+          </button>
+        )}
       </div>
       {file && <p className="file-name">✓ {file.name}</p>}
       {required && !file && <p className="required-hint">This document is required</p>}
@@ -150,6 +152,7 @@ function DocumentUpload({ label, onFileSelect, file, required = false }) {
         .required { color: #E95721; }
         .upload-options { display: flex; gap: 12px; }
         .upload-btn { flex: 1; padding: 14px; border: 2px dashed #e0e0e0; border-radius: 10px; background: #f8f9fa; cursor: pointer; font-size: 14px; font-family: inherit; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .upload-btn.full-width { flex: none; width: 100%; }
         .upload-btn:hover { border-color: #E95721; background: rgba(233, 87, 33, 0.05); }
         .upload-btn.camera { border-color: #4CAF50; }
         .upload-btn.camera:hover { background: rgba(76, 175, 80, 0.05); }
