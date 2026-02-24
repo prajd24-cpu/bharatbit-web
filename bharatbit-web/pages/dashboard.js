@@ -854,7 +854,7 @@ export default function Dashboard() {
                   <h2>{user?.full_name || user?.name || user?.email?.split('@')[0] || 'BharatBit User'}</h2>
                   <p className="client-uid">Client ID: <strong>{user?.client_id || user?.client_uid}</strong></p>
                   <span className={`verification-badge ${user?.kyc_status}`}>
-                    {user?.kyc_status === 'approved' ? '✓ Verified Account' : 'Verification Pending'}
+                    {user?.kyc_status === 'approved' ? '✓ Verified Account' : user?.kyc_status === 'under_review' ? '⏳ Verification in Progress' : 'Verification Pending'}
                   </span>
                 </div>
               </div>
