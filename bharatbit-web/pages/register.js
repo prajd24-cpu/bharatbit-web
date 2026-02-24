@@ -182,6 +182,18 @@ export default function Register() {
             )}
 
             <div className="form-group">
+              <label>Full Name</label>
+              <input
+                type="text"
+                name="full_name"
+                value={formData.full_name}
+                onChange={handleChange}
+                placeholder="Enter your full name"
+                required
+              />
+            </div>
+
+            <div className="form-group">
               <label>Email Address</label>
               <input
                 type="email"
