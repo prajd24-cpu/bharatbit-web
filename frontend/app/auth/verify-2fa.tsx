@@ -18,7 +18,6 @@ export default function Verify2FAScreen() {
   const [error, setError] = useState('');
 
   const mobile = params.mobile as string;
-  const mockOTP = params.mock_otp as string;
 
   const handleOtpChange = (text: string) => {
     const numericValue = text.replace(/[^0-9]/g, '');
@@ -27,23 +26,15 @@ export default function Verify2FAScreen() {
     }
   };
 
-  const showAlert = (title: string, message: string) => {
-    if (Platform.OS === 'web') {
-      setError(message);
-      window.alert(`${title}: ${message}`);
-    } else {
-      Alert.alert(title, message);
-    }
-  };
-
   const handleVerify = async () => {
     setError('');
-    if (Platform.OS !== 'web') {
-      Keyboard.dismiss();
-    }
     
     if (!otp || otp.length !== 6) {
-      showAlert('Error', 'Please enter a valid 6-digit OTP');
+      if (Platform.OS === 'web') {
+        setError('Please enter a valid 6-digit OTP');
+      } else {
+        Alert.alert('Error', 'Please enter a valid 6-digit OTP');
+      }
       return;
     }
 
@@ -51,14 +42,19 @@ export default function Verify2FAScreen() {
     try {
       await verify2FA(mobile, otp);
       router.replace('/(tabs)/dashboard');
-    } catch (error: any) {
-      showAlert('Verification Failed', error.message || 'An error occurred');
+    } catch (err: any) {
+      const message = err.message || 'Verification failed';
+      if (Platform.OS === 'web') {
+        setError(message);
+      } else {
+        Alert.alert('Verification Failed', message);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // Web version with pure HTML for better keyboard support
+  // Web version - pure HTML form for reliable keyboard on mobile browsers
   if (Platform.OS === 'web') {
     return (
       <div style={{
@@ -70,11 +66,7 @@ export default function Verify2FAScreen() {
         padding: '20px',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       }}>
-        <div style={{
-          width: '100%',
-          maxWidth: '400px',
-        }}>
-          {/* Header */}
+        <div style={{ width: '100%', maxWidth: '400px' }}>
           <div style={{ textAlign: 'center' as const, marginBottom: '24px' }}>
             <div style={{
               width: '80px',
@@ -88,60 +80,26 @@ export default function Verify2FAScreen() {
             }}>
               <Ionicons name="shield-checkmark" size={48} color="#E95721" />
             </div>
-            <h1 style={{
-              fontSize: '24px',
-              fontWeight: 700,
-              color: '#1a1a2e',
-              margin: '0 0 8px',
-            }}>Two-Factor Authentication</h1>
-            <p style={{
-              fontSize: '15px',
-              color: '#666',
-              margin: '0 0 4px',
-            }}>Enter the OTP sent to your email & phone</p>
-            <p style={{
-              fontSize: '16px',
-              fontWeight: 600,
-              color: '#E95721',
-              margin: '0',
-            }}>{mobile}</p>
+            <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#1a1a2e', margin: '0 0 8px' }}>
+              Two-Factor Authentication
+            </h1>
+            <p style={{ fontSize: '15px', color: '#666', margin: '0 0 4px' }}>
+              Enter the OTP sent to your email & phone
+            </p>
+            <p style={{ fontSize: '16px', fontWeight: 600, color: '#E95721', margin: 0 }}>
+              {mobile}
+            </p>
           </div>
 
-          {/* Mock OTP Display - For Development */}
-          {mockOTP && (
-            <div style={{
-              backgroundColor: '#fef3cd',
-              border: '1px solid #ffc107',
-              borderRadius: '12px',
-              padding: '16px',
-              marginBottom: '24px',
-              textAlign: 'center' as const,
-            }}>
-              <p style={{
-                fontSize: '12px',
-                color: '#856404',
-                fontWeight: 600,
-                margin: '0 0 8px',
-                textTransform: 'uppercase' as const,
-              }}>Mock OTP (Dev Only)</p>
-              <p style={{
-                fontSize: '28px',
-                fontWeight: 700,
-                color: '#d4a106',
-                margin: 0,
-                letterSpacing: '4px',
-              }}>{mockOTP}</p>
-            </div>
-          )}
-
-          {/* Card */}
-          <div style={{
-            backgroundColor: '#fff',
-            borderRadius: '16px',
-            padding: '24px',
-            boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-          }}>
-            {/* Error message */}
+          <form 
+            onSubmit={(e) => { e.preventDefault(); handleVerify(); }}
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: '16px',
+              padding: '24px',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+            }}
+          >
             {error && (
               <div style={{
                 backgroundColor: '#fee2e2',
@@ -155,7 +113,6 @@ export default function Verify2FAScreen() {
               </div>
             )}
 
-            {/* OTP Input */}
             <div style={{ marginBottom: '20px' }}>
               <label style={{
                 display: 'block',
@@ -164,10 +121,9 @@ export default function Verify2FAScreen() {
                 color: '#666',
                 marginBottom: '10px',
                 textTransform: 'uppercase' as const,
-                letterSpacing: '0.5px',
               }}>Enter 6-Digit OTP</label>
               <input
-                type="text"
+                type="tel"
                 inputMode="numeric"
                 pattern="[0-9]*"
                 maxLength={6}
@@ -189,44 +145,33 @@ export default function Verify2FAScreen() {
                   padding: '0 16px',
                   boxSizing: 'border-box' as const,
                   outline: 'none',
-                  caretColor: '#E95721',
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && otp.length === 6) {
-                    handleVerify();
-                  }
                 }}
               />
             </div>
 
-            {/* Verify Button */}
             <button
-              type="button"
-              onClick={handleVerify}
+              type="submit"
               disabled={loading || otp.length !== 6}
               style={{
                 width: '100%',
                 height: '56px',
-                backgroundColor: loading || otp.length !== 6 ? '#ccc' : '#E95721',
+                backgroundColor: (loading || otp.length !== 6) ? '#ccc' : '#E95721',
                 color: '#fff',
                 border: 'none',
                 borderRadius: '12px',
                 fontSize: '17px',
                 fontWeight: 600,
-                cursor: loading || otp.length !== 6 ? 'not-allowed' : 'pointer',
-                boxShadow: loading || otp.length !== 6 ? 'none' : '0 4px 14px rgba(233, 87, 33, 0.3)',
-                transition: 'all 0.2s ease',
+                cursor: (loading || otp.length !== 6) ? 'not-allowed' : 'pointer',
               }}
             >
               {loading ? 'Verifying...' : 'Verify & Login'}
             </button>
-          </div>
+          </form>
 
-          {/* Footer */}
           <div style={{ textAlign: 'center' as const, marginTop: '24px' }}>
             <button
               type="button"
-              onClick={() => window.alert('A new OTP has been sent to your phone and email.')}
+              onClick={() => alert('A new OTP has been sent to your phone and email.')}
               style={{
                 padding: '12px 24px',
                 backgroundColor: 'transparent',
@@ -255,12 +200,6 @@ export default function Verify2FAScreen() {
             <Text style={styles.title}>Two-Factor Authentication</Text>
             <Text style={styles.subtitle}>Enter the OTP sent to</Text>
             <Text style={styles.mobile}>{mobile}</Text>
-            {mockOTP && (
-              <View style={styles.mockContainer}>
-                <Text style={styles.mockLabel}>Mock OTP (Dev Only):</Text>
-                <Text style={styles.mockOTP}>{mockOTP}</Text>
-              </View>
-            )}
           </View>
 
           <Card>
@@ -329,25 +268,6 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.lg,
     fontWeight: theme.fontWeight.semibold,
     color: theme.colors.gold,
-    marginTop: theme.spacing.xs,
-  },
-  mockContainer: {
-    marginTop: theme.spacing.lg,
-    padding: theme.spacing.md,
-    backgroundColor: theme.colors.card,
-    borderRadius: theme.borderRadius.sm,
-    borderWidth: 1,
-    borderColor: theme.colors.warning,
-  },
-  mockLabel: {
-    fontSize: theme.fontSize.xs,
-    color: theme.colors.warning,
-    fontWeight: theme.fontWeight.semibold,
-  },
-  mockOTP: {
-    fontSize: theme.fontSize.xl,
-    color: theme.colors.gold,
-    fontWeight: theme.fontWeight.bold,
     marginTop: theme.spacing.xs,
   },
   footer: {
