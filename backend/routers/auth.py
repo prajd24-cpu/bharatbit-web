@@ -255,7 +255,8 @@ async def get_profile(current_user: dict = Depends(get_current_user)):
         "client_uid": current_user.get("client_uid", "N/A"),
         "email": current_user["email"],
         "mobile_number": current_user["mobile"],
-        "name": current_user.get("name", ""),
+        "full_name": current_user.get("full_name", ""),
+        "name": current_user.get("full_name", ""),  # Alias for compatibility
         "profile_pic": current_user.get("profile_pic"),
         "kyc_status": current_user["kyc_status"],
         "account_type": current_user.get("account_type", "individual"),
