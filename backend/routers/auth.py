@@ -47,6 +47,7 @@ async def register(data: RegisterRequest):
         mobile=full_mobile,
         email=data.email,
         password_hash=hash_password(data.password),
+        full_name=data.full_name,
         account_type=data.account_type,
         company_name=data.company_name,
         referral_code=data.referral_code,
