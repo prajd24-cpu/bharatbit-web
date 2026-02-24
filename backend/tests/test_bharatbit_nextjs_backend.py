@@ -162,10 +162,11 @@ class TestRegistrationWithCountryCode:
     def test_register_with_mobile_field(self):
         """Registration should also work with mobile field (backward compatibility)"""
         unique_email = generate_unique_email()
+        unique_mobile = generate_unique_mobile()  # Use unique mobile
         
         payload = {
             "email": unique_email,
-            "mobile": "+919876543210",  # Using mobile field directly
+            "mobile": f"+91{unique_mobile}",  # Using mobile field directly with unique number
             "password": "TestPassword123!",
             "account_type": "individual"
         }
