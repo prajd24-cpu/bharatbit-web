@@ -14,4 +14,3 @@ httpx==0.28.1
 resend==2.22.0
 dnspython==2.8.0
 cryptography==42.0.0
-starlette==0.36.3
