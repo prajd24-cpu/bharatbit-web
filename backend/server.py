@@ -1,19 +1,14 @@
 """
-BharatBit OTC Desk API - Refactored Modular Server
-===================================================
+BharatBit OTC Desk API - Production Server
+==========================================
 
 A premium Over-the-Counter crypto trading desk for high-net-worth Indian clients.
-
-Architecture:
-- /core: Configuration, database, dependencies
-- /models: Pydantic schemas and data models  
-- /routers: API route handlers (auth, admin, orders, wallets, kyc, rates, crypto)
-- /services: External integrations (email, sms, push, crypto prices)
 """
 
 from fastapi import FastAPI, APIRouter
 from starlette.middleware.cors import CORSMiddleware
 import logging
+import os
 
 from core.database import close_db
 from routers import (
@@ -43,6 +38,24 @@ app = FastAPI(
     version="2.0.0"
 )
 
+# CORS - Add FIRST before any routes
+# Allow all origins for production (or specify exact domains)
+cors_origins = os.getenv("CORS_ORIGINS", "*")
+if cors_origins != "*":
+    origins_list = [origin.strip() for origin in cors_origins.split(",")]
+else:
+    origins_list = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins_list,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_headers=["*"],
+    expose_headers=["*"],
+    max_age=3600,
+)
+
 # Create main API router with /api prefix
 api_router = APIRouter(prefix="/api")
 
@@ -58,7 +71,7 @@ api_router.include_router(rates_router)
 api_router.include_router(crypto_router)
 api_router.include_router(notifications_router)
 
-# Payment routes (for backwards compatibility)
+# Payment routes
 @api_router.get("/payment/bank-details")
 async def get_bank_details():
     return {
@@ -85,7 +98,7 @@ async def health_check():
 # Include the main router
 app.include_router(api_router)
 
-# Root route - returns API info
+# Root route
 @app.get("/")
 async def root():
     return {
@@ -96,21 +109,11 @@ async def root():
         "health": "/api/health"
     }
 
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 @app.on_event("shutdown")
 async def shutdown_db_client():
     await close_db()
 
-# Startup message
 @app.on_event("startup")
 async def startup():
     logger.info("BharatBit OTC Desk API v2.0.0 - Server started")
-    logger.info("Modular architecture enabled with separate routers")
+    logger.info("CORS Origins: " + str(origins_list))
