@@ -261,6 +261,8 @@ export default function Login() {
         .toggle-password {
           position: absolute;
           right: 12px;
+          top: 50%;
+          transform: translateY(-50%);
           background: none;
           border: none;
           cursor: pointer;
