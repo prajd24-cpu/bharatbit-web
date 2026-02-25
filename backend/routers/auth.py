@@ -134,6 +134,60 @@ async def verify_otp(data: VerifyOTPRequest):
     
     return {"success": True, "message": "OTP verified"}
 
+@router.post("/resend-otp")
+async def resend_otp(data: dict):
+    """Resend OTP to user's mobile and email"""
+    mobile = data.get("mobile", "").replace("+91", "").replace("+", "")
+    email = data.get("email")
+    
+    if not mobile and not email:
+        raise HTTPException(status_code=400, detail="Mobile or email required")
+    
+    # Find user
+    query = {}
+    if email:
+        query["email"] = email
+    elif mobile:
+        query["mobile"] = {"$regex": mobile}
+    
+    user = await db.users.find_one(query)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Generate new OTP
+    import random
+    otp = str(random.randint(100000, 999999))
+    
+    # Store OTP
+    await db.otp_store.update_one(
+        {"mobile": user["mobile"], "purpose": "login"},
+        {"$set": {"otp": otp, "is_used": False, "created_at": datetime.utcnow()}},
+        upsert=True
+    )
+    
+    # Send OTP via SMS and Email
+    sms_result = {"success": False}
+    email_result = {"success": False}
+    
+    try:
+        from services.sms_service import send_otp_sms
+        sms_result = await send_otp_sms(user["mobile"], otp)
+    except Exception as e:
+        logger.error(f"SMS send failed: {e}")
+    
+    try:
+        from services.email_service import send_otp_email
+        email_result = await send_otp_email(user["email"], otp)
+    except Exception as e:
+        logger.error(f"Email send failed: {e}")
+    
+    return {
+        "success": True,
+        "message": "OTP resent successfully",
+        "sms_sent": sms_result.get("success", False),
+        "email_sent": email_result.get("success", False)
+    }
+
 @router.post("/login")
 async def login(data: LoginRequest):
     # Support both identifier and email fields
