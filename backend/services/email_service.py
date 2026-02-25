@@ -162,6 +162,38 @@ async def send_kyc_rejection_email(to_email: str, name: str, reason: str) -> dic
     """
     return await email_service.send_email(to_email, subject, html)
 
+async def send_password_reset_email(to_email: str, token: str) -> dict:
+    """Send password reset email with token"""
+    subject = "Password Reset - BharatBit OTC Desk"
+    reset_link = f"https://app.bharatbit.world/reset-password?token={token}"
+    html = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #ffffff;">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #273A52; margin-bottom: 10px;">BharatBit OTC Desk</h1>
+            <p style="color: #5A6C7D; font-size: 14px;">Password Reset Request</p>
+        </div>
+        
+        <div style="background: #F8F9FA; border-left: 4px solid #E95721; padding: 20px; margin: 20px 0;">
+            <p style="color: #273A52; margin: 0 0 10px 0;">You requested to reset your password.</p>
+            <p style="color: #273A52; margin: 0 0 10px 0;">Click the button below to reset your password:</p>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="{reset_link}" style="background: #E95721; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block;">Reset Password</a>
+        </div>
+        
+        <p style="color: #5A6C7D; font-size: 14px;">
+            Or copy this link: <br/>
+            <span style="color: #E95721;">{reset_link}</span>
+        </p>
+        
+        <p style="color: #999; font-size: 12px; margin-top: 30px;">
+            This link will expire in 1 hour. If you did not request a password reset, please ignore this email.
+        </p>
+    </div>
+    """
+    return await email_service.send_email(to_email, subject, html)
+
 # ==================== ADMIN NOTIFICATION EMAILS ====================
 
 async def notify_admin_new_registration(user_data: dict) -> dict:
