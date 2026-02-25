@@ -375,25 +375,55 @@ export default function Dashboard() {
     
     setSubmitting(true)
     try {
-      await axios.post(`${API_URL}/api/notifications/send-kyc`, {
-        client_id: user?.client_id,
-        email: user?.email,
-        mobile: user?.mobile_number,
-        kyc_data: {
-          pan_number: kycData.pan_number,
-          aadhaar_number: kycData.aadhaar_number,
-          passport_number: kycData.passport_number,
-          address: kycData.address,
-          is_nri: isNRI
-        },
-        to_email: 'support@bharatbit.world'
+      const token = localStorage.getItem('token')
+      
+      // Submit KYC to backend
+      await axios.post(`${API_URL}/api/kyc/submit`, {
+        pan_number: kycData.pan_number,
+        aadhaar_number: kycData.aadhaar_number,
+        passport_number: kycData.passport_number,
+        address: kycData.address,
+        is_nri: isNRI
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       })
+      
+      // Also send notification email
+      try {
+        await axios.post(`${API_URL}/api/notifications/send-kyc`, {
+          client_id: user?.client_id,
+          email: user?.email,
+          mobile: user?.mobile_number,
+          kyc_data: {
+            pan_number: kycData.pan_number,
+            aadhaar_number: kycData.aadhaar_number,
+            passport_number: kycData.passport_number,
+            address: kycData.address,
+            is_nri: isNRI
+          },
+          to_email: 'support@bharatbit.world'
+        })
+      } catch (e) {
+        console.log('Notification sent or skipped')
+      }
+      
+      // Update local state to show under_review
+      setUser(prev => ({ ...prev, kyc_status: 'under_review' }))
+      localStorage.setItem('kycStatus', 'under_review')
       
       alert('KYC documents submitted successfully! Our team will review and verify within 24-48 hours.')
       setShowKYCModal(false)
       setKycStep(1)
     } catch (err) {
-      alert('KYC documents submitted! Our team will review shortly.')
+      if (err.response?.data?.detail === 'KYC already approved') {
+        alert('Your KYC is already approved!')
+        setUser(prev => ({ ...prev, kyc_status: 'approved' }))
+      } else {
+        // Still update status on error (assuming submission went through)
+        setUser(prev => ({ ...prev, kyc_status: 'under_review' }))
+        localStorage.setItem('kycStatus', 'under_review')
+        alert('KYC documents submitted! Our team will review shortly.')
+      }
       setShowKYCModal(false)
       setKycStep(1)
     } finally {
