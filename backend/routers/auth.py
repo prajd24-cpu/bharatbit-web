@@ -92,8 +92,14 @@ async def register(data: RegisterRequest):
 
 @router.post("/verify-otp")
 async def verify_otp(data: VerifyOTPRequest):
+    # Support both mobile and email for lookup
+    identifier = data.mobile
+    
     otp_record = await db.otp_store.find_one({
-        "mobile": data.mobile,
+        "$or": [
+            {"mobile": identifier},
+            {"email": identifier}
+        ],
         "otp": data.otp,
         "purpose": data.purpose,
         "is_used": False
@@ -110,7 +116,7 @@ async def verify_otp(data: VerifyOTPRequest):
         {"$set": {"is_used": True}}
     )
     
-    user = await db.users.find_one({"$or": [{"email": data.mobile}, {"mobile": data.mobile}]})
+    user = await db.users.find_one({"$or": [{"email": identifier}, {"mobile": identifier}]})
     if user:
         await db.users.update_one(
             {"id": user["id"]},
