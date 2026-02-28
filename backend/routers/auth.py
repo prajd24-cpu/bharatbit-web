@@ -245,8 +245,14 @@ async def login(data: LoginRequest):
 
 @router.post("/verify-2fa")
 async def verify_2fa(data: Verify2FARequest):
+    # Support both mobile and email for lookup
+    identifier = data.mobile
+    
     otp_record = await db.otp_store.find_one({
-        "mobile": data.mobile,
+        "$or": [
+            {"mobile": identifier},
+            {"email": identifier}
+        ],
         "otp": data.otp,
         "purpose": "2fa",
         "is_used": False
