@@ -46,10 +46,21 @@ export default function VerifyOTP() {
 
     setLoading(true)
     try {
-      const response = await axios.post(`${API_URL}/api/auth/verify-2fa`, {
-        mobile,
-        otp
-      })
+      // Try verify-otp first (for registration), then verify-2fa (for login)
+      let response
+      try {
+        response = await axios.post(`${API_URL}/api/auth/verify-otp`, {
+          mobile,
+          otp,
+          purpose: 'registration'
+        })
+      } catch (err) {
+        // If verify-otp fails, try verify-2fa (for login)
+        response = await axios.post(`${API_URL}/api/auth/verify-2fa`, {
+          mobile,
+          otp
+        })
+      }
 
       // Store token and user data
       localStorage.setItem('token', response.data.token || response.data.access_token)
